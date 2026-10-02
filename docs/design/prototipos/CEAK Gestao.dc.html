@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F7F4EE;color:#1F2A24;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#2F5D46;text-decoration:none}a:hover{color:#1E3D2F;text-decoration:underline}
+button{font-family:inherit;cursor:pointer}input,textarea,select{font-family:inherit;font-size:14px}
+</style>
+</helmet>
+
+<sc-if value="{{ showLogin }}" hint-placeholder-val="{{ false }}">
+  <div style="min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))">
+    <div style="background:#1E3D2F;color:#F7F4EE;padding:56px;display:flex;flex-direction:column;justify-content:space-between;gap:40px">
+      <div style="display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:50%;background:#F7F4EE;color:#1E3D2F;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-weight:600">AK</div><div style="font-size:14px;letter-spacing:.08em">CEAK GESTÃO</div></div>
+      <div><div style="font-family:'Newsreader',serif;font-size:clamp(34px,4vw,48px);line-height:1.1;max-width:460px">Centro Espírita Allan Kardec — Penápolis</div><div style="font-size:16px;color:#C9D6CD;margin-top:16px;max-width:420px;line-height:1.6">Sistema administrativo restrito à diretoria, coordenação e equipes de trabalho.</div></div>
+      <div style="font-size:13px;color:#A9C2B1">Acesso monitorado · registros de auditoria ativos</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;padding:40px 24px">
+      <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px">
+        <div style="font-family:'Newsreader',serif;font-size:32px;margin-bottom:8px">Entrar</div>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500">E-mail<input value="antonio.ferreira@allankardecpenapolis.com.br" style="border:1px solid #D8D0BF;border-radius:10px;padding:13px;background:#fff"></input></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:500">Senha<input type="password" value="••••••••••" style="border:1px solid #D8D0BF;border-radius:10px;padding:13px;background:#fff"></input></label>
+        <button onClick="{{ login }}" style="background:#2F5D46;color:#fff;border:0;border-radius:10px;padding:14px;font-size:15px;font-weight:500;margin-top:6px">Entrar</button>
+        <button onClick="{{ toggleRecover }}" style="background:none;border:0;color:#2F5D46;font-size:14px;padding:4px;text-align:left">Recuperar senha</button>
+        <sc-if value="{{ s.recover }}" hint-placeholder-val="{{ false }}"><div style="background:#E4EDE6;border-radius:10px;padding:12px 14px;font-size:13px;color:#1E3D2F;line-height:1.5">Um link de redefinição foi enviado para o e-mail cadastrado. O link expira em 30 minutos.</div></sc-if>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ s.logged }}" hint-placeholder-val="{{ true }}">
+<div style="min-height:100vh;display:flex">
+  <sc-if value="{{ sb.backdrop }}" hint-placeholder-val="{{ false }}"><div onClick="{{ toggleSide }}" style="position:fixed;inset:0;background:rgba(31,42,36,.35);z-index:39"></div></sc-if>
+  <sc-if value="{{ s.sideOpen }}" hint-placeholder-val="{{ true }}">
+  <aside style="flex:0 0 240px;width:240px;background:#EFE8DA;border-right:1px solid #E1D9C8;padding:18px 12px;display:flex;flex-direction:column;gap:14px;position:{{ sb.pos }};left:0;top:0;z-index:40;height:100vh;overflow-y:auto;box-shadow:{{ sb.sh }}">
+    <div style="display:flex;align-items:center;gap:10px;padding:4px 8px 8px"><div style="width:34px;height:34px;border-radius:50%;background:#2F5D46;color:#F7F4EE;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-size:13px;font-weight:600">AK</div><div style="line-height:1.15"><div style="font-size:14px;font-weight:600">CEAK Gestão</div><div style="font-size:11px;color:#6B746C">Command Center</div></div></div>
+    <sc-for list="{{ menu }}" as="g" hint-placeholder-count="6">
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <div style="font-size:10px;letter-spacing:.12em;font-weight:600;color:#8A8F86;padding:0 10px 4px">{{ g.label }}</div>
+        <sc-for list="{{ g.items }}" as="m">
+          <button onClick="{{ m.go }}" style="display:flex;justify-content:space-between;align-items:center;background:{{ m.bg }};color:{{ m.fg }};border:0;border-radius:8px;padding:8px 10px;font-size:14px;font-weight:{{ m.fw }};text-align:left"><span>{{ m.label }}</span><span style="font-size:11px;background:#fff;color:#7A5A1E;border-radius:999px;padding:1px 7px;display:{{ m.badgeDisplay }}">{{ m.badge }}</span></button>
+        </sc-for>
+      </div>
+    </sc-for>
+  </aside>
+  </sc-if>
+
+  <div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column">
+    <header style="position:sticky;top:0;z-index:10;background:rgba(247,244,238,.96);backdrop-filter:blur(6px);border-bottom:1px solid #E6E0D3;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <button onClick="{{ toggleSide }}" style="background:#fff;border:1px solid #E1D9C8;border-radius:8px;padding:8px 10px;font-size:13px;color:#1F2A24">Menu</button>
+      <input placeholder="Buscar pessoas, eventos, lançamentos…" style="flex:1;min-width:180px;max-width:420px;border:1px solid #E1D9C8;border-radius:8px;padding:9px 12px;background:#fff"></input>
+      <div style="flex:1"></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#6B746C">Perfil de acesso
+        <select value="{{ s.role }}" onChange="{{ setRole }}" style="border:1px solid #E1D9C8;border-radius:8px;padding:8px;background:#fff;color:#1F2A24">
+          <sc-for list="{{ roles }}" as="r" hint-placeholder-count="9"><option value="{{ r }}">{{ r }}</option></sc-for>
+        </select>
+      </label>
+      <button onClick="{{ toggleAlerts }}" style="position:relative;background:#fff;border:1px solid #E1D9C8;border-radius:8px;padding:8px 12px;font-size:13px;color:#1F2A24">Alertas <span style="background:#A4473A;color:#fff;border-radius:999px;padding:1px 6px;font-size:11px;margin-left:4px">4</span></button>
+      <div style="display:flex;align-items:center;gap:8px"><div style="width:34px;height:34px;border-radius:50%;background:#E4EDE6;color:#2F5D46;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">AF</div><div style="line-height:1.1"><div style="font-size:13px;font-weight:600">Antônio Ferreira</div><div style="font-size:11px;color:#6B746C">{{ s.role }}</div></div></div>
+      <sc-if value="{{ s.alertsOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;right:24px;top:58px;width:340px;max-width:calc(100vw - 48px);background:#fff;border:1px solid #E1D9C8;border-radius:14px;box-shadow:0 20px 40px -20px rgba(31,42,36,.3);padding:8px;z-index:30">
+          <div style="font-size:12px;font-weight:600;color:#6B746C;padding:8px 10px">Central de alertas</div>
+          <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="4"><div onClick="{{ a.go }}" style="display:flex;gap:10px;padding:10px;border-radius:10px;cursor:pointer" style-hover="background:#F7F4EE"><span style="width:8px;height:8px;border-radius:50%;background:{{ a.c }};margin-top:6px;flex:none"></span><div><div style="font-size:14px;font-weight:500">{{ a.t }}</div><div style="font-size:13px;color:#6B746C">{{ a.d }}</div></div></div></sc-for>
+        </div>
+      </sc-if>
+    </header>
+
+    <main style="padding:{{ sb.mainPad }};max-width:1360px;width:100%">
+
+<sc-if value="{{ noAccess }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:560px;margin:60px auto;background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:32px;display:flex;flex-direction:column;gap:12px">
+    <div style="font-family:'Newsreader',serif;font-size:28px">Perfil sem acesso ao CEAK Gestão</div>
+    <div style="font-size:15px;color:#5E675F;line-height:1.6">O perfil {{ s.role }} utiliza o CEAK App para agenda, check-in, estudos e contribuições. O acesso administrativo é concedido pela secretaria mediante função na casa.</div>
+    <div><a href="CEAK%20App.dc.html#home" style="display:inline-block;background:#2F5D46;color:#fff;border-radius:10px;padding:12px 18px;font-size:14px;text-decoration:none">Abrir CEAK App</a></div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.dashboard }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap">
+      <div><div style="font-size:13px;color:#6B746C">Sexta-feira, 02 de outubro de 2026</div><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:36px;margin:4px 0 0">CEAK Command Center</h1></div>
+      <div style="font-size:13px;color:#6B746C">Dados atualizados às 10:28</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="7"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:32px;margin-top:4px;line-height:1.1">{{ k.v }}</div><div style="font-size:12px;color:{{ k.dc }};margin-top:4px">{{ k.d }}</div></div></sc-for>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:stretch">
+      <div style="flex:2 1 520px;background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><div style="font-size:15px;font-weight:600">Engajamento · check-ins por semana</div><div style="font-size:12px;color:#6B746C">últimas 12 semanas</div></div>
+        <div style="display:flex;align-items:flex-end;gap:8px;height:160px;border-bottom:1px solid #EFE8DA">
+          <sc-for list="{{ weekBars }}" as="b" hint-placeholder-count="12"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;justify-content:flex-end;height:100%"><div style="font-size:10px;color:#6B746C">{{ b.v }}</div><div style="width:100%;max-width:28px;height:{{ b.h }};background:{{ b.c }};border-radius:5px 5px 0 0"></div></div></sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;margin-top:16px">
+          <sc-for list="{{ engage }}" as="e" hint-placeholder-count="5"><div><div style="font-size:12px;color:#6B746C">{{ e.l }}</div><div style="font-size:20px;font-weight:600;margin-top:2px">{{ e.v }}</div></div></sc-for>
+        </div>
+      </div>
+      <div style="flex:1 1 300px;min-width:0;background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px">Alertas</div>
+        <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="4"><div onClick="{{ a.go }}" style="display:flex;gap:10px;padding:10px;border-radius:10px;background:#FCFBF8;border:1px solid #F0EBE0;cursor:pointer"><span style="width:8px;height:8px;border-radius:50%;background:{{ a.c }};margin-top:6px;flex:none"></span><div><div style="font-size:14px;font-weight:500">{{ a.t }}</div><div style="font-size:13px;color:#6B746C">{{ a.d }}</div></div></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+      <sc-if value="{{ can.financeiro }}" hint-placeholder-val="{{ true }}">
+        <div onClick="{{ go.financeiro }}" style="background:#1E3D2F;color:#F7F4EE;border-radius:16px;padding:20px;cursor:pointer">
+          <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:600"><span>Financeiro · setembro</span><span style="font-size:12px;color:#A9C2B1">Abrir ›</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px">
+            <div><div style="font-size:12px;color:#A9C2B1">Receitas</div><div style="font-size:19px;font-weight:600">R$ 18.840</div></div>
+            <div><div style="font-size:12px;color:#A9C2B1">Despesas</div><div style="font-size:19px;font-weight:600">R$ 13.290</div></div>
+            <div><div style="font-size:12px;color:#A9C2B1">Saldo</div><div style="font-size:19px;font-weight:600">R$ 5.550</div></div>
+          </div>
+        </div>
+      </sc-if>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px">
+        <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:600;margin-bottom:12px"><span>Aguardando aprovação</span><span onClick="{{ go.aprovacoes }}" style="font-size:12px;color:#2F5D46;cursor:pointer">Central ›</span></div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+          <sc-for list="{{ apprCounts }}" as="c" hint-placeholder-count="6"><div onClick="{{ c.go }}" style="background:#F7F4EE;border-radius:10px;padding:10px;cursor:pointer"><div style="font-size:20px;font-weight:600">{{ c.v }}</div><div style="font-size:12px;color:#6B746C">{{ c.l }}</div></div></sc-for>
+        </div>
+      </div>
+      <div onClick="{{ go.sistema }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;cursor:pointer">
+        <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:600;margin-bottom:12px"><span>Saúde do sistema</span><span style="font-size:12px;color:#7A5A1E">1 atenção</span></div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+          <sc-for list="{{ health }}" as="h" hint-placeholder-count="9"><div style="display:flex;align-items:center;gap:6px;font-size:13px"><span style="width:8px;height:8px;border-radius:50%;background:{{ h.c }}"></span>{{ h.n }}</div></sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px">
+      <sc-for list="{{ miniBoards }}" as="mb" hint-placeholder-count="3">
+        <div onClick="{{ mb.go }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;cursor:pointer">
+          <div style="font-size:15px;font-weight:600;margin-bottom:12px">{{ mb.t }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <sc-for list="{{ mb.items }}" as="i"><div><div style="font-size:12px;color:#6B746C">{{ i.l }}</div><div style="font-size:20px;font-weight:600;color:{{ i.c }}">{{ i.v }}</div></div></sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.financeiro }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Financeiro</h1>
+    <div style="display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid #E6E0D3">
+      <sc-for list="{{ finTabs }}" as="t" hint-placeholder-count="8"><button onClick="{{ t.go }}" style="background:none;border:0;border-bottom:2px solid {{ t.bd }};padding:10px 12px;font-size:14px;color:{{ t.fg }};font-weight:500;white-space:nowrap;flex:none">{{ t.label }}</button></sc-for>
+    </div>
+    <sc-if value="{{ fin.dash }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">
+        <sc-for list="{{ finKpis }}" as="k" hint-placeholder-count="5"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:28px;margin-top:4px;color:{{ k.c }}">{{ k.v }}</div></div></sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px">
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px">
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px"><div style="font-size:15px;font-weight:600">Receita × despesa</div><div style="display:flex;gap:12px;font-size:12px;color:#6B746C"><span style="color:#2F5D46">■ Receita</span><span style="color:#B5833A">■ Despesa</span></div></div>
+          <div style="display:flex;align-items:flex-end;gap:14px;height:180px;border-bottom:1px solid #EFE8DA">
+            <sc-for list="{{ rxd }}" as="m" hint-placeholder-count="6"><div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end"><div style="display:flex;gap:3px;align-items:flex-end;height:100%;width:100%;justify-content:center"><div style="width:40%;max-width:18px;height:{{ m.r }};background:#2F5D46;border-radius:4px 4px 0 0"></div><div style="width:40%;max-width:18px;height:{{ m.d }};background:#B5833A;border-radius:4px 4px 0 0"></div></div></div></sc-for>
+          </div>
+          <div style="display:flex;gap:14px;margin-top:6px"><sc-for list="{{ rxd }}" as="m"><div style="flex:1;text-align:center;font-size:11px;color:#6B746C">{{ m.l }}</div></sc-for></div>
+        </div>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:16px"><div style="font-size:15px;font-weight:600">Fluxo de caixa · saldo do mês</div><div style="font-size:12px;color:#6B746C">abr–set</div></div>
+          <div style="display:flex;align-items:flex-end;gap:14px;height:180px;border-bottom:1px solid #EFE8DA">
+            <sc-for list="{{ flow }}" as="m" hint-placeholder-count="6"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;justify-content:flex-end;height:100%"><div style="font-size:10px;color:#6B746C">{{ m.v }}</div><div style="width:100%;max-width:30px;height:{{ m.h }};background:#7FA08C;border-radius:4px 4px 0 0"></div></div></sc-for>
+          </div>
+          <div style="display:flex;gap:14px;margin-top:6px"><sc-for list="{{ flow }}" as="m"><div style="flex:1;text-align:center;font-size:11px;color:#6B746C">{{ m.l }}</div></sc-for></div>
+        </div>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px">
+          <div style="font-size:15px;font-weight:600;margin-bottom:14px">Receita por origem</div>
+          <sc-for list="{{ byOrigin }}" as="o" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:120px minmax(0,1fr) 80px;gap:10px;align-items:center;margin-bottom:10px;font-size:13px"><span>{{ o.l }}</span><div style="height:10px;background:#F2ECE0;border-radius:5px"><div style="height:10px;width:{{ o.w }};background:#2F5D46;border-radius:5px"></div></div><span style="text-align:right">{{ o.v }}</span></div></sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px">
+          <div style="font-size:15px;font-weight:600;margin-bottom:14px">Despesa por categoria</div>
+          <sc-for list="{{ byCat }}" as="o" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:120px minmax(0,1fr) 80px;gap:10px;align-items:center;margin-bottom:10px;font-size:13px"><span>{{ o.l }}</span><div style="height:10px;background:#F2ECE0;border-radius:5px"><div style="height:10px;width:{{ o.w }};background:#B5833A;border-radius:5px"></div></div><span style="text-align:right">{{ o.v }}</span></div></sc-for>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ fin.pagar }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div style="font-size:14px;color:#6B746C;flex:1">Outubro de 2026 · 8 lançamentos · R$ 9.716,40</div><button style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px">Novo lançamento</button></div>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:900px">
+          <thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><th style="padding:12px 14px;font-weight:500">Fornecedor</th><th style="padding:12px 14px;font-weight:500">Descrição</th><th style="padding:12px 14px;font-weight:500">Categoria</th><th style="padding:12px 14px;font-weight:500">Centro de custo</th><th style="padding:12px 14px;font-weight:500">Vencimento</th><th style="padding:12px 14px;font-weight:500;text-align:right">Valor</th><th style="padding:12px 14px;font-weight:500">Status</th><th style="padding:12px 14px;font-weight:500">Responsável</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ payables }}" as="r" hint-placeholder-count="8"><tr style="border-top:1px solid #EFE8DA"><td style="padding:12px 14px;font-weight:500">{{ r.f }}</td><td style="padding:12px 14px">{{ r.d }}</td><td style="padding:12px 14px">{{ r.c }}</td><td style="padding:12px 14px">{{ r.cc }}</td><td style="padding:12px 14px">{{ r.v }}</td><td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ r.val }}</td><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500">{{ r.st }}</span></td><td style="padding:12px 14px">{{ r.r }}</td></tr></sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+    <sc-if value="{{ fin.receber }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:820px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ receberTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ receberTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></sc-if>
+    <sc-if value="{{ fin.fluxo }}" hint-placeholder-val="{{ false }}"><div style="font-size:14px;color:#6B746C">Outubro de 2026 · realizado e previsto · saldo projetado em 31/10: R$ 61.930,00</div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:680px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ fluxoTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ fluxoTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></sc-if>
+    <sc-if value="{{ fin.cats }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px"><div style="font-size:15px;font-weight:600;margin-bottom:14px">Despesas por categoria · realizado × orçado (setembro)</div><sc-for list="{{ catsList }}" as="c" hint-placeholder-count="7"><div style="display:grid;grid-template-columns:minmax(120px,180px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid #F4F0E7;font-size:13px"><span style="font-weight:500">{{ c.t }}</span><div style="height:10px;background:#F2ECE0;border-radius:5px"><div style="height:10px;width:{{ c.w }};background:{{ c.c }};border-radius:5px"></div></div><span style="white-space:nowrap">{{ c.v }} / {{ c.b }} · <strong style="color:{{ c.c }}">{{ c.pct }}</strong></span></div></sc-for></div></sc-if>
+    <sc-if value="{{ fin.cc }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px"><sc-for list="{{ ccList }}" as="c" hint-placeholder-count="6"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px"><div style="font-size:15px;font-weight:600">{{ c.t }}</div><div style="font-size:12px;color:#6B746C;margin-top:2px">{{ c.d }}</div><div style="font-family:'Newsreader',serif;font-size:26px;margin-top:12px">{{ c.v }}</div><div style="font-size:12px;color:#6B746C">de {{ c.b }} orçados</div><div style="height:6px;background:#F2ECE0;border-radius:4px;margin-top:10px"><div style="height:6px;width:{{ c.w }};background:#2F5D46;border-radius:4px"></div></div></div></sc-for></div></sc-if>
+    <sc-if value="{{ fin.conc }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div style="font-size:14px;color:#6B746C">Extrato importado do banco em 02/10 06:00 · 7 linhas · 1 divergência</div><button onClick="{{ concAll }}" style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px">Conciliar sugeridos</button></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:820px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ concTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ concTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></sc-if>
+    <sc-if value="{{ fin.rel }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px"><sc-for list="{{ reports }}" as="r" hint-placeholder-count="6"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:6px"><div style="font-size:15px;font-weight:600">{{ r.t }}</div><div style="font-size:13px;color:#6B746C">{{ r.d }}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><span style="font-size:12px;font-family:'JetBrains Mono',monospace;color:#6B746C">{{ r.f }}</span><button style="background:#fff;border:1px solid #D8D0BF;border-radius:8px;padding:7px 12px;font-size:12px;color:#1F2A24">Gerar</button></div></div></sc-for></div></sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.conteudo }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">CEAK Conteúdo</h1><button style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px">Novo conteúdo</button></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">
+      <sc-for list="{{ contentKpis }}" as="k" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:30px;margin-top:4px;color:{{ k.c }}">{{ k.v }}</div></div></sc-for>
+    </div>
+    <div style="background:#E4EDE6;border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;font-weight:600;color:#1E3D2F">Fluxo de publicação · nenhum conteúdo institucional é publicado sem revisão e aprovação humana</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <sc-for list="{{ pipeline }}" as="p" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:6px"><span style="background:{{ p.bg }};color:{{ p.fg }};border:1px solid #2F5D46;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:500;white-space:nowrap">{{ p.t }}</span><span style="color:#5F8A72;display:{{ p.arrow }}">→</span></div></sc-for>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:860px">
+        <thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><th style="padding:12px 14px;font-weight:500">Título</th><th style="padding:12px 14px;font-weight:500">Fonte</th><th style="padding:12px 14px;font-weight:500">Canal</th><th style="padding:12px 14px;font-weight:500">Status</th><th style="padding:12px 14px;font-weight:500">Data</th><th style="padding:12px 14px;font-weight:500">Responsável</th><th style="padding:12px 14px"></th></tr></thead>
+        <tbody>
+          <sc-for list="{{ contents }}" as="r" hint-placeholder-count="9"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;cursor:pointer" style-hover="background:#FCFBF8"><td style="padding:12px 14px;font-weight:500">{{ r.t }}</td><td style="padding:12px 14px;color:#5E675F">{{ r.f }}</td><td style="padding:12px 14px">{{ r.c }}</td><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td><td style="padding:12px 14px">{{ r.d }}</td><td style="padding:12px 14px">{{ r.r }}</td><td style="padding:12px 14px;color:#2F5D46;font-weight:600">{{ r.cta }}</td></tr></sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div style="font-size:15px;font-weight:600">Calendário editorial · semana 05–11 out</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ chFilters }}" as="f" hint-placeholder-count="6"><button onClick="{{ f.go }}" style="background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }};border-radius:999px;padding:5px 11px;font-size:12px">{{ f.label }}</button></sc-for></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:8px;overflow-x:auto">
+        <sc-for list="{{ week }}" as="d" hint-placeholder-count="7">
+          <div style="background:#FCFBF8;border:1px solid #F0EBE0;border-radius:12px;padding:10px;min-height:150px;display:flex;flex-direction:column;gap:6px">
+            <div style="font-size:12px;color:#6B746C">{{ d.l }}</div>
+            <sc-for list="{{ d.posts }}" as="p"><div style="border-left:3px solid {{ p.c }};background:#fff;border-radius:6px;padding:6px 8px;font-size:12px;line-height:1.35"><div style="font-weight:600;color:{{ p.c }};font-size:11px">{{ p.ch }} · {{ p.h }}</div>{{ p.t }}</div></sc-for>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.editor }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div style="font-size:13px;color:#6B746C"><span onClick="{{ go.conteudo }}" style="cursor:pointer;color:#2F5D46">Conteúdo</span> / Editor</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:30px;margin:0">Resumo da palestra “Família e Espiritualidade”</h1><span style="background:{{ edPill.bg }};color:{{ edPill.fg }};border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600">{{ s.edStatus }}</span></div>
+      <sc-if value="{{ ed.review }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button style="background:#fff;border:1px solid #D8D0BF;border-radius:8px;padding:9px 14px;font-size:13px;color:#1F2A24">Editar</button>
+          <button onClick="{{ edReject }}" style="background:#fff;border:1px solid #D8D0BF;border-radius:8px;padding:9px 14px;font-size:13px;color:#A4473A">Rejeitar</button>
+          <button style="background:#fff;border:1px solid #D8D0BF;border-radius:8px;padding:9px 14px;font-size:13px;color:#1F2A24">Agendar</button>
+          <button onClick="{{ edApprove }}" style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:500">Aprovar</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ ed.approved }}" hint-placeholder-val="{{ false }}"><button onClick="{{ edPublish }}" style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:500">Publicar agora nos 4 canais</button></sc-if>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid #E6E0D3;border-radius:12px;padding:12px 14px">
+      <sc-for list="{{ edPipe }}" as="p" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:6px"><span style="background:{{ p.bg }};color:{{ p.fg }};border:1px solid {{ p.bd }};border-radius:999px;padding:5px 11px;font-size:12px;font-weight:500;white-space:nowrap">{{ p.t }}</span><span style="color:#B8B09E;display:{{ p.arrow }}">→</span></div></sc-for>
+      <span style="font-size:12px;color:#6B746C;margin-left:auto;flex:1 1 220px;text-align:right">{{ edNote }}</span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+      <div style="flex:2 1 520px;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B746C">TÍTULO<input value="Família e Espiritualidade: laços que atravessam o tempo" style="border:1px solid #E1D9C8;border-radius:10px;padding:12px;background:#fff;font-size:16px;color:#1F2A24"></input></label>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:#6B746C;margin-bottom:8px"><span>TEXTO ORIGINAL</span><span style="font-weight:400">Transcrição automática · gravação de 30/09 · 52 min</span></div>
+          <div style="font-size:13px;line-height:1.6;color:#5E675F;max-height:110px;overflow:auto;font-family:'JetBrains Mono',monospace">[00:03:12] …e quando Kardec pergunta aos Espíritos sobre os laços de família, a resposta é que os laços do espírito são anteriores aos laços do corpo. A família que temos hoje não é obra do acaso… [00:04:40] …então o convívio difícil dentro de casa é, muitas vezes, a oportunidade que pedimos antes de reencarnar…</div>
+        </div>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;overflow:hidden">
+          <div style="display:flex;border-bottom:1px solid #EFE8DA;padding:0 8px;flex-wrap:wrap">
+            <sc-for list="{{ edTabs }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.go }}" style="background:none;border:0;border-bottom:2px solid {{ t.bd }};padding:12px;font-size:13px;font-weight:500;color:{{ t.fg }}">{{ t.label }}</button></sc-for>
+            <span style="margin-left:auto;align-self:center;font-size:11px;color:#6B746C;padding:0 8px">Conteúdo gerado por IA · revisar antes de aprovar</span>
+          </div>
+          <textarea rows="10" value="{{ edText }}" style="width:100%;border:0;padding:16px;font-size:15px;line-height:1.65;resize:vertical;color:#1F2A24;font-family:'Instrument Sans',sans-serif"></textarea>
+        </div>
+      </div>
+      <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:12px">
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;font-weight:600;color:#6B746C;margin-bottom:8px">RESUMO</div><div style="font-size:14px;line-height:1.55">Marta Andrade apresenta a família como espaço de reencontro e aprendizado entre espíritos, a partir de O Livro dos Espíritos e O Evangelho Segundo o Espiritismo.</div></div>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px"><div style="font-size:12px;font-weight:600;color:#6B746C">SEO</div><div style="font-size:14px;color:#2F5D46">Família e Espiritualidade | CEAK Penápolis</div><div style="font-size:13px;color:#5E675F;line-height:1.5">Resumo da palestra pública sobre laços de família à luz da Doutrina Espírita. Assista à gravação completa.</div><div style="font-size:12px;color:#6B746C;font-family:'JetBrains Mono',monospace">/blog/familia-e-espiritualidade</div></div>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;font-weight:600;color:#6B746C;margin-bottom:8px">TAGS</div><div style="display:flex;gap:6px;flex-wrap:wrap"><span style="background:#F2ECE0;border-radius:999px;padding:4px 10px;font-size:12px">família</span><span style="background:#F2ECE0;border-radius:999px;padding:4px 10px;font-size:12px">reencarnação</span><span style="background:#F2ECE0;border-radius:999px;padding:4px 10px;font-size:12px">palestra pública</span><span style="background:#F2ECE0;border-radius:999px;padding:4px 10px;font-size:12px">evangelho</span></div></div>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;font-weight:600;color:#6B746C;margin-bottom:8px">IMAGEM</div><div style="aspect-ratio:16/9;border-radius:10px;background:repeating-linear-gradient(135deg,#ECE5D6 0 8px,#F2ECE0 8px 16px);display:flex;align-items:flex-end;padding:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7A7363">frame da gravação · 00:12:40</div></div>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;font-weight:600;color:#6B746C;margin-bottom:8px">FONTES</div><div style="font-size:13px;line-height:1.7">Gravação YouTube · 30/09/2026<br>O Livro dos Espíritos, q. 203–206<br>O Evangelho Segundo o Espiritismo, cap. XIV</div></div>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.aprovacoes }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Central de aprovações</h1>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px">
+      <sc-for list="{{ apprCounts }}" as="c" hint-placeholder-count="6"><button onClick="{{ c.go }}" style="text-align:left;background:{{ c.bg }};border:1px solid {{ c.bd }};border-radius:14px;padding:14px;color:#1F2A24"><div style="font-family:'Newsreader',serif;font-size:28px">{{ c.v }}</div><div style="font-size:13px;color:#5E675F">{{ c.l }}</div></button></sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ apprList }}" as="a" hint-placeholder-count="6">
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+          <span style="background:#F2ECE0;border-radius:6px;padding:4px 8px;font-size:11px;font-weight:600;letter-spacing:.04em;min-width:100px;text-align:center">{{ a.k }}</span>
+          <div style="flex:1;min-width:220px"><div style="font-size:14px;font-weight:500">{{ a.t }}</div><div style="font-size:12px;color:#6B746C;margin-top:2px">{{ a.d }}</div></div>
+          <div style="display:flex;gap:6px"><button onClick="{{ a.edit }}" style="background:#fff;border:1px solid #D8D0BF;border-radius:8px;padding:8px 12px;font-size:13px;color:#1F2A24">Editar</button><button onClick="{{ a.reject }}" style="background:#fff;border:1px solid #D8D0BF;border-radius:8px;padding:8px 12px;font-size:13px;color:#A4473A">Rejeitar</button><button onClick="{{ a.approve }}" style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:13px">Aprovar</button></div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ apprEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D8D0BF;border-radius:14px;padding:28px;text-align:center;color:#6B746C;font-size:14px">Nenhum item pendente nesta categoria.</div></sc-if>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.automacoes }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">CEAK Automation Engine</h1>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">
+      <sc-for list="{{ autoKpis }}" as="k" hint-placeholder-count="5"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:30px;margin-top:4px;color:{{ k.c }}">{{ k.v }}</div></div></sc-for>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:820px">
+        <thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><th style="padding:12px 14px;font-weight:500">Automação</th><th style="padding:12px 14px;font-weight:500">Gatilho</th><th style="padding:12px 14px;font-weight:500">Ação</th><th style="padding:12px 14px;font-weight:500">Status</th><th style="padding:12px 14px;font-weight:500">Última execução</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ autos }}" as="a" hint-placeholder-count="8"><tr style="border-top:1px solid #EFE8DA"><td style="padding:12px 14px;font-weight:500">{{ a.n }}</td><td style="padding:12px 14px">{{ a.g }}</td><td style="padding:12px 14px">→ {{ a.a }}</td><td style="padding:12px 14px"><div onClick="{{ a.toggle }}" style="display:flex;align-items:center;gap:8px;cursor:pointer"><div style="width:34px;height:20px;border-radius:10px;background:{{ a.tb }};padding:2px;display:flex;justify-content:{{ a.tj }}"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div><span style="font-size:12px;color:{{ a.sc }}">{{ a.st }}</span></div></td><td style="padding:12px 14px;color:#5E675F">{{ a.last }}</td></tr></sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px">
+      <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px"><div style="font-size:15px;font-weight:600">Fluxo completo de palestra</div><div style="display:flex;gap:14px;font-size:12px;color:#6B746C"><span>○ automático</span><span style="color:#7A5A1E">● decisão humana</span></div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px">
+        <sc-for list="{{ lectureFlow }}" as="f" hint-placeholder-count="16"><div style="background:{{ f.bg }};border:1px solid {{ f.bd }};border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:center"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#6B746C">{{ f.n }}</span><span style="font-size:13px;font-weight:{{ f.fw }}">{{ f.t }}</span></div></sc-for>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.logs }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">CEAK Logs Center</h1>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #E6E0D3">
+      <sc-for list="{{ logTabs }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.go }}" style="background:none;border:0;border-bottom:2px solid {{ t.bd }};padding:10px 12px;font-size:14px;color:{{ t.fg }};font-weight:500">{{ t.label }}</button></sc-for>
+    </div>
+    <sc-if value="{{ lg.logs }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ logFilters }}" as="f" hint-placeholder-count="9"><button onClick="{{ f.go }}" style="background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }};border-radius:999px;padding:6px 12px;font-size:12px">{{ f.label }}</button></sc-for></div>
+      <div style="background:#1F2A24;border-radius:14px;padding:6px;overflow-x:auto">
+        <sc-for list="{{ logs }}" as="l" hint-placeholder-count="10">
+          <div style="display:grid;grid-template-columns:150px 64px 100px minmax(260px,1fr) 80px 50px 60px;gap:12px;align-items:center;padding:9px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#D7DDD5;border-bottom:1px solid #2C3A32;min-width:860px">
+            <span style="color:#8FA196">{{ l.ts }}</span><span style="color:{{ l.lc }};font-weight:500">{{ l.lv }}</span><span style="color:#A9C2B1">{{ l.cat }}</span><span>{{ l.msg }}</span><span style="color:#8FA196">{{ l.u }}</span><span style="color:{{ l.sc }}">{{ l.st }}</span><span style="color:#8FA196;text-align:right">{{ l.ms }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ lg.audit }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ audits }}" as="a" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:18px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:50%;background:#E4EDE6;color:#2F5D46;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">{{ a.ini }}</div>
+            <div><div style="font-size:14px"><strong style="font-weight:600">{{ a.who }}</strong> {{ a.act }}</div><div style="font-size:14px;margin-top:2px">{{ a.obj }}</div><div style="display:flex;gap:10px;align-items:center;margin-top:8px;font-size:13px;flex-wrap:wrap"><span style="color:#6B746C">Anterior</span><span style="background:#F3DDD5;color:#8A3426;border-radius:6px;padding:2px 8px;text-decoration:line-through">{{ a.before }}</span><span style="color:#6B746C">Novo</span><span style="background:#E4EDE6;color:#1E3D2F;border-radius:6px;padding:2px 8px">{{ a.after }}</span></div></div>
+            <div style="font-size:12px;color:#6B746C;text-align:right">{{ a.when }}<br>{{ a.ip }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.sistema }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Saúde do sistema</h1>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
+      <sc-for list="{{ health }}" as="h" hint-placeholder-count="9"><div style="background:#fff;border:1px solid {{ h.bd }};border-radius:14px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:15px;font-weight:600">{{ h.n }}</span><span style="width:10px;height:10px;border-radius:50%;background:{{ h.c }}"></span></div><div style="font-size:13px;color:{{ h.c }};margin-top:6px;font-weight:500">{{ h.s }}</div><div style="font-size:12px;color:#6B746C;margin-top:4px">{{ h.m }}</div></div></sc-for>
+    </div>
+    <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:26px;margin:10px 0 0">Integrações</h2>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px">
+      <sc-for list="{{ integrations }}" as="i" hint-placeholder-count="8">
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid #EFE8DA;flex-wrap:wrap">
+          <div style="width:36px;height:36px;border-radius:10px;background:#F2ECE0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">{{ i.ab }}</div>
+          <div style="flex:1;min-width:180px"><div style="font-size:14px;font-weight:500">{{ i.n }}</div><div style="font-size:12px;color:#6B746C">{{ i.d }}</div></div>
+          <span style="background:{{ i.pb }};color:{{ i.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500">{{ i.st }}</span>
+          <button style="background:#fff;border:1px solid #D8D0BF;border-radius:8px;padding:7px 12px;font-size:12px;color:#1F2A24">{{ i.cta }}</button>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.ia }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:16px;max-width:880px">
+    <div><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">CEAK IA</h1><div style="font-size:14px;color:#6B746C;margin-top:4px">Copiloto administrativo · consulta os dados dos módulos que o seu perfil pode acessar</div></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ iaMsgs }}" as="m" hint-placeholder-count="0">
+        <div style="align-self:{{ m.al }};max-width:86%;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }};border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.55">
+          {{ m.text }}
+          <sc-if value="{{ m.hasRows }}"><div style="margin-top:10px;border:1px solid #EFE8DA;border-radius:10px;overflow:hidden"><sc-for list="{{ m.rows }}" as="r"><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:8px 12px;border-bottom:1px solid #EFE8DA;font-size:13px;font-weight:{{ r.fw }}"><span>{{ r.a }}</span><span>{{ r.b }}</span><span>{{ r.c }}</span><span>{{ r.d }}</span></div></sc-for></div></sc-if>
+          <sc-if value="{{ m.hasSrc }}"><div style="margin-top:10px;font-size:12px;color:#6B746C">Fontes: <span style="color:#2F5D46;font-weight:600">{{ m.src }}</span></div></sc-if>
+          <sc-if value="{{ m.draft }}"><div style="margin-top:10px;display:flex;gap:8px"><button onClick="{{ toApproval }}" style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:7px 12px;font-size:12px">Enviar para aprovação</button></div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px">
+      <sc-for list="{{ iaSugg }}" as="q" hint-placeholder-count="4"><button onClick="{{ q.go }}" style="text-align:left;background:#fff;border:1px solid #E6E0D3;border-radius:12px;padding:14px;font-size:14px;color:#1F2A24;line-height:1.4">{{ q.t }}</button></sc-for>
+    </div>
+    <div style="display:flex;gap:8px;background:#fff;border:1px solid #E1D9C8;border-radius:12px;padding:8px"><input value="{{ s.iaInput }}" onChange="{{ setIa }}" onKeyDown="{{ iaKey }}" placeholder="Pergunte sobre pessoas, eventos, finanças, estudos…" style="flex:1;border:0;padding:8px;outline:none;background:transparent"></input><button onClick="{{ iaSend }}" style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:8px 16px;font-size:13px">Perguntar</button></div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.pessoas }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Pessoas</h1><div style="font-size:13px;color:#6B746C">1.284 cadastros · 382 membros ativos</div></div>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #E6E0D3;flex-wrap:wrap">
+      <sc-for list="{{ peopleTabs }}" as="t" hint-placeholder-count="5"><button onClick="{{ t.go }}" style="background:none;border:0;border-bottom:2px solid {{ t.bd }};padding:10px 12px;font-size:14px;color:{{ t.fg }};font-weight:500">{{ t.label }}</button></sc-for>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:760px">
+        <thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><th style="padding:12px 14px;font-weight:500">Nome</th><th style="padding:12px 14px;font-weight:500">Perfil</th><th style="padding:12px 14px;font-weight:500">Última visita</th><th style="padding:12px 14px;font-weight:500">Check-ins</th><th style="padding:12px 14px;font-weight:500">Estudos</th><th style="padding:12px 14px;font-weight:500">Status</th></tr></thead>
+        <tbody><sc-for list="{{ people }}" as="p" hint-placeholder-count="8"><tr onClick="{{ go.perfil }}" style="border-top:1px solid #EFE8DA;cursor:pointer" style-hover="background:#FCFBF8"><td style="padding:12px 14px;font-weight:500">{{ p.n }}</td><td style="padding:12px 14px">{{ p.p }}</td><td style="padding:12px 14px">{{ p.v }}</td><td style="padding:12px 14px">{{ p.c }}</td><td style="padding:12px 14px">{{ p.e }}</td><td style="padding:12px 14px"><span style="background:{{ p.pb }};color:{{ p.pf }};border-radius:999px;padding:3px 10px;font-size:12px">{{ p.s }}</span></td></tr></sc-for></tbody>
+      </table>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.perfil }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div style="font-size:13px;color:#6B746C"><span onClick="{{ go.pessoas }}" style="cursor:pointer;color:#2F5D46">Pessoas</span> / Victor Alves</div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:22px;display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+      <div style="width:64px;height:64px;border-radius:50%;background:#E4EDE6;color:#2F5D46;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-size:24px">VA</div>
+      <div style="flex:1;min-width:220px"><div style="font-family:'Newsreader',serif;font-size:28px">Victor Alves</div><div style="font-size:13px;color:#6B746C">Membro desde 03/2024 · Voluntário (Recepção) · Aluno ESDE · (18) 99654-1120</div></div>
+      <span style="background:#E4EDE6;color:#1E3D2F;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600">Ativo</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
+      <sc-for list="{{ p360 }}" as="c" hint-placeholder-count="8"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;font-weight:600;color:#6B746C;letter-spacing:.04em;margin-bottom:8px">{{ c.t }}</div><sc-for list="{{ c.l }}" as="x"><div style="font-size:13px;padding:5px 0;border-bottom:1px solid #F4F0E7">{{ x }}</div></sc-for></div></sc-for>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.assistencia }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Assistência e acolhimento</h1>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+      <sc-for list="{{ asstKpis }}" as="k" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:30px;margin-top:4px">{{ k.v }}</div></div></sc-for>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:720px">
+        <thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><th style="padding:12px 14px;font-weight:500">Solicitante</th><th style="padding:12px 14px;font-weight:500">Tipo</th><th style="padding:12px 14px;font-weight:500">Data</th><th style="padding:12px 14px;font-weight:500">Atendente</th><th style="padding:12px 14px;font-weight:500">Status</th></tr></thead>
+        <tbody><sc-for list="{{ asstList }}" as="r" hint-placeholder-count="6"><tr style="border-top:1px solid #EFE8DA"><td style="padding:12px 14px;font-weight:500">{{ r.n }}</td><td style="padding:12px 14px">{{ r.t }}</td><td style="padding:12px 14px">{{ r.d }}</td><td style="padding:12px 14px">{{ r.a }}</td><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px">{{ r.s }}</span></td></tr></sc-for></tbody>
+      </table>
+    </div>
+    <div style="font-size:12px;color:#6B746C">Relatos e informações pessoais são visíveis apenas para a coordenação de assistência. Todo acesso é registrado em auditoria.</div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.voluntariado }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:end;gap:20px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Voluntariado</h1><div style="font-size:14px;color:#6B746C"><strong style="font-family:'Newsreader',serif;font-size:26px;color:#1F2A24;font-weight:500">68</strong> voluntários ativos</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">
+      <sc-for list="{{ areas }}" as="a" hint-placeholder-count="6"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:14px;font-weight:600">{{ a.n }}</div><div style="font-family:'Newsreader',serif;font-size:28px;margin-top:4px">{{ a.v }}</div><div style="font-size:12px;color:{{ a.c }}">{{ a.d }}</div></div></sc-for>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:12px">Banco de habilidades</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ skillBank }}" as="k" hint-placeholder-count="12"><span style="background:#F7F4EE;border:1px solid #EAE3D5;border-radius:999px;padding:6px 12px;font-size:13px">{{ k.t }} · <strong style="font-weight:600">{{ k.v }}</strong></span></sc-for></div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.agenda }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Agenda</h1><div style="display:flex;gap:8px"><button style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px;white-space:nowrap">Nova atividade</button></div></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;padding:16px;overflow-x:auto"><div style="min-width:640px"><div style="display:flex;justify-content:space-between;margin-bottom:10px"><div style="font-family:'Newsreader',serif;font-size:22px">Outubro 2026</div><div style="font-size:12px;color:#6B746C">Palestras · Estudos · Cursos · Assistência · Eventos · Campanhas</div></div><div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;font-size:12px;color:#6B746C;margin-bottom:6px"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div><div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px"><sc-for list="{{ admCal }}" as="c" hint-placeholder-count="35"><div style="min-height:86px;border-radius:10px;background:{{ c.bg }};border:1px solid {{ c.bd }};padding:6px;display:flex;flex-direction:column;gap:3px"><div style="font-size:12px;font-weight:600">{{ c.n }}</div><sc-for list="{{ c.ev }}" as="e"><div style="font-size:10px;line-height:1.25;border-left:2px solid {{ e.c }};padding-left:4px;color:#3F4A42">{{ e.t }}</div></sc-for></div></sc-for></div></div></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:860px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ agendaTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ agendaTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></div>
+</sc-if>
+
+<sc-if value="{{ is.eventos }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Eventos</h1><button style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px;white-space:nowrap">Novo evento</button></div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+      <div style="flex:1 1 280px;display:flex;flex-direction:column;gap:8px"><sc-for list="{{ evList }}" as="e" hint-placeholder-count="4"><button onClick="{{ e.go }}" style="text-align:left;background:{{ e.bg }};border:1px solid {{ e.bd }};border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:6px;color:#1F2A24"><span style="font-size:14px;font-weight:600">{{ e.t }}</span><span style="display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#6B746C">{{ e.d }}<span style="background:{{ e.pb }};color:{{ e.pf }};border-radius:999px;padding:2px 8px;white-space:nowrap">{{ e.st }}</span></span></button></sc-for></div>
+      <div style="flex:2 1 480px;min-width:0;display:flex;flex-direction:column;gap:12px">
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px"><div style="font-family:'Newsreader',serif;font-size:26px">{{ ev.t }}</div><div style="font-size:13px;color:#6B746C;margin-top:4px">{{ ev.d }} · {{ ev.who }}</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:16px"><sc-for list="{{ ev.k }}" as="k"><div><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-size:22px;font-weight:600">{{ k.v }}</div></div></sc-for></div></div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;flex:1 1 220px"><div style="font-size:12px;font-weight:600;color:#6B746C;margin-bottom:10px">AVALIAÇÃO MÉDIA</div><sc-for list="{{ ev.r }}" as="r"><div style="display:flex;justify-content:space-between;font-size:14px;padding:5px 0">{{ r.l }}<strong style="font-weight:600">{{ r.v }}</strong></div></sc-for></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;flex:2 1 300px"><div style="font-size:12px;font-weight:600;color:#6B746C;margin-bottom:10px">COMENTÁRIOS E OBSERVAÇÕES</div><sc-for list="{{ ev.com }}" as="c"><div style="font-size:14px;padding:6px 0;border-bottom:1px solid #F4F0E7;line-height:1.45">{{ c.t }}</div></sc-for></div></div>
+        <div style="background:#E4EDE6;border-radius:12px;padding:14px 16px;font-size:13px;color:#1E3D2F">Fluxo da palestra: {{ ev.flow }} · <span onClick="{{ go.automacoes }}" style="cursor:pointer;font-weight:600">ver automações ›</span></div>
+      </div>
+    </div></div>
+</sc-if>
+
+<sc-if value="{{ is.estudos }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Estudos e cursos</h1><button style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px;white-space:nowrap">Nova turma</button></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"><sc-for list="{{ studyKpis }}" as="k" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:28px;margin-top:4px;color:{{ k.c }}">{{ k.v }}</div></div></sc-for></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:900px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ turmasTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ turmasTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px"><div><div style="font-size:15px;font-weight:600">{{ turma.t }}</div><div style="font-size:12px;color:#6B746C">{{ turma.d }} · clique numa turma acima para trocar</div></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:480px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ alunosTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ alunosTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></div></div>
+</sc-if>
+
+<sc-if value="{{ is.comunicacao }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Comunicação</h1></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"><sc-for list="{{ commKpis }}" as="k" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:28px;margin-top:4px;color:{{ k.c }}">{{ k.v }}</div></div></sc-for></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px"><div style="font-size:15px;font-weight:600">Nova mensagem</div><div style="display:flex;gap:4px;background:#EFE8DA;border-radius:999px;padding:4px;align-self:flex-start"><sc-for list="{{ commTabs }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.go }}" style="background:{{ t.bg }};border:0;border-radius:999px;padding:8px 16px;font-size:13px;color:#1F2A24;white-space:nowrap">{{ t.label }}</button></sc-for></div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px"><label style="flex:1 1 220px;display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B746C">PÚBLICO<select style="border:1px solid #E1D9C8;border-radius:8px;padding:10px;background:#fff"><option>Membros ativos (382)</option><option>Todos os cadastros (1.284)</option><option>Alunos ESDE (32)</option><option>Voluntários (68)</option><option>Doadores (163)</option></select></label><label style="flex:1 1 220px;display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B746C">ENVIO<input value="07/10/2026 18:00" style="border:1px solid #E1D9C8;border-radius:8px;padding:10px;background:#fff"></input></label></div>
+      <textarea rows="3" value="{{ commTpl }}" style="border:1px solid #E1D9C8;border-radius:8px;padding:12px;font-size:14px;line-height:1.5;resize:vertical"></textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button style="background:#fff;border:1px solid #D8D0BF;border-radius:8px;padding:9px 14px;font-size:13px;color:#1F2A24">Gerar texto com IA</button><button onClick="{{ toApproval }}" style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px">Enviar para aprovação</button></div></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:860px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ commTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ commTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></div>
+</sc-if>
+
+<sc-if value="{{ is.doacoes }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Doações</h1><button style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px;white-space:nowrap">Registrar doação</button></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"><sc-for list="{{ donKpis }}" as="k" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:28px;margin-top:4px;color:{{ k.c }}">{{ k.v }}</div></div></sc-for></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px"><sc-for list="{{ campaigns }}" as="c" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px"><div style="font-size:15px;font-weight:600">{{ c.t }}</div><div style="font-size:13px;color:#6B746C;margin-top:4px">{{ c.d }} · {{ c.until }}</div><div style="display:flex;align-items:center;gap:10px;margin-top:12px"><div style="flex:1;height:8px;background:#F2ECE0;border-radius:4px"><div style="height:8px;width:{{ c.w }};background:#2F5D46;border-radius:4px"></div></div><span style="font-size:13px;font-weight:600">{{ c.p }}</span></div></div></sc-for></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:820px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ donTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ donTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></div>
+</sc-if>
+
+<sc-if value="{{ is.loja }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Loja</h1><button style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px;white-space:nowrap">Cadastrar produto</button></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"><sc-for list="{{ shopKpis }}" as="k" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:28px;margin-top:4px;color:{{ k.c }}">{{ k.v }}</div></div></sc-for></div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start"><div style="flex:2 1 520px;min-width:0"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:760px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ ordersTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ ordersTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;flex:1 1 280px"><div style="font-size:15px;font-weight:600;margin-bottom:12px">Mais vendidos · setembro</div><sc-for list="{{ topProducts }}" as="p" hint-placeholder-count="5"><div style="padding:8px 0;border-bottom:1px solid #F4F0E7"><div style="display:flex;justify-content:space-between;font-size:13px"><span>{{ p.t }}</span><strong style="font-weight:600">{{ p.v }}</strong></div><div style="height:6px;background:#F2ECE0;border-radius:4px;margin-top:6px"><div style="height:6px;width:{{ p.w }};background:#2F5D46;border-radius:4px"></div></div></div></sc-for></div></div></div>
+</sc-if>
+
+<sc-if value="{{ is.estoque }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Estoque</h1><button style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px;white-space:nowrap">Registrar movimentação</button></div>
+    <div style="background:#F3DDD5;color:#8A3426;border-radius:12px;padding:12px 16px;font-size:14px">Arroz tipo 1 abaixo do mínimo: 14 kg de 60 kg. As cestas de 15/10 precisam de 126 kg.</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ stockCats }}" as="f" hint-placeholder-count="5"><button onClick="{{ f.go }}" style="background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }};border-radius:999px;padding:6px 12px;font-size:12px;white-space:nowrap">{{ f.label }}</button></sc-for></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:820px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ stockTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ stockTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div><div style="font-size:15px;font-weight:600">Movimentações recentes</div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:820px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ movesTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ movesTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></div>
+</sc-if>
+
+<sc-if value="{{ is.bi }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">BI · Indicadores</h1></div><div style="display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid #E6E0D3"><sc-for list="{{ biTabs }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.go }}" style="background:none;border:0;border-bottom:2px solid {{ t.bd }};padding:10px 12px;font-size:14px;color:{{ t.fg }};font-weight:500;white-space:nowrap;flex:none">{{ t.label }}</button></sc-for></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px"><sc-for list="{{ bi.k }}" as="k" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:16px"><div style="font-size:12px;color:#6B746C">{{ k.l }}</div><div style="font-family:'Newsreader',serif;font-size:28px;margin-top:4px;color:{{ k.c }}">{{ k.v }}</div></div></sc-for></div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;flex:2 1 460px;min-width:0"><div style="font-size:15px;font-weight:600;margin-bottom:16px">{{ bi.ch }}</div><div style="display:flex;align-items:flex-end;gap:14px;height:200px;border-bottom:1px solid #EFE8DA"><sc-for list="{{ bi.bars }}" as="b" hint-placeholder-count="6"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;justify-content:flex-end;height:100%"><div style="font-size:11px;color:#6B746C">{{ b.v }}</div><div style="width:100%;max-width:36px;height:{{ b.h }};background:#2F5D46;border-radius:5px 5px 0 0"></div><div style="font-size:11px;color:#6B746C">{{ b.l }}</div></div></sc-for></div></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;flex:1 1 280px"><div style="font-size:15px;font-weight:600;margin-bottom:10px">Destaques</div><sc-for list="{{ bi.hi }}" as="h"><div style="font-size:14px;line-height:1.5;padding:8px 0;border-bottom:1px solid #F4F0E7">{{ h.t }}</div></sc-for></div></div></div>
+</sc-if>
+
+<sc-if value="{{ is.integracoes }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Integrações</h1></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px"><sc-for list="{{ integrations }}" as="i" hint-placeholder-count="8"><div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid #EFE8DA;flex-wrap:wrap"><div style="width:36px;height:36px;border-radius:10px;background:#F2ECE0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">{{ i.ab }}</div><div style="flex:1;min-width:180px"><div style="font-size:14px;font-weight:500">{{ i.n }}</div><div style="font-size:12px;color:#6B746C">{{ i.d }}</div></div><span style="background:{{ i.pb }};color:{{ i.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500">{{ i.st }}</span><button style="background:#fff;border:1px solid #D8D0BF;border-radius:8px;padding:7px 12px;font-size:12px;color:#1F2A24">{{ i.cta }}</button></div></sc-for></div></div>
+</sc-if>
+
+<sc-if value="{{ is.config }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:18px"><div style="display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">Configurações</h1></div><div style="display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid #E6E0D3"><sc-for list="{{ cfgTabs }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.go }}" style="background:none;border:0;border-bottom:2px solid {{ t.bd }};padding:10px 12px;font-size:14px;color:{{ t.fg }};font-weight:500;white-space:nowrap;flex:none">{{ t.label }}</button></sc-for></div>
+    <sc-if value="{{ cfg.inst }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B746C">RAZÃO SOCIAL<input value="Centro Espírita Allan Kardec" style="border:1px solid #E1D9C8;border-radius:8px;padding:10px"></input></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B746C">CNPJ<input value="00.000.000/0001-00" style="border:1px solid #E1D9C8;border-radius:8px;padding:10px"></input></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B746C">DOMÍNIO<input value="allankardecpenapolis.com.br" style="border:1px solid #E1D9C8;border-radius:8px;padding:10px"></input></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B746C">CIDADE<input value="Penápolis – SP" style="border:1px solid #E1D9C8;border-radius:8px;padding:10px"></input></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B746C">CHAVE PIX<input value="ceak-penapolis@pix.org.br" style="border:1px solid #E1D9C8;border-radius:8px;padding:10px"></input></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:#6B746C">HORÁRIO DA RECEPÇÃO<input value="Ter. a sáb., 19h às 21h30" style="border:1px solid #E1D9C8;border-radius:8px;padding:10px"></input></label>
+    </div></sc-if>
+    <sc-if value="{{ cfg.perf }}" hint-placeholder-val="{{ true }}"><div style="font-size:14px;color:#6B746C">Menus do CEAK Gestão mudam conforme o perfil. Use o seletor “Perfil de acesso” no topo para simular.</div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:900px"><thead><tr style="background:#FCFBF8;color:#6B746C"><th style="padding:10px 14px;text-align:left;font-weight:500">Módulo</th><sc-for list="{{ roleCols }}" as="c"><th style="padding:10px 8px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ roleRows }}" as="r" hint-placeholder-count="21"><tr style="border-top:1px solid #EFE8DA"><td style="padding:9px 14px;font-weight:500;white-space:nowrap">{{ r.label }}</td><sc-for list="{{ r.cells }}" as="c"><td style="padding:9px 8px;text-align:center;color:{{ c.c }}">{{ c.t }}</td></sc-for></tr></sc-for></tbody></table></div></sc-if>
+    <sc-if value="{{ cfg.users }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:flex-end"><button style="background:#2F5D46;color:#fff;border:0;border-radius:8px;padding:9px 14px;font-size:13px;white-space:nowrap">Convidar usuário</button></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:760px"><thead><tr style="text-align:left;color:#6B746C;background:#FCFBF8"><sc-for list="{{ usersTbl.cols }}" as="c"><th style="padding:12px 14px;font-weight:500;white-space:nowrap">{{ c.t }}</th></sc-for></tr></thead><tbody><sc-for list="{{ usersTbl.rows }}" as="r" hint-placeholder-count="6"><tr onClick="{{ r.go }}" style="border-top:1px solid #EFE8DA;background:{{ r.bg }}"><sc-for list="{{ r.cells }}" as="c"><td style="padding:12px 14px;font-weight:{{ c.fw }}">{{ c.t }}</td></sc-for><sc-if value="{{ r.hasSt }}"><td style="padding:12px 14px"><span style="background:{{ r.pb }};color:{{ r.pf }};border-radius:999px;padding:3px 10px;font-size:12px;font-weight:500;white-space:nowrap">{{ r.st }}</span></td></sc-if></tr></sc-for></tbody></table></div></sc-if>
+    <sc-if value="{{ cfg.sec }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px"><sc-for list="{{ secItems }}" as="i" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid #EFE8DA"><div style="flex:1"><div style="font-size:14px;font-weight:500">{{ i.t }}</div><div style="font-size:12px;color:#6B746C">{{ i.d }}</div></div><div style="width:38px;height:22px;border-radius:11px;background:{{ i.tb }};padding:3px;display:flex;justify-content:{{ i.tj }};flex:none"><div style="width:16px;height:16px;border-radius:50%;background:#fff"></div></div></div></sc-for></div></sc-if></div>
+</sc-if>
+
+<sc-if value="{{ is.placeholder }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0">{{ pageLabel }}</h1>
+    <div style="background:#fff;border:1px dashed #D8D0BF;border-radius:16px;padding:40px;color:#6B746C;font-size:14px;line-height:1.6">Módulo previsto no ecossistema CEAK Gestão. As telas detalhadas entram na próxima rodada do protótipo.</div>
+  </div>
+</sc-if>
+
+    </main>
+  </div>
+</div>
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}"><div style="position:fixed;bottom:24px;right:24px;background:#1F2A24;color:#F7F4EE;border-radius:10px;padding:12px 18px;font-size:14px;z-index:50">{{ s.toast }}</div></sc-if>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { logged: false, recover: false, page: 'dashboard', role: 'Administrador', sideOpen: true, alertsOpen: false, finTab: 'Dashboard', edTab: 'Blog', edStatus: 'Revisão', apprFilter: 'Todos', done: [], logTab: 'logs', logCat: 'Todos', autoOff: [], iaMsgs: [], iaInput: '', chFilter: 'Todos', pTab: 'Membros', toast: '', evSel: 0, turmaSel: 0, commCh: 'Push', biTab: 'Executivo', cfgTab: 'Perfis de acesso', concDone: [], stockCat: 'Todos' };
+  moreVals(s, pill, stK, roleAccess, menuDef) {
+    const SK = { ...stK, 'Confirmada': 'ok', 'Rascunho': 'neu', 'Aguardando aprovação': 'warn', 'Ativo': 'ok', 'Inativo': 'neu', 'Encerrada': 'neu', 'Em andamento': 'info', 'Aberta': 'ok', 'Enviado': 'ok', 'Agendado': 'info', 'Recebido': 'ok', 'A receber': 'warn', 'Atrasado': 'err', 'Pago': 'ok', 'Aguardando retirada': 'warn', 'Retirado': 'ok', 'Aguardando PIX': 'info', 'Normal': 'ok', 'Baixo': 'warn', 'Crítico': 'err', 'Conciliado': 'ok', 'Divergente': 'err', 'Sugerido': 'info', 'Em risco': 'warn', 'Concluída': 'ok', 'Emitido': 'ok' };
+    const T = (cols, rows, o = {}) => ({ cols: cols.map(t => ({ t })), rows: rows.map((r, i) => { const st = o.status ? r[r.length - 1] : null; const cells = (o.status ? r.slice(0, -1) : r).map((t, j) => ({ t, fw: j === 0 ? 500 : 400 })); return { cells, st, hasSt: !!st, ...(st ? pill(SK[st] || 'neu') : { pb: '', pf: '' }), go: o.go ? () => o.go(i) : undefined, bg: o.sel === i ? '#F4F7F2' : 'transparent' }; }) });
+    const K = arr => arr.map(([l, v, d, c]) => ({ l, v, d: d || '', c: c || '#1F2A24' }));
+    const C = { Palestras: 'oklch(0.48 0.08 155)', Estudos: 'oklch(0.48 0.08 235)', Cursos: 'oklch(0.48 0.08 295)', Eventos: 'oklch(0.48 0.08 60)', 'Assistência': 'oklch(0.48 0.08 20)', Campanhas: 'oklch(0.48 0.08 195)' };
+    const evDays = { 2: [['Palestras', 'Palestra 20h']], 3: [['Estudos', 'Evangelho 19h30']], 5: [['Cursos', 'ESDE 20h']], 6: [['Assistência', 'Atendimento 19h']], 7: [['Palestras', 'Palestra 20h']], 8: [['Assistência', 'Tratamento 19h']], 9: [['Palestras', 'Palestra 20h']], 10: [['Campanhas', 'Coleta 9h'], ['Estudos', 'Evangelho 19h30']], 12: [['Cursos', 'ESDE 20h']], 13: [['Assistência', 'Atendimento 19h']], 14: [['Palestras', 'Palestra 20h']], 15: [['Assistência', 'Tratamento 19h']], 16: [['Palestras', 'Palestra 20h']], 17: [['Eventos', 'Bazar 8h'], ['Estudos', 'Evangelho 19h30']], 19: [['Cursos', 'ESDE 20h']], 20: [['Assistência', 'Atendimento 19h']], 21: [['Palestras', 'Palestra 20h']], 23: [['Palestras', 'Palestra 20h']], 24: [['Estudos', 'Evangelho 19h30']], 26: [['Cursos', 'ESDE 20h']], 28: [['Palestras', 'Palestra 20h']], 30: [['Palestras', 'Palestra 20h']], 31: [['Estudos', 'Evangelho 19h30'], ['Campanhas', 'Fim do Agasalho']] };
+    const admCal = Array.from({ length: 35 }, (_, i) => { const n = i - 3; const ok = n >= 1 && n <= 31; return { n: ok ? n : '', ev: ok ? (evDays[n] || []).map(([k, t]) => ({ t, c: C[k] })) : [], bg: n === 2 ? '#F4F7F2' : (ok ? '#FCFBF8' : 'transparent'), bd: n === 2 ? '#2F5D46' : (ok ? '#F0EBE0' : 'transparent') }; });
+    const events = [
+      { t: 'Palestra: Família e Espiritualidade', d: 'Qua 30/09 · 20h', who: 'Marta Andrade', st: 'Encerrada', k: [['Inscritos', '186'], ['Presentes', '154'], ['Online', '412'], ['NPS', '78']], r: [['Conteúdo', '4,8'], ['Clareza', '4,7'], ['Aplicabilidade', '4,6']], com: ['“A explicação sobre os laços de família entre as existências.”', '“Gostaria de um estudo só sobre esse tema.”', '“O som do fundo do salão estava baixo.”'], flow: 'Gravação publicada · Resumo IA em revisão' },
+      { t: 'Palestra: O perdão como libertação', d: 'Hoje · 20h', who: 'Rogério Lima', st: 'Em andamento', k: [['Inscritos', '142'], ['Check-ins', '37'], ['Push enviados', '382'], ['NPS', '—']], r: [['Conteúdo', '—'], ['Clareza', '—'], ['Aplicabilidade', '—']], com: ['Avaliações abertas após o encerramento.'], flow: 'Divulgação publicada · Push 18:00 enviado · Check-in aberto' },
+      { t: 'Palestra: A esperança que sustenta', d: 'Qua 07/10 · 20h', who: 'Marta Andrade', st: 'Confirmada', k: [['Inscritos', '64'], ['Lembretes', 'agendados'], ['Divulgação', 'em revisão'], ['Sala', 'Salão principal']], r: [['Conteúdo', '—'], ['Clareza', '—'], ['Aplicabilidade', '—']], com: ['Divulgação gerada por IA aguardando aprovação humana.'], flow: 'IA gerou descrição · aguardando aprovação' },
+      { t: 'Bazar beneficente de primavera', d: 'Sáb 17/10 · 8h', who: 'Lúcia Moraes', st: 'Confirmada', k: [['Voluntários', '22'], ['Itens triados', '1.140'], ['Meta', 'R$ 3.000'], ['Local', 'Pátio']], r: [['Montagem', '7h'], ['Caixas', '3'], ['PIX', 'ativo']], com: ['Faltam 4 voluntários para o turno das 10h às 12h.'], flow: 'Divulgação agendada 05/10 09:00' }
+    ];
+    const ev = events[s.evSel];
+    const turmas = [['ESDE', 'Turma 2026 — seg', 'Helena Prado', 'Seg 20h', '32', '88%', 'Mód. 3/5', 'Ativo'], ['ESDE', 'Turma 2025 — qui', 'Rogério Lima', 'Qui 20h', '28', '68%', 'Mód. 2/5', 'Em risco'], ['Evangelho', 'Sábado aberto', 'Paulo Mendes', 'Sáb 19h30', '46', '—', 'Cap. 10/28', 'Ativo'], ['Mediunidade', 'Educação mediúnica I', 'Antônio Ferreira', 'Ter 20h', '22', '82%', 'Mód. 1/3', 'Ativo'], ['Mocidade', 'Jovens 14–21', 'Renata Campos', 'Dom 9h30', '21', '79%', 'Ciclo 2/4', 'Ativo'], ['Evangelização', 'Infantil 5–12', 'Sueli Andrade', 'Dom 9h30', '34', '90%', 'Ano 2026', 'Ativo']];
+    const alunos = [['Victor Alves', '88%', '14/16', 'Ativo'], ['Renata Campos', '94%', '15/16', 'Ativo'], ['João Batista Rocha', '50%', '8/16', 'Em risco'], ['Sueli Andrade', '100%', '16/16', 'Ativo'], ['Marcos Tavares', '62%', '10/16', 'Em risco'], ['Cláudia Ribeiro', '81%', '13/16', 'Ativo']];
+    const biData = {
+      Executivo: { k: [['Pessoas', '1.284'], ['Engajamento', '41% retorno'], ['Saldo do ano', 'R$ 38.910'], ['NPS médio', '74']], ch: 'Pessoas ativas por mês', bars: [[`abr`, 341], ['mai', 352], ['jun', 348], ['jul', 360], ['ago', 371], ['set', 382]], hi: ['Visitantes de primeira vez cresceram 12% no mês.', 'Saldo positivo em 6 dos últimos 6 meses.', 'Instagram com publicações pausadas desde hoje 06:00.'] },
+      Financeiro: { k: [['Receita 2026', 'R$ 152.300'], ['Despesa 2026', 'R$ 113.390'], ['Reserva', 'R$ 64.200'], ['Inadimplência', '3%']], ch: 'Receita mensal (R$ mil)', bars: [['abr', 15.2], ['mai', 16.1], ['jun', 15.8], ['jul', 16.9], ['ago', 17.4], ['set', 18.8]], hi: ['Doações representam 45% da receita.', 'Assistência social é 37% da despesa.', 'Reparo do telhado conclui em novembro.'] },
+      Pessoas: { k: [['Cadastros', '1.284'], ['Membros ativos', '382'], ['Visitantes/mês', '214'], ['Retorno 30 dias', '41%']], ch: 'Novos cadastros por mês', bars: [['abr', 28], ['mai', 31], ['jun', 26], ['jul', 34], ['ago', 33], ['set', 38]], hi: ['62% dos visitantes chegam pelas palestras.', '18 pessoas sem visita há mais de 6 semanas.', 'Faixa etária predominante: 45 a 64 anos.'] },
+      Eventos: { k: [['Eventos no mês', '23'], ['Check-ins', '1.472'], ['Média/palestra', '153'], ['Audiência online', '1.940']], ch: 'Presença média nas palestras', bars: [['abr', 131], ['mai', 138], ['jun', 129], ['jul', 142], ['ago', 140], ['set', 153]], hi: ['Quartas reúnem 58% mais público que sextas.', 'Transmissão dobra o alcance das palestras.', 'NPS das palestras: 74.'] },
+      Estudos: { k: [['Alunos', '147'], ['Turmas', '6'], ['Frequência', '83%'], ['Evasão', '11%']], ch: 'Frequência média (%)', bars: [['abr', 86], ['mai', 85], ['jun', 81], ['jul', 78], ['ago', 82], ['set', 83]], hi: ['ESDE quinta: evasão de 32%.', 'Evangelização infantil com 90% de frequência.', '42 pré-inscrições para o ESDE 2027.'] },
+      Loja: { k: [['Produtos ativos', '215'], ['Pedidos', '78'], ['Vendas', 'R$ 4.820'], ['Ticket médio', 'R$ 61,79']], ch: 'Vendas por mês (R$ mil)', bars: [['abr', 3.1], ['mai', 3.6], ['jun', 3.3], ['jul', 4.0], ['ago', 4.2], ['set', 4.8]], hi: ['Livros: 46% das vendas.', 'Itens doados: 31% das vendas.', '12 pedidos aguardando retirada.'] },
+      'Doações': { k: [['Doações no mês', 'R$ 8.420'], ['Doadores', '163'], ['Recorrentes', '41'], ['Ticket médio', 'R$ 51,66']], ch: 'Doações por mês (R$ mil)', bars: [['abr', 6.9], ['mai', 7.2], ['jun', 7.0], ['jul', 7.6], ['ago', 7.9], ['set', 8.4]], hi: ['PIX representa 88% das doações.', 'Campanha do Agasalho: 378 de 500 peças.', '9 novos doadores recorrentes no mês.'] },
+      'Comunicação': { k: [['Pushes enviados', '4.210'], ['Taxa de abertura', '38%'], ['E-mails', '1.150'], ['Descadastros', '0,4%']], ch: 'Abertura de push (%)', bars: [['abr', 31], ['mai', 33], ['jun', 34], ['jul', 36], ['ago', 37], ['set', 38]], hi: ['Lembretes 2h antes têm a maior abertura.', '1.026 dispositivos com push ativo.', 'WhatsApp oficial em homologação.'] },
+      'Conteúdo': { k: [['Publicados', '34'], ['Em aprovação', '12'], ['Alcance social', '18,4 mil'], ['Visitas ao blog', '2.310']], ch: 'Alcance social (mil)', bars: [['abr', 9.8], ['mai', 11.2], ['jun', 12.0], ['jul', 14.1], ['ago', 15.6], ['set', 18.4]], hi: ['Resumos de palestra são o conteúdo mais lido.', 'Tempo médio de aprovação: 6h.', '1 falha de publicação (Instagram).'] },
+      IA: { k: [['Consultas', '3.904'], ['Resolvidas', '91%'], ['Encaminhadas', '9%'], ['Rascunhos gerados', '61']], ch: 'Consultas ao CEAK IA', bars: [['abr', 410], ['mai', 520], ['jun', 580], ['jul', 640], ['ago', 790], ['set', 964]], hi: ['Pergunta mais comum: horário das palestras.', '100% dos rascunhos passaram por revisão humana.', '4 fontes novas na base de conhecimento.'] },
+      'Automação': { k: [['Execuções/mês', '12.480'], ['Sucesso', '97,2%'], ['Tempo economizado', '412h'], ['Fluxos ativos', '8']], ch: 'Execuções por mês (mil)', bars: [['abr', 7.1], ['mai', 8.4], ['jun', 9.0], ['jul', 10.2], ['ago', 11.6], ['set', 12.5]], hi: ['Falhas concentradas na integração Instagram.', 'Baixa de estoque: 1 falha por SKU sem saldo.', 'NPS enviado automaticamente após 100% das palestras.'] }
+    };
+    const bd = biData[s.biTab]; const bmax = Math.max(...bd.bars.map(b => b[1]));
+    const users = [['Antônio Ferreira', 'antonio.ferreira@…', 'Administrador', 'hoje 10:02', 'Ativo'], ['Maria Silva', 'maria.silva@…', 'Tesouraria', 'hoje 10:19', 'Ativo'], ['Paulo Mendes', 'paulo.mendes@…', 'Secretaria', 'hoje 09:40', 'Ativo'], ['Lúcia Moraes', 'lucia.moraes@…', 'Diretoria', 'ontem', 'Ativo'], ['Helena Prado', 'helena.prado@…', 'Instrutor', '30/09', 'Ativo'], ['Renata Campos', 'renata.campos@…', 'Coordenador', '28/09', 'Ativo'], ['Victor Alves', 'victor.alves@…', 'Voluntário', 'hoje', 'Ativo'], ['Carlos Teixeira', 'carlos.t@…', 'Secretaria', '02/06', 'Inativo']];
+    const roles = Object.keys(roleAccess);
+    const mods = menuDef.flatMap(g => g[1]);
+    const concLines = [['01/10', 'PIX recebido — Victor Alves', 'R$ 50,00', 'Doação #8812', 'Conciliado'], ['01/10', 'PIX recebido — 14 lançamentos', 'R$ 1.240,00', 'Doações (lote)', 'Conciliado'], ['30/09', 'Débito automático CPFL', '− R$ 842,00', 'Energia elétrica (R$ 862,00)', 'Divergente'], ['30/09', 'TED Atacadão Penápolis', '− R$ 3.180,00', 'Cestas de setembro', 'Conciliado'], ['29/09', 'PIX recebido — Loja pedido 1031', 'R$ 92,00', 'Pedido #1031', 'Sugerido'], ['29/09', 'Tarifa bancária', '− R$ 18,90', '—', 'Pendente'], ['28/09', 'PIX recebido — Mensalidade', 'R$ 30,00', 'Contribuição associado', 'Sugerido']];
+    return {
+      admCal,
+      agendaTbl: T(['Atividade', 'Tipo', 'Data', 'Local', 'Responsável', 'Inscritos', 'Status'], [['O perdão como libertação', 'Palestra', 'Sex 02/10 20h', 'Salão principal', 'Rogério Lima', '142', 'Confirmada'], ['Estudo do Evangelho', 'Estudo', 'Sáb 03/10 19h30', 'Sala 2', 'Paulo Mendes', '—', 'Confirmada'], ['ESDE — Aula 15', 'Curso', 'Seg 05/10 20h', 'Sala 1', 'Helena Prado', '32', 'Confirmada'], ['Atendimento fraterno', 'Assistência', 'Ter 06/10 19h', 'Recepção', 'Equipe A', '9 agend.', 'Confirmada'], ['A esperança que sustenta', 'Palestra', 'Qua 07/10 20h', 'Salão principal', 'Marta Andrade', '64', 'Confirmada'], ['Caridade sem distinção', 'Palestra', 'Sex 09/10 20h', 'Salão principal', 'Paulo Mendes', '—', 'Aguardando aprovação'], ['Bazar de primavera', 'Evento', 'Sáb 17/10 8h', 'Pátio', 'Lúcia Moraes', '22 vol.', 'Confirmada'], ['Encontro de trabalhadores', 'Evento', 'Dom 25/10 9h', 'Salão principal', 'Diretoria', '—', 'Rascunho']], { status: true }),
+      evList: events.map((e, i) => ({ t: e.t, d: e.d, st: e.st, ...pill(SK[e.st]), go: () => this.setState({ evSel: i }), bg: s.evSel === i ? '#F4F7F2' : '#fff', bd: s.evSel === i ? '#2F5D46' : '#E6E0D3' })),
+      ev: { ...ev, k: ev.k.map(([l, v]) => ({ l, v })), r: ev.r.map(([l, v]) => ({ l, v })), com: ev.com.map(t => ({ t })) },
+      turmasTbl: T(['Curso', 'Turma', 'Instrutor', 'Encontros', 'Alunos', 'Frequência', 'Progresso', 'Status'], turmas, { status: true, go: i => this.setState({ turmaSel: i }), sel: s.turmaSel }),
+      turma: { t: turmas[s.turmaSel][0] + ' · ' + turmas[s.turmaSel][1], d: turmas[s.turmaSel][2] + ' · ' + turmas[s.turmaSel][3] },
+      alunosTbl: T(['Aluno', 'Frequência', 'Presenças', 'Status'], alunos, { status: true }),
+      studyKpis: K([['Alunos', '147'], ['Turmas ativas', '6'], ['Frequência média', '83%'], ['Evasão', '11%', '', '#A4473A'], ['Pré-inscrições 2027', '42']]),
+      commTabs: ['Push', 'E-mail', 'WhatsApp'].map(t => ({ label: t, go: () => this.setState({ commCh: t }), bg: s.commCh === t ? '#fff' : 'transparent' })),
+      commTpl: { Push: 'Hoje às 20h: palestra “O perdão como libertação”, com Rogério Lima. Transmissão ao vivo no app.', 'E-mail': 'Prezados, informamos a programação de outubro do Centro Espírita Allan Kardec. Palestras às quartas e sextas, 20h; Estudo do Evangelho aos sábados, 19h30.', WhatsApp: 'CEAK informa: a Campanha do Agasalho segue até 31/10. Coleta drive-thru aos sábados, das 9h às 12h.' }[s.commCh],
+      commKpis: K([['Pushes no mês', '4.210'], ['Abertura', '38%'], ['E-mails no mês', '1.150'], ['Dispositivos ativos', '1.026']]),
+      commTbl: T(['Mensagem', 'Canal', 'Público', 'Enviados', 'Abertura', 'Data', 'Status'], [['Lembrete: palestra hoje 20h', 'Push', 'Membros (382)', '382', '44%', '02/10 18:00', 'Enviado'], ['Nova apostila ESDE disponível', 'Push', 'Alunos ESDE (32)', '32', '72%', '01/10 19:00', 'Enviado'], ['Programação de outubro', 'E-mail', 'Todos (1.150)', '1.150', '31%', '01/10 08:00', 'Enviado'], ['Campanha do Agasalho — reta final', 'WhatsApp', 'Doadores (163)', '—', '—', '05/10 10:00', 'Agendado'], ['Lembrete: palestra quarta', 'Push', 'Membros (382)', '—', '—', '07/10 18:00', 'Aguardando aprovação'], ['Escala de voluntários outubro', 'E-mail', 'Voluntários (68)', '68', '81%', '27/09 09:00', 'Enviado']], { status: true }),
+      donKpis: K([['Doações no mês', 'R$ 8.420'], ['Doadores', '163'], ['Recorrentes', '41'], ['Ticket médio', 'R$ 51,66'], ['Itens recebidos', '612 peças']]),
+      campaigns: [['Campanha do Agasalho', '378 de 500 peças', 75, 'até 31/10'], ['Cestas de outubro', '96 de 126 cestas', 76, 'até 15/10'], ['Reforma do telhado', 'R$ 9.800 de R$ 14.000', 70, 'até 30/11'], ['Natal solidário', 'R$ 0 de R$ 6.000', 0, 'início 01/11']].map(([t, d, p, until]) => ({ t, d, p: p + '%', w: p + '%', until })),
+      donTbl: T(['Doador', 'Valor / item', 'Forma', 'Destino', 'Data', 'Recibo'], [['Victor Alves', 'R$ 50,00', 'PIX', 'Onde for mais necessário', '02/10 09:31', 'Emitido'], ['Anônimo', 'R$ 200,00', 'PIX', 'Assistência social', '01/10 21:12', 'Emitido'], ['Sueli Andrade', 'R$ 30,00/mês', 'PIX recorrente', 'Manutenção', '01/10 08:00', 'Emitido'], ['Família Rocha', '6 peças', 'Entrega', 'Campanha do Agasalho', '29/09', 'Emitido'], ['Mercado Bom Preço', '40 kg de arroz', 'Entrega', 'Cestas', '28/09', 'Emitido'], ['Cláudia Ribeiro', 'R$ 100,00', 'PIX', 'Reforma do telhado', '27/09', 'Emitido']], { status: true }),
+      shopKpis: K([['Produtos ativos', '215'], ['Pedidos', '78'], ['Vendas', 'R$ 4.820'], ['Ticket médio', 'R$ 61,79'], ['Aguardando retirada', '12', '', '#7A5A1E']]),
+      ordersTbl: T(['Pedido', 'Cliente', 'Itens', 'Total', 'Pagamento', 'Data', 'Status'], [['#1042', 'Carla Nogueira', '3', 'R$ 64,00', 'PIX', '02/10', 'Aguardando PIX'], ['#1041', 'Roberto Martins', '1', 'R$ 32,00', 'PIX', '01/10', 'Aguardando retirada'], ['#1040', 'Sueli Andrade', '2', 'R$ 83,00', 'PIX', '01/10', 'Aguardando retirada'], ['#1039', 'Marina Souza', '4', 'R$ 112,00', 'PIX', '30/09', 'Retirado'], ['#1038', 'Jorge Pereira', '1', 'R$ 15,00', 'PIX', '30/09', 'Retirado'], ['#1037', 'Fernanda Lima', '2', 'R$ 58,00', 'PIX', '29/09', 'Retirado']], { status: true }),
+      topProducts: [['O Evangelho Segundo o Espiritismo', 31], ['O Livro dos Espíritos', 22], ['Pano de prato bordado', 18], ['Caneca CEAK 60 anos', 11], ['Nosso Lar', 9]].map(([t, v]) => ({ t, v, w: Math.round(v / 31 * 100) + '%' })),
+      stockCats: ['Todos', 'Alimentos', 'Loja', 'Limpeza', 'Doações'].map(c => ({ label: c, go: () => this.setState({ stockCat: c }), bg: s.stockCat === c ? '#2F5D46' : '#fff', fg: s.stockCat === c ? '#fff' : '#1F2A24', bd: s.stockCat === c ? '#2F5D46' : '#D8D0BF' })),
+      stockTbl: T(['Item', 'Categoria', 'Saldo', 'Mínimo', 'Última movimentação', 'Situação'], [['Arroz tipo 1', 'Alimentos', '14 kg', '60 kg', 'Saída 30/09 · 120 kg cestas', 'Crítico'], ['Feijão carioca', 'Alimentos', '72 kg', '50 kg', 'Entrada 28/09 · 40 kg', 'Normal'], ['Óleo de soja', 'Alimentos', '22 un', '40 un', 'Saída 30/09 · 96 un', 'Baixo'], ['Leite em pó', 'Alimentos', '48 un', '30 un', 'Entrada 25/09', 'Normal'], ['O Evangelho Segundo o Espiritismo', 'Loja', '12 un', '10 un', 'Venda 02/10', 'Normal'], ['O Livro dos Espíritos', 'Loja', '8 un', '10 un', 'Venda 01/10', 'Baixo'], ['Detergente', 'Limpeza', '30 un', '20 un', 'Entrada 20/09', 'Normal'], ['Casacos (triados)', 'Doações', '214 pç', '—', 'Entrada 29/09 · 6 pç', 'Normal']].filter(r => s.stockCat === 'Todos' || r[1] === s.stockCat), { status: true }),
+      movesTbl: T(['Data', 'Movimento', 'Item', 'Qtd.', 'Origem / destino', 'Por'], [['02/10 09:12', 'Saída (venda)', 'O Evangelho Segundo o Espiritismo', '1', 'Pedido #1042', 'Automação'], ['30/09 15:20', 'Saída', 'Arroz tipo 1', '120 kg', 'Cestas de setembro', 'Lúcia Moraes'], ['29/09 10:05', 'Entrada (doação)', 'Casacos', '6 pç', 'Família Rocha', 'Recepção'], ['28/09 11:40', 'Entrada (doação)', 'Feijão carioca', '40 kg', 'Mercado Bom Preço', 'Recepção']]),
+      biTabs: Object.keys(biData).map(t => ({ label: t, go: () => this.setState({ biTab: t }), bd: s.biTab === t ? '#2F5D46' : 'transparent', fg: s.biTab === t ? '#1E3D2F' : '#6B746C' })),
+      bi: { k: K(bd.k), ch: bd.ch, bars: bd.bars.map(([l, v]) => ({ l, v: String(v).replace('.', ','), h: Math.round(v / bmax * 100) + '%' })), hi: bd.hi.map(t => ({ t })) },
+      cfgTabs: ['Instituição', 'Perfis de acesso', 'Usuários', 'Segurança e LGPD'].map(t => ({ label: t, go: () => this.setState({ cfgTab: t }), bd: s.cfgTab === t ? '#2F5D46' : 'transparent', fg: s.cfgTab === t ? '#1E3D2F' : '#6B746C' })),
+      cfg: { inst: s.cfgTab === 'Instituição', perf: s.cfgTab === 'Perfis de acesso', users: s.cfgTab === 'Usuários', sec: s.cfgTab === 'Segurança e LGPD' },
+      roleCols: roles.map(r => ({ t: r })),
+      roleRows: mods.map(([id, label]) => ({ label, cells: roles.map(r => { const on = roleAccess[r].includes(id); return { t: on ? '●' : '—', c: on ? '#2F5D46' : '#C9C2B3' }; }) })),
+      usersTbl: T(['Nome', 'E-mail', 'Perfil', 'Último acesso', 'Status'], users, { status: true }),
+      secItems: [['Autenticação em dois fatores', 'Obrigatória para Administrador, Diretoria e Tesouraria', true], ['Sessão expira por inatividade', '30 minutos', true], ['Consentimento LGPD no cadastro', 'Termo versão 2026.1', true], ['Dados de assistência com acesso restrito', 'Somente coordenação de assistência', true], ['Retenção de logs', '24 meses', true], ['Login com Google', 'Para membros no CEAK App', false]].map(([t, d, on]) => ({ t, d, tb: on ? '#2F5D46' : '#CFC7B6', tj: on ? 'flex-end' : 'flex-start' })),
+      receberTbl: T(['Origem', 'Descrição', 'Categoria', 'Vencimento', 'Valor', 'Status'], [['Associados', 'Contribuições mensais — out/26', 'Mensalidades', '10/10/2026', 'R$ 3.150,00', 'A receber'], ['Loja', 'Pedidos aguardando PIX', 'Loja', '03/10/2026', 'R$ 64,00', 'A receber'], ['Bazar', 'Bazar de primavera (estimado)', 'Eventos', '17/10/2026', 'R$ 3.000,00', 'A receber'], ['Prefeitura de Penápolis', 'Convênio assistência social — 3º tri', 'Convênios', '30/09/2026', 'R$ 2.400,00', 'Atrasado'], ['Doações recorrentes', 'PIX Automático — 41 doadores', 'Doações', '01/10/2026', 'R$ 1.380,00', 'Recebido'], ['Loja', 'Vendas setembro', 'Loja', '30/09/2026', 'R$ 4.820,00', 'Recebido']], { status: true }),
+      fluxoTbl: T(['Data', 'Descrição', 'Entradas', 'Saídas', 'Saldo'], [['01/10', 'Saldo inicial', '', '', 'R$ 64.200,00'], ['01/10', 'Doações PIX (lote)', 'R$ 1.240,00', '', 'R$ 65.440,00'], ['01/10', 'Doações recorrentes', 'R$ 1.380,00', '', 'R$ 66.820,00'], ['02/10', 'Loja — vendas', 'R$ 128,00', '', 'R$ 66.948,00'], ['05/10', 'CPFL — energia (previsto)', '', 'R$ 862,00', 'R$ 66.086,00'], ['08/10', 'Atacadão — cestas (previsto)', '', 'R$ 3.420,00', 'R$ 62.666,00'], ['10/10', 'Mensalidades (previsto)', 'R$ 3.150,00', '', 'R$ 65.816,00'], ['15/10', 'Reparo telhado 3/4 (previsto)', '', 'R$ 1.650,00', 'R$ 64.166,00']]),
+      catsList: [['Assistência social', 4980, 5200], ['Energia e água', 2360, 2400], ['Manutenção', 2140, 1500], ['Material de consumo', 1420, 1600], ['Tecnologia', 890, 900], ['Comunicação', 620, 800], ['Outras', 880, 1000]].map(([t, v, b]) => ({ t, v: 'R$ ' + v.toLocaleString('pt-BR'), b: 'R$ ' + b.toLocaleString('pt-BR'), w: Math.min(100, Math.round(v / b * 100)) + '%', c: v > b ? '#A4473A' : '#2F5D46', pct: Math.round(v / b * 100) + '%' })),
+      ccList: [['Sede', 'Água, energia, manutenção, limpeza', 5310, 6000], ['Assistência social', 'Cestas, agasalhos, atendimento', 4980, 5200], ['Estudos', 'Apostilas, material didático', 640, 800], ['Comunicação', 'Gráfica, impulsionamento', 620, 800], ['Loja', 'Compra de livros', 960, 1200], ['Administração', 'Internet, banco, contabilidade', 780, 900]].map(([t, d, v, b]) => ({ t, d, v: 'R$ ' + v.toLocaleString('pt-BR'), b: 'R$ ' + b.toLocaleString('pt-BR'), w: Math.round(v / b * 100) + '%' })),
+      concTbl: T(['Data', 'Extrato bancário', 'Valor', 'Lançamento no sistema', 'Status'], concLines.map((r, i) => s.concDone.includes(i) ? [...r.slice(0, 4), 'Conciliado'] : r), { status: true }),
+      concAll: () => { this.setState({ concDone: [0, 1, 2, 3, 4, 5, 6] }); this.toast('7 lançamentos conciliados'); },
+      reports: [['Prestação de contas mensal', 'Setembro/2026 · aprovado pela diretoria', 'PDF'], ['DRE — demonstrativo de resultado', 'Jan–set/2026', 'PDF · XLSX'], ['Balancete', 'Setembro/2026', 'PDF · XLSX'], ['Doações por doador', 'Para emissão de recibos anuais', 'XLSX'], ['Relatório de transparência pública', 'Publicado no site', 'PDF'], ['Despesas por centro de custo', 'Trimestre 3/2026', 'PDF · XLSX']].map(([t, d, f]) => ({ t, d, f }))
+    };
+  }
+  componentDidMount() { this._rs = () => { const n = window.innerWidth < 900; if (n !== this.state.narrow) this.setState({ narrow: n, sideOpen: !n }); }; window.addEventListener('resize', this._rs); this._rs(); const h = location.hash.slice(1); if (h) this.setState({ logged: h !== 'login', page: h === 'login' ? 'dashboard' : h }); }
+  componentWillUnmount() { window.removeEventListener('resize', this._rs); }
+  go = (page, extra = {}) => { this.setState(st => ({ page, alertsOpen: false, sideOpen: st.narrow ? false : st.sideOpen, ...extra })); window.scrollTo({ top: 0 }); };
+  toast = t => { this.setState({ toast: t }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: '' }), 2600); };
+  iaAsk = q => {
+    const A = {
+      'Quantas pessoas participaram das palestras este mês?': { text: 'Em setembro, as 4 palestras públicas registraram 612 check-ins de 418 pessoas distintas, das quais 87 eram visitantes de primeira vez. A média por palestra foi de 153 presentes, 9% acima de agosto. Outras 1.940 visualizações vieram das transmissões.', src: 'Eventos · Check-ins · YouTube' },
+      'Compare receitas e despesas dos últimos 3 meses.': { text: 'O saldo foi positivo nos três meses, com redução em agosto pela manutenção do telhado.', rows: [['Mês', 'Receitas', 'Despesas', 'Saldo'], ['Julho', 'R$ 16.920', 'R$ 12.410', 'R$ 4.510'], ['Agosto', 'R$ 17.380', 'R$ 15.970', 'R$ 1.410'], ['Setembro', 'R$ 18.840', 'R$ 13.290', 'R$ 5.550']], src: 'Financeiro · Fluxo de caixa' },
+      'Quais estudos possuem maior evasão?': { text: 'A turma de quinta-feira do ESDE (módulo 2) tem a maior evasão: 9 de 28 alunos sem presença há mais de 3 semanas (32%). Em seguida, o Estudo de Mediunidade, com 18%. Sugiro contato da coordenação com os ausentes antes do próximo módulo.', src: 'Estudos · Presenças' },
+      'Crie uma mensagem para divulgar a próxima palestra.': { text: 'Rascunho: “Nesta quarta-feira, 07/10, às 20h, Marta Andrade apresenta a palestra pública A esperança que sustenta no Centro Espírita Allan Kardec. Entrada gratuita, com transmissão ao vivo pelo YouTube. Todos são bem-vindos.”', src: 'Agenda · Eventos', draft: true }
+    };
+    const a = A[q] || { text: 'Consultei os módulos disponíveis para o seu perfil. Para essa pergunta, recomendo refinar o período ou o módulo (ex.: “check-ins de visitantes em setembro”).', src: 'Índice CEAK Gestão' };
+    this.setState(s => ({ iaInput: '', iaMsgs: [...s.iaMsgs, { me: true, text: q }, { me: false, ...a }] }));
+  };
+  renderVals() {
+    const s = this.state;
+    const P = { ok: ['#E4EDE6', '#1E3D2F'], warn: ['#F4EAD5', '#7A5A1E'], err: ['#F3DDD5', '#8A3426'], neu: ['#EEEAE1', '#4F5A52'], info: ['#E1E8EF', '#2F4B63'] };
+    const pill = k => ({ pb: P[k][0], pf: P[k][1] });
+    const menuDef = [
+      ['', [['dashboard', 'Visão Geral']]],
+      ['PESSOAS E ATIVIDADES', [['pessoas', 'Pessoas'], ['agenda', 'Agenda'], ['eventos', 'Eventos'], ['estudos', 'Estudos']]],
+      ['COMUNICAÇÃO', [['conteudo', 'Conteúdo'], ['comunicacao', 'Comunicação']]],
+      ['SOLIDÁRIO E FINANÇAS', [['doacoes', 'Doações'], ['financeiro', 'Financeiro'], ['loja', 'Loja'], ['estoque', 'Estoque']]],
+      ['SERVIÇO', [['voluntariado', 'Voluntariado'], ['assistencia', 'Assistência']]],
+      ['INTELIGÊNCIA', [['ia', 'CEAK IA'], ['automacoes', 'Automações'], ['aprovacoes', 'Aprovações'], ['bi', 'BI']]],
+      ['SISTEMA', [['logs', 'Logs'], ['integracoes', 'Integrações'], ['sistema', 'Sistema'], ['config', 'Configurações']]]
+    ];
+    const allIds = menuDef.flatMap(g => g[1].map(i => i[0]));
+    const roleAccess = {
+      'Administrador': allIds,
+      'Diretoria': ['dashboard', 'pessoas', 'agenda', 'eventos', 'estudos', 'conteudo', 'doacoes', 'financeiro', 'loja', 'voluntariado', 'assistencia', 'ia', 'aprovacoes', 'bi'],
+      'Tesouraria': ['dashboard', 'doacoes', 'financeiro', 'loja', 'estoque', 'aprovacoes', 'bi'],
+      'Secretaria': ['dashboard', 'pessoas', 'agenda', 'eventos', 'conteudo', 'comunicacao', 'aprovacoes'],
+      'Coordenador': ['dashboard', 'pessoas', 'agenda', 'eventos', 'estudos', 'voluntariado', 'assistencia'],
+      'Instrutor': ['dashboard', 'agenda', 'estudos', 'pessoas'],
+      'Voluntário': ['dashboard', 'agenda', 'voluntariado', 'assistencia'],
+      'Membro': [], 'Visitante': []
+    };
+    const acc = roleAccess[s.role];
+    const can = {}; allIds.forEach(id => can[id] = acc.includes(id));
+    const labels = Object.fromEntries(menuDef.flatMap(g => g[1]));
+    const built = ['dashboard', 'pessoas', 'perfil', 'financeiro', 'conteudo', 'editor', 'aprovacoes', 'automacoes', 'logs', 'sistema', 'ia', 'assistencia', 'voluntariado', 'agenda', 'eventos', 'estudos', 'comunicacao', 'doacoes', 'loja', 'estoque', 'bi', 'config', 'integracoes'];
+    let page = s.page;
+    const parent = { editor: 'conteudo', perfil: 'pessoas' }[page] || page;
+    const noAccess = acc.length === 0;
+    const allowed = !noAccess && acc.includes(parent);
+    const is = {}; built.forEach(p => is[p] = !noAccess && allowed && page === p);
+    is.placeholder = !noAccess && (!built.includes(page) || !allowed);
+    const go = {}; [...allIds, 'editor', 'perfil'].forEach(id => go[id] = () => this.go(id));
+    const pendingAppr = [
+      { id: 1, k: 'Conteúdo', t: 'Resumo da palestra “Família e Espiritualidade” — Blog, Facebook, Instagram, Google', d: 'Rascunho IA · revisado por Paulo Mendes · hoje 09:40', edit: 'editor' },
+      { id: 2, k: 'Conteúdo', t: 'Divulgação: Palestra “O perdão como libertação”', d: 'Instagram e Facebook · agendar para hoje 12:00', edit: 'editor' },
+      { id: 3, k: 'Financeiro', t: 'Pagamento CPFL — energia elétrica · R$ 862,00', d: 'Vence 05/10 · lançado por Maria Silva', edit: 'financeiro' },
+      { id: 4, k: 'Financeiro', t: 'Reembolso de material de limpeza · R$ 214,30', d: 'Solicitado por Lúcia Moraes', edit: 'financeiro' },
+      { id: 5, k: 'Campanhas', t: 'Prorrogação da Campanha do Agasalho até 15/11', d: 'Proposta da assistência social', edit: 'dashboard' },
+      { id: 6, k: 'Comunicações', t: 'Push: lembrete da palestra de quarta-feira', d: 'Envio para 382 membros · 07/10 18:00', edit: 'dashboard' },
+      { id: 7, k: 'Produtos', t: '6 itens doados para publicação na loja', d: 'Cadastrados pelo bazar · fotos anexadas', edit: 'dashboard' },
+      { id: 8, k: 'IA', t: 'Nova base de conhecimento: Regulamento ESDE 2027', d: 'Fonte para respostas do CEAK IA', edit: 'ia' }
+    ].filter(a => !s.done.includes(a.id));
+    const totals = { 'Conteúdo': 8, 'Financeiro': 3, 'Campanhas': 2, 'Comunicações': 4, 'Produtos': 6, 'IA': 1 };
+    const doneBy = k => [1, 2, 3, 4, 5, 6, 7, 8].filter(id => s.done.includes(id) && ({ 1: 'Conteúdo', 2: 'Conteúdo', 3: 'Financeiro', 4: 'Financeiro', 5: 'Campanhas', 6: 'Comunicações', 7: 'Produtos', 8: 'IA' })[id] === k).length;
+    const apprCounts = Object.keys(totals).map(k => ({ l: k, v: totals[k] - doneBy(k) - (k === 'Conteúdo' && s.edStatus !== 'Revisão' && !s.done.includes(1) ? 1 : 0), go: () => this.go('aprovacoes', { apprFilter: s.apprFilter === k ? 'Todos' : k }), bg: s.apprFilter === k ? '#E4EDE6' : '#fff', bd: s.apprFilter === k ? '#2F5D46' : '#E6E0D3' }));
+    const apprList = pendingAppr.filter(a => s.apprFilter === 'Todos' || a.k === s.apprFilter).map(a => ({ ...a, approve: () => { this.setState(st => ({ done: [...st.done, a.id], edStatus: a.id === 1 ? 'Aprovado' : st.edStatus })); this.toast('Aprovado · registrado na auditoria'); }, reject: () => { this.setState(st => ({ done: [...st.done, a.id] })); this.toast('Rejeitado · autor notificado'); }, edit: () => this.go(a.edit) }));
+    const alerts = [{ t: 'Pagamento vencido', d: 'Sabesp · R$ 2.800,00 · venceu 30/09', c: '#A4473A', go: () => this.go('financeiro', { finTab: 'Contas a pagar' }) }, { t: 'Estoque baixo', d: 'Arroz · 14 kg (mínimo 60 kg)', c: '#B5833A', go: () => this.go('estoque') }, { t: 'Instagram', d: 'Token expirado · publicações pausadas', c: '#B5833A', go: () => this.go('sistema') }, { t: 'Conteúdos aguardando aprovação', d: '8 itens', c: '#2F5D46', go: () => this.go('aprovacoes', { apprFilter: 'Conteúdo' }) }];
+    const healthRaw = [['Website', 'Online', '99,98% · 182 ms'], ['App', 'Online', '99,95% · 1.204 sessões hoje'], ['API', 'Online', 'p95 210 ms'], ['Banco', 'Online', '38% armazenamento'], ['IA', 'Online', '312 consultas hoje'], ['Push', 'Online', 'último envio 08:00'], ['Facebook', 'Online', 'última publicação 09:12'], ['Instagram', 'Atenção', 'token expirado às 06:00'], ['Google', 'Online', 'perfil sincronizado']];
+    const health = healthRaw.map(([n, st, m]) => ({ n, s: st, m, c: st === 'Online' ? '#2F7A52' : '#B5833A', bd: st === 'Online' ? '#E6E0D3' : '#E3C98F' }));
+    const brlK = v => 'R$ ' + v.toLocaleString('pt-BR');
+    const rxdRaw = [['abr', 15200, 12800], ['mai', 16100, 13400], ['jun', 15800, 14100], ['jul', 16920, 12410], ['ago', 17380, 15970], ['set', 18840, 13290]];
+    const contentsRaw = [
+      ['Resumo da palestra “Família e Espiritualidade”', 'Gravação YouTube', 'Blog + 3 redes', 'Revisão', '02/10', 'Paulo Mendes'],
+      ['Divulgação: O perdão como libertação', 'Agenda', 'Instagram, Facebook', 'Rascunho IA', '02/10', 'IA → Paulo Mendes'],
+      ['Campanha do Agasalho — 75% da meta', 'Campanhas', 'Blog, Google', 'Aprovado', '01/10', 'Lúcia Moraes'],
+      ['Bazar de primavera 17/10', 'Agenda', 'Instagram, Google', 'Agendado', '05/10 09:00', 'Lúcia Moraes'],
+      ['Pré-inscrição ESDE 2027', 'Estudos', 'Blog, push', 'Publicado', '18/09', 'Helena Prado'],
+      ['Resumo “A coragem da fé”', 'Gravação YouTube', 'Blog', 'Publicado', '24/09', 'Paulo Mendes'],
+      ['Mensagem da semana — Cap. X', 'Estudo do Evangelho', 'Facebook', 'Processando', '02/10', 'IA'],
+      ['Novo horário da biblioteca', 'Secretaria', 'Google Business', 'Capturado', '02/10', '—'],
+      ['Agradecimento aos voluntários', 'Voluntariado', 'Instagram', 'Erro', '01/10 18:00', 'Lúcia Moraes']
+    ];
+    const stK = { 'Capturado': 'neu', 'Processando': 'info', 'Rascunho IA': 'info', 'Revisão': 'warn', 'Aprovado': 'ok', 'Agendado': 'ok', 'Publicado': 'ok', 'Erro': 'err', 'Pendente': 'warn', 'Pago': 'ok', 'Vencido': 'err', 'Cancelado': 'neu' };
+    const CH = { Blog: 'oklch(0.48 0.08 155)', Facebook: 'oklch(0.48 0.08 250)', Instagram: 'oklch(0.48 0.08 330)', Google: 'oklch(0.48 0.08 60)', Eventos: 'oklch(0.48 0.08 195)', Campanhas: 'oklch(0.48 0.08 20)' };
+    const weekRaw = [['Seg 05', [['Google', '09:00', 'Bazar de primavera'], ['Blog', '10:00', 'Resumo: Família e Espiritualidade']]], ['Ter 06', [['Facebook', '12:00', 'Atendimento fraterno hoje'], ['Eventos', '19:00', 'Atendimento fraterno']]], ['Qua 07', [['Instagram', '10:00', 'Palestra hoje 20h'], ['Facebook', '10:00', 'Palestra hoje 20h'], ['Eventos', '20:00', 'Palestra pública']]], ['Qui 08', [['Campanhas', '09:00', 'Agasalho: faltam 122 peças']]], ['Sex 09', [['Blog', '10:00', 'Mensagem da semana']]], ['Sáb 10', [['Instagram', '08:00', 'Coleta drive-thru'], ['Eventos', '19:30', 'Estudo do Evangelho']]], ['Dom 11', []]];
+    const edTexts = {
+      Blog: 'Na palestra pública de 30 de setembro, Marta Andrade abordou a família como espaço de reencontro entre espíritos. Apoiada em O Livro dos Espíritos (questões 203 a 206), lembrou que os laços espirituais antecedem os laços do corpo e que as dificuldades de convivência podem ser oportunidades de reconciliação escolhidas antes da reencarnação.\n\nA palestrante destacou três atitudes para o dia a dia: paciência com as diferenças, diálogo sem acusações e o hábito da prece em família. A gravação completa está disponível na biblioteca do CEAK.',
+      Facebook: 'A família que temos hoje não é obra do acaso. Na palestra de quarta-feira, Marta Andrade falou sobre os laços que atravessam as existências. Assista à gravação completa no link.',
+      Instagram: 'Laços que atravessam o tempo.\n\nResumo da palestra “Família e Espiritualidade”, com Marta Andrade. Gravação completa no link da bio.\n\n#espiritismo #família #CEAKPenápolis',
+      'Google Business': 'Gravação disponível: palestra pública “Família e Espiritualidade”. Palestras todas as quartas-feiras, às 20h. Entrada gratuita.'
+    };
+    const pipeSteps = ['IA / Robô', 'Rascunho', 'Revisão humana', 'Aprovação', 'Publicação'];
+    const edIdx = { 'Revisão': 2, 'Aprovado': 3, 'Publicado': 4, 'Rejeitado': 2 }[s.edStatus];
+    const logRaw = [
+      ['02/10/2026 10:28:31', 'INFO', 'Aplicação', 'POST /api/v1/checkins', 'Victor', '200', '82 ms'],
+      ['02/10/2026 10:27:02', 'INFO', 'Automação', 'palestra.encerrada → nps.enviar (148 destinatários)', 'engine', '200', '1,2 s'],
+      ['02/10/2026 10:21:45', 'WARN', 'Integrações', 'instagram.graph: token expirado (OAuthException 190)', 'engine', '401', '340 ms'],
+      ['02/10/2026 10:19:10', 'INFO', 'Auditoria', 'financeiro.lancamento.update #4471', 'Maria Silva', '200', '64 ms'],
+      ['02/10/2026 10:12:33', 'INFO', 'IA', 'ia.resumo gerado · palestra 2026-09-30', 'engine', '200', '8,4 s'],
+      ['02/10/2026 09:58:20', 'WARN', 'Segurança', '3 tentativas de login falhas · secretaria@', '187.42.x.x', '429', '12 ms'],
+      ['02/10/2026 09:40:11', 'INFO', 'Notificações', 'push.enviado · lembrete palestra (382)', 'engine', '200', '2,1 s'],
+      ['02/10/2026 09:31:54', 'INFO', 'Financeiro', 'pix.recebido · doação R$ 50,00', 'pix-webhook', '200', '91 ms'],
+      ['02/10/2026 09:12:08', 'ERROR', 'Automação', 'pedido.pago → estoque.baixar: SKU 0088 sem saldo', 'engine', '409', '55 ms'],
+      ['02/10/2026 08:00:00', 'INFO', 'Aplicação', 'GET /api/v1/agenda?mes=10', 'anônimo', '200', '38 ms']
+    ];
+    const lvC = { INFO: '#A9C2B1', WARN: '#E3C98F', ERROR: '#E8A08E' };
+    const role = s.role;
+    return {
+      ...this.moreVals(s, pill, stK, roleAccess, menuDef),
+      s, is, go, can, noAccess, showLogin: !s.logged,
+      sb: { pos: s.narrow ? 'fixed' : 'sticky', sh: s.narrow ? '0 0 40px rgba(0,0,0,.2)' : 'none', backdrop: !!(s.narrow && s.sideOpen && s.logged), mainPad: s.narrow ? '20px 14px 56px' : '28px 24px 64px' },
+      login: () => this.setState({ logged: true }), toggleRecover: () => this.setState({ recover: !s.recover }),
+      toggleSide: () => this.setState({ sideOpen: !s.sideOpen }), toggleAlerts: () => this.setState({ alertsOpen: !s.alertsOpen }),
+      roles: Object.keys(roleAccess), setRole: e => this.setState({ role: e.target.value, page: 'dashboard' }),
+      menu: menuDef.map(([label, items]) => ({ label, items: items.filter(i => acc.includes(i[0])).map(([id, l]) => { const on = parent === id || (s.page === id); return { label: l, go: () => this.go(id), bg: on ? '#fff' : 'transparent', fg: on ? '#1E3D2F' : '#3F4A42', fw: on ? 600 : 500, badge: id === 'aprovacoes' ? pendingAppr.length : '', badgeDisplay: id === 'aprovacoes' ? 'inline' : 'none' }; }) })).filter(g => g.items.length),
+      pageLabel: labels[s.page] || 'Módulo',
+      alerts, health,
+      kpis: [['Pessoas', '1.284', '+38 no mês'], ['Membros ativos', '382', '+6'], ['Visitantes no mês', '214', '+12%'], ['Check-ins', '1.472', 'setembro'], ['Eventos', '23', 'no mês'], ['Alunos', '147', '6 turmas'], ['Voluntários', '68', '6 áreas']].map(([l, v, d]) => ({ l, v, d, dc: d.startsWith('+') ? '#2F7A52' : '#6B746C' })),
+      weekBars: [288, 301, 276, 322, 340, 298, 352, 361, 344, 372, 380, 376].map((v, i) => ({ v, h: Math.round(v / 400 * 100) + '%', c: i === 11 ? '#2F5D46' : '#9DB8A6' })),
+      engage: [['Visitantes', '214'], ['Taxa de retorno', '41%'], ['Frequência média', '2,8/mês'], ['NPS', '72'], ['Avaliação média', '4,7 / 5']].map(([l, v]) => ({ l, v })),
+      apprCounts,
+      miniBoards: [
+        { t: 'Loja', go: () => this.go('loja'), items: [{ l: 'Produtos ativos', v: '215' }, { l: 'Pedidos', v: '78' }, { l: 'Vendas', v: 'R$ 4.820' }, { l: 'Ticket médio', v: 'R$ 61,79' }] },
+        { t: 'Conteúdo', go: () => this.go('conteudo'), items: [{ l: 'Publicados', v: '34' }, { l: 'Aguardando aprovação', v: '12', c: '#7A5A1E' }, { l: 'Agendados', v: '8' }, { l: 'Falhas', v: '1', c: '#A4473A' }] },
+        { t: 'Automações · hoje', go: () => this.go('automacoes'), items: [{ l: 'Execuções', v: '438' }, { l: 'Taxa de sucesso', v: '97,2%' }, { l: 'Falhas', v: '12', c: '#A4473A' }, { l: 'Tempo economizado', v: '31h' }] }
+      ].filter(b => acc.includes({ Loja: 'loja', 'Conteúdo': 'conteudo', 'Automações · hoje': 'automacoes' }[b.t])),
+      finTabs: ['Dashboard', 'Contas a pagar', 'Contas a receber', 'Fluxo de caixa', 'Categorias', 'Centros de custo', 'Conciliação', 'Relatórios'].map(t => ({ label: t, go: () => this.setState({ finTab: t }), bd: s.finTab === t ? '#2F5D46' : 'transparent', fg: s.finTab === t ? '#1E3D2F' : '#6B746C' })),
+      fin: { dash: s.finTab === 'Dashboard', pagar: s.finTab === 'Contas a pagar', receber: s.finTab === 'Contas a receber', fluxo: s.finTab === 'Fluxo de caixa', cats: s.finTab === 'Categorias', cc: s.finTab === 'Centros de custo', conc: s.finTab === 'Conciliação', rel: s.finTab === 'Relatórios' },
+      finKpis: [['Receitas', 'R$ 18.840', '#2F5D46'], ['Despesas', 'R$ 13.290', '#8A5A1E'], ['Saldo', 'R$ 5.550', '#1F2A24'], ['Doações', 'R$ 8.420', '#1F2A24'], ['Loja', 'R$ 4.820', '#1F2A24']].map(([l, v, c]) => ({ l, v, c })),
+      rxd: rxdRaw.map(([l, r, d]) => ({ l, r: Math.round(r / 20000 * 100) + '%', d: Math.round(d / 20000 * 100) + '%' })),
+      flow: rxdRaw.map(([l, r, d]) => ({ l, v: brlK(r - d), h: Math.round((r - d) / 6000 * 100) + '%' })),
+      byOrigin: [['Doações', 8420], ['Loja e bazar', 4820], ['Mensalidades', 3150], ['Eventos', 1680], ['Outras', 770]].map(([l, v]) => ({ l, v: brlK(v), w: Math.round(v / 8420 * 100) + '%' })),
+      byCat: [['Assistência social', 4980], ['Energia e água', 2360], ['Manutenção', 2140], ['Material', 1420], ['Tecnologia', 890], ['Outras', 1500]].map(([l, v]) => ({ l, v: brlK(v), w: Math.round(v / 4980 * 100) + '%' })),
+      payables: [['Sabesp', 'Água e esgoto — set/26', 'Utilidades', 'Sede', '30/09/2026', 'R$ 2.800,00', 'Vencido', 'Maria Silva'], ['CPFL Paulista', 'Energia elétrica — set/26', 'Utilidades', 'Sede', '05/10/2026', 'R$ 862,00', 'Pendente', 'Maria Silva'], ['Atacadão Penápolis', 'Alimentos — cestas de outubro', 'Assistência social', 'Assistência', '08/10/2026', 'R$ 3.420,00', 'Aprovado', 'Lúcia Moraes'], ['Vivo Empresas', 'Internet e telefone', 'Tecnologia', 'Administração', '10/10/2026', 'R$ 189,90', 'Aprovado', 'Maria Silva'], ['Gráfica Central', 'Folhetos Campanha do Agasalho', 'Comunicação', 'Campanhas', '12/10/2026', 'R$ 420,00', 'Pendente', 'Paulo Mendes'], ['Hidráulica Souza', 'Reparo do telhado — parcela 3/4', 'Manutenção', 'Sede', '15/10/2026', 'R$ 1.650,00', 'Pendente', 'Antônio Ferreira'], ['FEB Editora', 'Livros para a loja', 'Loja', 'Loja', '20/09/2026', 'R$ 960,20', 'Pago', 'Maria Silva'], ['Limpeza Total ME', 'Material de limpeza', 'Material', 'Sede', '25/09/2026', 'R$ 214,30', 'Cancelado', 'Lúcia Moraes']].map(([f, d, c, cc, v, val, st, r]) => ({ f, d, c, cc, v, val, st, r, ...pill(stK[st] || 'ok') })),
+      contentKpis: [['Posts publicados', '34', '#1F2A24'], ['Aguardando aprovação', '12', '#7A5A1E'], ['Agendados', '8', '#1F2A24'], ['Falhas', '1', '#A4473A']].map(([l, v, c]) => ({ l, v, c })),
+      pipeline: pipeSteps.map((t, i) => ({ t, bg: i === 2 || i === 3 ? '#2F5D46' : '#fff', fg: i === 2 || i === 3 ? '#fff' : '#1E3D2F', arrow: i < 4 ? 'inline' : 'none' })),
+      contents: contentsRaw.map(([t, f, c, st, d, r], i) => { const status = i === 0 ? (s.edStatus === 'Revisão' ? 'Revisão' : s.edStatus) : st; return { t, f, c, st: status, d, r, ...pill(stK[status] || 'err'), cta: ['Revisão', 'Rascunho IA'].includes(status) ? 'Revisar ›' : 'Abrir ›', go: () => this.go('editor') }; }),
+      chFilters: ['Todos', 'Blog', 'Facebook', 'Instagram', 'Google', 'Eventos', 'Campanhas'].map(f => ({ label: f, go: () => this.setState({ chFilter: f }), bg: s.chFilter === f ? '#2F5D46' : '#fff', fg: s.chFilter === f ? '#fff' : '#1F2A24', bd: s.chFilter === f ? '#2F5D46' : '#D8D0BF' })),
+      week: weekRaw.map(([l, ps]) => ({ l, posts: ps.filter(p => s.chFilter === 'Todos' || p[0] === s.chFilter).map(([ch, h, t]) => ({ ch, h, t, c: CH[ch] })) })),
+      edPill: { bg: P[stK[s.edStatus] || 'err'][0], fg: P[stK[s.edStatus] || 'err'][1] },
+      ed: { review: s.edStatus === 'Revisão', approved: s.edStatus === 'Aprovado' },
+      edPipe: pipeSteps.map((t, i) => ({ t: i < edIdx || s.edStatus === 'Publicado' ? '✓ ' + t : t, bg: i < edIdx || s.edStatus === 'Publicado' ? '#E4EDE6' : (i === edIdx ? '#2F5D46' : '#fff'), fg: i === edIdx && s.edStatus !== 'Publicado' ? '#fff' : '#1E3D2F', bd: i <= edIdx ? '#2F5D46' : '#E1D9C8', arrow: i < 4 ? 'inline' : 'none' })),
+      edNote: { 'Revisão': 'Aguardando aprovação de um responsável', 'Aprovado': 'Aprovado por ' + 'Antônio Ferreira' + ' · agendado para 05/10 09:00', 'Publicado': 'Publicado em Blog, Facebook, Google · Instagram na fila (token)', 'Rejeitado': 'Devolvido ao autor com comentários' }[s.edStatus],
+      edTabs: ['Blog', 'Facebook', 'Instagram', 'Google Business'].map(t => ({ label: t, go: () => this.setState({ edTab: t }), bd: s.edTab === t ? '#2F5D46' : 'transparent', fg: s.edTab === t ? '#1E3D2F' : '#6B746C' })),
+      edText: edTexts[s.edTab],
+      edApprove: () => { this.setState(st => ({ edStatus: 'Aprovado', done: [...st.done, 1] })); this.toast('Conteúdo aprovado · agendado para 05/10 09:00'); },
+      edReject: () => { this.setState({ edStatus: 'Rejeitado' }); this.toast('Conteúdo devolvido ao autor'); },
+      edPublish: () => { this.setState({ edStatus: 'Publicado' }); this.toast('Publicação enviada aos canais'); },
+      apprList, apprEmpty: apprList.length === 0,
+      autoKpis: [['Execuções hoje', '438', '#1F2A24'], ['Sucesso', '426', '#2F7A52'], ['Falhas', '12', '#A4473A'], ['Taxa', '97,2%', '#1F2A24'], ['Tempo economizado', '31h', '#1F2A24']].map(([l, v, c]) => ({ l, v, c })),
+      autos: [['Divulgação de palestra', 'Palestra criada', 'gerar divulgação (rascunho para aprovação)', 'hoje 08:02'], ['Pesquisa pós-palestra', 'Palestra encerrada', 'enviar NPS', 'hoje 10:27'], ['Baixa de estoque', 'Pedido pago', 'baixar estoque', 'hoje 09:12 · falha'], ['Publicação aprovada', 'Novo artigo aprovado', 'publicar redes', 'ontem 18:00'], ['Resumo de palestra', 'Gravação disponível', 'IA resume e gera artigo', 'hoje 10:12'], ['Lembrete de evento', '2h antes do evento', 'push para inscritos', 'hoje 18:00 (agendado)'], ['Recibo de doação', 'PIX recebido', 'enviar recibo por e-mail', 'hoje 09:31'], ['Alerta de estoque', 'Estoque abaixo do mínimo', 'notificar tesouraria', 'hoje 07:00']].map(([n, g, a, last], i) => { const off = s.autoOff.includes(i); return { n, g, a, last, st: off ? 'Pausada' : 'Ativa', sc: off ? '#6B746C' : '#2F7A52', tb: off ? '#CFC7B6' : '#2F5D46', tj: off ? 'flex-start' : 'flex-end', toggle: () => this.setState(st => ({ autoOff: off ? st.autoOff.filter(x => x !== i) : [...st.autoOff, i] })) }; }),
+      lectureFlow: ['Palestra criada', 'IA gera descrição', 'Conteúdo social', 'Humano aprova', 'Postagens agendadas', 'Push antes do evento', 'Check-in', 'Palestra', 'Gravação', 'NPS', 'IA resume palestra', 'Gera artigo', 'Gera post', 'Humano aprova', 'Publicação'].map((t, i) => { const h = t === 'Humano aprova' || t === 'Palestra criada'; return { t, n: String(i + 1).padStart(2, '0'), bg: h ? '#F4EAD5' : '#FCFBF8', bd: h ? '#E3C98F' : '#EFE8DA', fw: h ? 600 : 500 }; }),
+      logTabs: [['Logs', 'logs'], ['Auditoria', 'audit']].map(([label, k]) => ({ label, go: () => this.setState({ logTab: k }), bd: s.logTab === k ? '#2F5D46' : 'transparent', fg: s.logTab === k ? '#1E3D2F' : '#6B746C' })),
+      lg: { logs: s.logTab === 'logs', audit: s.logTab === 'audit' },
+      logFilters: ['Todos', 'Aplicação', 'Segurança', 'Auditoria', 'Financeiro', 'IA', 'Automação', 'Integrações', 'Notificações'].map(f => ({ label: f, go: () => this.setState({ logCat: f }), bg: s.logCat === f ? '#2F5D46' : '#fff', fg: s.logCat === f ? '#fff' : '#1F2A24', bd: s.logCat === f ? '#2F5D46' : '#D8D0BF' })),
+      logs: logRaw.filter(l => s.logCat === 'Todos' || l[2] === s.logCat).map(([ts, lv, cat, msg, u, st, ms]) => ({ ts, lv, cat, msg, u, st, ms, lc: lvC[lv], sc: st.startsWith('2') ? '#A9C2B1' : '#E8A08E' })),
+      audits: [['MS', 'Maria Silva', 'alterou lançamento financeiro', 'Energia elétrica · CPFL · set/26', 'R$ 842', 'R$ 862', 'hoje 10:19', 'IP 177.38.x.x'], ['PM', 'Paulo Mendes', 'editou conteúdo gerado por IA', 'Resumo “Família e Espiritualidade” · Blog', '3 parágrafos', '2 parágrafos', 'hoje 09:40', 'IP 189.10.x.x'], ['LM', 'Lúcia Moraes', 'alterou meta de campanha', 'Campanha do Agasalho', '400 peças', '500 peças', '28/09 16:02', 'IP 177.38.x.x'], ['AF', 'Antônio Ferreira', 'alterou perfil de acesso', 'Helena Prado', 'Voluntário', 'Instrutor', '27/09 11:15', 'IP 200.150.x.x']].map(([ini, who, act, obj, before, after, when, ip]) => ({ ini, who, act, obj, before, after, when, ip })),
+      integrations: [['FB', 'Facebook', 'Página CEAKDEPENAPOLIS · publicação automática após aprovação', 'Conectado'], ['IG', 'Instagram', '@ceakpenapolis · token expirado em 02/10 06:00', 'Atenção'], ['G', 'Google Business', 'Perfil da instituição · horários e postagens', 'Conectado'], ['YT', 'YouTube', 'Transmissões e gravações', 'Conectado'], ['@', 'E-mail', 'contato@allankardecpenapolis.com.br', 'Conectado'], ['P', 'Push', 'Web Push · 1.026 dispositivos', 'Conectado'], ['PX', 'PIX', 'Webhook de recebimentos · banco conveniado', 'Conectado'], ['IA', 'IA', 'Modelo de linguagem · base de conhecimento CEAK', 'Conectado']].map(([ab, n, d, st]) => ({ ab, n, d, st, ...pill(st === 'Conectado' ? 'ok' : st === 'Atenção' ? 'warn' : 'err'), cta: st === 'Conectado' ? 'Configurar' : 'Reconectar' })),
+      iaMsgs: s.iaMsgs.map(m => ({ text: m.text, src: m.src, hasSrc: !!m.src, draft: !!m.draft, rows: (m.rows || []).map((r, i) => ({ a: r[0], b: r[1], c: r[2], d: r[3], fw: i === 0 ? 600 : 400 })), hasRows: !!m.rows, al: m.me ? 'flex-end' : 'flex-start', bg: m.me ? '#2F5D46' : '#fff', fg: m.me ? '#fff' : '#1F2A24', bd: m.me ? '#2F5D46' : '#E6E0D3' })),
+      iaSugg: ['Quantas pessoas participaram das palestras este mês?', 'Compare receitas e despesas dos últimos 3 meses.', 'Quais estudos possuem maior evasão?', 'Crie uma mensagem para divulgar a próxima palestra.'].map(t => ({ t, go: () => this.iaAsk(t) })),
+      setIa: e => this.setState({ iaInput: e.target.value }), iaKey: e => { if (e.key === 'Enter' && s.iaInput.trim()) this.iaAsk(s.iaInput.trim()); }, iaSend: () => s.iaInput.trim() && this.iaAsk(s.iaInput.trim()),
+      toApproval: () => this.toast('Rascunho enviado à Central de aprovações'),
+      peopleTabs: ['Membros', 'Visitantes', 'Voluntários', 'Instrutores', 'Diretoria'].map(t => ({ label: t, go: () => this.setState({ pTab: t }), bd: s.pTab === t ? '#2F5D46' : 'transparent', fg: s.pTab === t ? '#1E3D2F' : '#6B746C' })),
+      people: [['Victor Alves', 'Membro · Voluntário', 'hoje', '58', 'ESDE, Evangelho', 'Ativo'], ['Carla Nogueira', 'Visitante', '30/09', '2', '—', 'Novo'], ['Helena Prado', 'Instrutora', 'ontem', '112', 'ESDE (instrutora)', 'Ativo'], ['João Batista Rocha', 'Membro', '16/08', '41', 'Evangelho', 'Ausente 6 sem.'], ['Lúcia Moraes', 'Diretoria', 'hoje', '203', 'Mediunidade', 'Ativo'], ['Renata Campos', 'Membro · Voluntária', '30/09', '37', 'ESDE', 'Ativo'], ['Marcos Tavares', 'Visitante', '23/09', '1', '—', 'Novo'], ['Sueli Andrade', 'Membro', '28/09', '76', 'Evangelho', 'Ativo']].map(([n, p, v, c, e, st]) => ({ n, p, v, c, e, s: st, ...pill(st === 'Ativo' ? 'ok' : st === 'Novo' ? 'info' : 'warn') })),
+      p360: [['DADOS PESSOAIS', ['victor.alves@email.com', '(18) 99654-1120', 'Nasc. 14/05/1987', 'Penápolis – SP']], ['MINHA JORNADA', ['Membro desde 03/2024', '7 visitas em setembro', '4 conquistas']], ['CHECK-INS', ['58 no total', 'Último: hoje 19:54', 'Média 6,2 / mês']], ['ESTUDOS', ['ESDE · Turma 2026 · 78% · 88% presença', 'Evangelho · 60%']], ['EVENTOS', ['Bazar de primavera (inscrito)', 'Palestras: 14 em 2026']], ['VOLUNTARIADO', ['Recepção · quartas', '2 ações em setembro · 6h']], ['CONTRIBUIÇÕES', ['Doação PIX R$ 50 · 02/10', 'Agasalho · 6 peças · 29/09']], ['AVALIAÇÕES', ['8 avaliações · média 4,8', 'NPS individual: promotor']], ['SOLICITAÇÕES', ['Nenhuma em aberto']]].map(([t, l]) => ({ t, l })),
+      asstKpis: [['Solicitações hoje', '8'], ['Pendentes', '12'], ['Agendadas', '15'], ['Concluídas no mês', '42']].map(([l, v]) => ({ l, v })),
+      asstList: [['Carla N.', 'Tratamento espiritual', 'Qui 08/10 · 19h00', 'Equipe B', 'Agendada'], ['Anônimo', 'Prece', 'Reunião de 06/10', '—', 'Pendente'], ['Roberto M.', 'Atendimento fraterno', 'Ter 06/10 · 19h00', 'Sueli Andrade', 'Agendada'], ['Fernanda L.', 'Orientação', 'hoje', '—', 'Pendente'], ['Jorge P.', 'Passe', '30/09', 'Equipe A', 'Concluída'], ['Marina S.', 'Atendimento fraterno', '29/09', 'Lúcia Moraes', 'Concluída']].map(([n, t, d, a, st]) => ({ n, t, d, a, s: st, ...pill(st === 'Concluída' ? 'ok' : st === 'Agendada' ? 'info' : 'warn') })),
+      areas: [['Recepção', 14, 'escala completa', '#2F7A52'], ['Assistência Social', 18, 'precisa de 3', '#7A5A1E'], ['Eventos', 11, 'bazar 17/10', '#6B746C'], ['Comunicação', 6, 'precisa de 2', '#7A5A1E'], ['Manutenção', 7, 'escala completa', '#2F7A52'], ['Estudos', 12, 'monitores', '#6B746C']].map(([n, v, d, c]) => ({ n, v, d, c })),
+      skillBank: [['Elétrica', 3], ['Informática', 7], ['Fotografia', 4], ['Cozinha', 12], ['Organização', 15], ['Limpeza', 9], ['Transporte', 6], ['Música', 5], ['Costura', 8], ['Atendimento', 14], ['Ensino', 10], ['Outras', 6]].map(([t, v]) => ({ t, v })),
+      hasToast: !!s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

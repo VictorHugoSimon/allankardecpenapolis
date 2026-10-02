@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F7F4EE;color:#1F2A24;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#2F5D46;text-decoration:none}a:hover{color:#1E3D2F;text-decoration:underline}
+</style>
+</helmet>
+<div style="max-width:1180px;margin:0 auto;padding:64px 24px 80px;display:flex;flex-direction:column;gap:48px">
+  <div style="display:flex;flex-direction:column;gap:16px;max-width:760px">
+    <div style="display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:50%;background:#2F5D46;color:#F7F4EE;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-weight:600">AK</div><div style="font-size:13px;letter-spacing:.14em;font-weight:600;color:#2F5D46">CEAK DIGITAL · PROTÓTIPO v1</div></div>
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(40px,5vw,60px);line-height:1.05;margin:0;text-wrap:balance">Ecossistema digital do Centro Espírita Allan Kardec — Penápolis</h1>
+    <p style="font-size:18px;color:#4F5A52;line-height:1.6;margin:0">Aproximar, acolher, informar, ensinar, envolver, permitir ajudar e facilitar ser ajudado. Três experiências com a mesma identidade visual, conectadas entre si.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px">
+    <a href="CEAK%20Site.dc.html" style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:28px;color:#1F2A24;text-decoration:none;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:12px;letter-spacing:.1em;font-weight:600;color:#2F5D46">EXPERIÊNCIA PÚBLICA</div>
+      <div style="font-family:'Newsreader',serif;font-size:30px">Site institucional</div>
+      <div style="font-size:15px;color:#5E675F;line-height:1.55">Home, O CEAK, agenda, palestra, cadastro, Preciso de ajuda, tratamento espiritual, Quero ajudar, doação PIX, loja, produto, carrinho e checkout.</div>
+      <div style="font-size:14px;font-weight:600;margin-top:auto;color:#2F5D46">allankardecpenapolis.com.br →</div>
+    </a>
+    <a href="CEAK%20App.dc.html" style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:28px;color:#1F2A24;text-decoration:none;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:12px;letter-spacing:.1em;font-weight:600;color:#2F5D46">EXPERIÊNCIA DO MEMBRO</div>
+      <div style="font-family:'Newsreader',serif;font-size:30px">CEAK App</div>
+      <div style="font-size:15px;color:#5E675F;line-height:1.55">Login, home, check-in, minha jornada, estudos e curso, palestra, avaliação NPS, CEAK IA, agenda, biblioteca, notificações e perfil.</div>
+      <div style="font-size:14px;font-weight:600;margin-top:auto;color:#2F5D46">Abrir o app →</div>
+    </a>
+    <a href="CEAK%20Gestao.dc.html" style="background:#1E3D2F;border-radius:20px;padding:28px;color:#F7F4EE;text-decoration:none;display:flex;flex-direction:column;gap:10px">
+      <div style="font-size:12px;letter-spacing:.1em;font-weight:600;color:#A9C2B1">EXPERIÊNCIA ADMINISTRATIVA</div>
+      <div style="font-family:'Newsreader',serif;font-size:30px">CEAK Gestão</div>
+      <div style="font-size:15px;color:#C9D6CD;line-height:1.55">Command Center, financeiro, conteúdo e editor, aprovações, automações, logs e auditoria, saúde do sistema, CEAK IA, pessoas, assistência, voluntariado e perfis de acesso.</div>
+      <div style="font-size:14px;font-weight:600;margin-top:auto;color:#F7F4EE">Entrar no sistema →</div>
+    </a>
+  </div>
+  <div>
+    <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:32px;margin:0 0 20px">Jornadas navegáveis</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px">
+      <sc-for list="{{ journeys }}" as="j" hint-placeholder-count="6">
+        <a href="{{ j.href }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px;color:#1F2A24;text-decoration:none;display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:16px;font-weight:600">{{ j.t }}</div>
+          <div style="font-size:14px;color:#5E675F;line-height:1.5">{{ j.steps }}</div>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      journeys: [
+        { t: 'Jornada visitante', steps: 'Home → Agenda → Palestra → Cadastro → PWA', href: 'CEAK%20Site.dc.html#home' },
+        { t: 'Jornada membro', steps: 'Login → Home App → Check-in → Estudo → Palestra → Avaliação', href: 'CEAK%20App.dc.html#login' },
+        { t: 'Jornada ajuda', steps: 'Home → Preciso de ajuda → Tratamento espiritual → Solicitar → Confirmar', href: 'CEAK%20Site.dc.html#ajuda' },
+        { t: 'Jornada doação', steps: 'Home → Quero ajudar → Doação → PIX → Confirmação', href: 'CEAK%20Site.dc.html#ajudar' },
+        { t: 'Jornada loja', steps: 'Loja → Produto → Carrinho → Checkout → PIX', href: 'CEAK%20Site.dc.html#loja' },
+        { t: 'Jornada administrativa', steps: 'Login → Command Center → Conteúdo pendente → Revisar → Aprovar → Publicação', href: 'CEAK%20Gestao.dc.html#login' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

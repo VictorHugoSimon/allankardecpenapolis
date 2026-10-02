@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#EFE8DA;color:#1F2A24;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#2F5D46;text-decoration:none}a:hover{color:#1E3D2F;text-decoration:underline}
+button{font-family:inherit;cursor:pointer}input,textarea{font-family:inherit;font-size:15px}
+@keyframes ceakPop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+@keyframes ceakRing{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.6);opacity:0}}
+@keyframes ceakScan{0%,100%{top:12%}50%{top:84%}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:{{ fr.gap }};align-items:center;justify-content:center;padding:{{ fr.outerPad }}">
+  <sc-if value="{{ showSide }}" hint-placeholder-val="{{ true }}"><div style="flex:0 1 340px;display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;align-items:center;gap:12px"><div style="width:44px;height:44px;border-radius:12px;background:#2F5D46;color:#F7F4EE;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-size:17px;font-weight:600">AK</div><div><div style="font-family:'Newsreader',serif;font-size:26px">CEAK App</div><div style="font-size:13px;color:#5E675F">Aplicativo instalável (PWA) · área do membro</div></div></div>
+    <div style="background:#F7F4EE;border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:12px;letter-spacing:.1em;font-weight:600;color:#2F5D46">JORNADA DO MEMBRO</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ journey }}" as="j" hint-placeholder-count="6"><button onClick="{{ j.go }}" style="background:{{ j.bg }};color:{{ j.fg }};border:1px solid #D8D0BF;border-radius:999px;padding:7px 12px;font-size:13px;white-space:nowrap">{{ j.label }}</button></sc-for>
+      </div>
+      <div style="font-size:12px;letter-spacing:.1em;font-weight:600;color:#2F5D46;margin-top:6px">OUTRAS TELAS</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        <sc-for list="{{ others }}" as="j" hint-placeholder-count="6"><button onClick="{{ j.go }}" style="background:{{ j.bg }};color:{{ j.fg }};border:1px solid #D8D0BF;border-radius:999px;padding:7px 12px;font-size:13px;white-space:nowrap">{{ j.label }}</button></sc-for>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;font-size:14px"><a href="CEAK%20Digital.dc.html">← Visão geral</a><a href="CEAK%20Site.dc.html">Site público</a><a href="CEAK%20Gestao.dc.html">CEAK Gestão</a></div>
+  </div></sc-if>
+
+  <div style="width:100%;max-width:{{ fr.frameMax }};height:{{ fr.frameH }};border-radius:{{ fr.frameR }};background:{{ fr.bg }};padding:{{ fr.framePad }};box-shadow:0 30px 60px -30px rgba(31,42,36,.45)">
+    <div style="width:100%;height:100%;border-radius:{{ fr.innerR }};background:#F7F4EE;overflow:hidden;display:flex;flex-direction:column;position:relative">
+      <sc-if value="{{ showStatus }}" hint-placeholder-val="{{ true }}"><div style="height:46px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600"><span>19:54</span><span style="width:96px;height:26px;border-radius:14px;background:#1F2A24"></span><span style="font-size:12px;white-space:nowrap">5G ▮▮▮</span></div></sc-if>
+      <sc-if value="{{ hasHeader }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:none;display:flex;align-items:center;gap:8px;padding:6px 14px 10px">
+          <button onClick="{{ back }}" style="width:40px;height:40px;border-radius:50%;border:0;background:#EFE8DA;font-size:18px;color:#1F2A24">‹</button>
+          <div style="font-size:17px;font-weight:600">{{ title }}</div>
+        </div>
+      </sc-if>
+      <div ref="{{ scrollRef }}" style="flex:1;overflow-y:auto;padding:0 18px 24px">
+
+<sc-if value="{{ is.login }}" hint-placeholder-val="{{ false }}">
+  <div style="min-height:100%;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:20px 6px">
+    <div style="width:64px;height:64px;border-radius:18px;background:#2F5D46;color:#F7F4EE;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-size:24px">AK</div>
+    <div style="font-family:'Newsreader',serif;font-size:32px;line-height:1.1">Bem-vindo ao<br>CEAK App</div>
+    <div style="font-size:15px;color:#5E675F;line-height:1.5">Agenda, check-in, estudos e comunicados do Centro Espírita Allan Kardec.</div>
+    <input value="victor.alves@email.com" style="border:1px solid #D8D0BF;border-radius:14px;padding:15px;background:#fff;margin-top:10px"></input>
+    <input type="password" value="••••••••" style="border:1px solid #D8D0BF;border-radius:14px;padding:15px;background:#fff"></input>
+    <button onClick="{{ go.home }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:16px;font-size:16px;font-weight:500">Entrar</button>
+    <button style="background:#fff;color:#1F2A24;border:1px solid #D8D0BF;border-radius:999px;padding:15px;font-size:15px">Entrar com código pelo WhatsApp</button>
+    <div style="text-align:center;font-size:14px;color:#5E675F">Primeiro acesso? <span style="color:#2F5D46;font-weight:600">Criar conta</span></div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.home }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;flex-direction:column;gap:14px;padding-top:6px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:14px;color:#5E675F">Sexta-feira, 2 de outubro</div><div style="font-family:'Newsreader',serif;font-size:30px">Olá, Victor</div></div>
+      <button onClick="{{ go.notificacoes }}" style="position:relative;width:44px;height:44px;border-radius:50%;border:1px solid #E6E0D3;background:#fff;font-size:13px;font-weight:600;color:#1F2A24">3<span style="position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:#C0654D"></span></button>
+    </div>
+    <div style="background:#1E3D2F;color:#F7F4EE;border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:12px;letter-spacing:.1em;font-weight:600;color:#A9C2B1">HOJE NO CEAK</div>
+      <div style="font-family:'Newsreader',serif;font-size:24px">Palestra Pública</div>
+      <div style="font-size:15px;color:#C9D6CD">20:00 · Salão principal · Rogério Lima</div>
+      <div style="display:flex;gap:8px;margin-top:10px"><button onClick="{{ go.palestra }}" style="flex:1;background:#F7F4EE;color:#1E3D2F;border:0;border-radius:999px;padding:12px;font-size:14px;font-weight:600">Ver detalhes</button><button onClick="{{ go.checkin }}" style="flex:1;background:transparent;color:#F7F4EE;border:1px solid #5F8A72;border-radius:999px;padding:12px;font-size:14px;font-weight:500">Fazer check-in</button></div>
+    </div>
+    <div onClick="{{ go.jornada }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:18px;cursor:pointer">
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:600;margin-bottom:12px"><span>Minha jornada</span><span style="color:#2F5D46;font-size:13px">Ver ›</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <div><div style="font-family:'Newsreader',serif;font-size:28px">7</div><div style="font-size:12px;color:#5E675F">visitas este mês</div></div>
+        <div><div style="font-family:'Newsreader',serif;font-size:28px">3</div><div style="font-size:12px;color:#5E675F">estudos</div></div>
+        <div><div style="font-family:'Newsreader',serif;font-size:28px">2</div><div style="font-size:12px;color:#5E675F">ações voluntárias</div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <a onClick="{{ go.ajuda }}" style="cursor:pointer;background:#E4EDE6;border-radius:18px;padding:18px;color:#1F2A24;text-decoration:none"><div style="font-size:15px;font-weight:600">Preciso de ajuda</div><div style="font-size:12px;color:#4F5A52;margin-top:4px">Atendimento e passe</div></a>
+      <a onClick="{{ go.ajudar }}" style="cursor:pointer;background:#EFE8DA;border-radius:18px;padding:18px;color:#1F2A24;text-decoration:none"><div style="font-size:15px;font-weight:600">Quero ajudar</div><div style="font-size:12px;color:#4F5A52;margin-top:4px">Doações e voluntariado</div></a>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:18px">
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:600;margin-bottom:12px"><span>Meus estudos</span><span onClick="{{ go.estudos }}" style="color:#2F5D46;font-size:13px;cursor:pointer">Todos ›</span></div>
+      <div onClick="{{ go.curso }}" style="cursor:pointer"><div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px"><span>ESDE · Módulo 3</span><span style="font-weight:600">78%</span></div><div style="height:6px;background:#EFE8DA;border-radius:9px"><div style="height:6px;width:78%;background:#2F5D46;border-radius:9px"></div></div></div>
+    </div>
+    <sc-if value="{{ npsPending }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:18px;display:flex;align-items:center;gap:12px">
+        <div style="flex:1"><div style="font-size:12px;color:#8A6A2E;font-weight:600;letter-spacing:.06em">AVALIAÇÃO PENDENTE</div><div style="font-size:15px;font-weight:500;margin-top:4px">Palestra: Família e Espiritualidade</div></div>
+        <button onClick="{{ go.avaliacao }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:10px 16px;font-size:14px">Avaliar</button>
+      </div>
+    </sc-if>
+    <button onClick="{{ go.ia }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:999px;padding:15px 18px;font-size:15px;color:#5E675F;text-align:left;display:flex;justify-content:space-between"><span>Pergunte ao CEAK IA…</span><span style="color:#2F5D46;font-weight:600">IA</span></button>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      <button onClick="{{ go.biblioteca }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:12px 6px;font-size:13px;color:#1F2A24">Biblioteca</button>
+      <button onClick="{{ go.lives }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:12px 6px;font-size:13px;color:#1F2A24">Lives</button>
+      <button onClick="{{ go.loja }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:12px 6px;font-size:13px;color:#1F2A24">Loja</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.checkin }}" hint-placeholder-val="{{ false }}">
+  <sc-if value="{{ ck.s0 }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:12px;padding-top:6px">
+      <div style="font-family:'Newsreader',serif;font-size:28px">Fazer check-in</div>
+      <div style="font-size:15px;color:#5E675F;line-height:1.5">Palestra Pública · hoje, 20:00 · Salão principal</div>
+      <button onClick="{{ ckScan }}" style="background:#2F5D46;color:#fff;border:0;border-radius:20px;padding:22px;text-align:left;margin-top:8px"><div style="font-size:17px;font-weight:600">Escanear QR Code</div><div style="font-size:13px;color:#C9D6CD;margin-top:4px">O código está na entrada do salão</div></button>
+      <button onClick="{{ ckDone }}" style="background:#fff;color:#1F2A24;border:1px solid #E6E0D3;border-radius:20px;padding:22px;text-align:left"><div style="font-size:17px;font-weight:600">Confirmar presença</div><div style="font-size:13px;color:#5E675F;margin-top:4px">Use se estiver no CEAK e não encontrar o código</div></button>
+      <div style="font-size:13px;color:#6B746C;line-height:1.5;margin-top:8px">O check-in registra sua presença na sua jornada pessoal e ajuda a organização da casa. Não é obrigatório.</div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ ck.s1 }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:16px;padding-top:6px">
+      <div style="aspect-ratio:1;border-radius:24px;background:#1F2A24;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <div style="width:62%;aspect-ratio:1;border:2px solid #F7F4EE;border-radius:18px"></div>
+        {{ scanLine }}
+        <div style="position:absolute;bottom:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#A9C2B1">câmera · aponte para o QR Code</div>
+      </div>
+      <button onClick="{{ ckDone }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:15px;font-weight:500">Simular leitura</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ ck.s2 }}" hint-placeholder-val="{{ false }}">
+    <div style="min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center">
+      {{ okMark }}
+      <div style="font-family:'Newsreader',serif;font-size:30px;margin-top:10px">Check-in realizado</div>
+      <div style="font-size:16px">Centro Espírita Allan Kardec</div>
+      <div style="font-size:15px;color:#5E675F">02/10/2026 · 19:54</div>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:14px 18px;font-size:14px;color:#3F4A42;margin-top:8px">8ª visita em outubro registrada na sua jornada</div>
+      <button onClick="{{ go.home }}" style="margin-top:10px;background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:14px 28px;font-size:15px">Voltar ao início</button>
+    </div>
+  </sc-if>
+</sc-if>
+
+<sc-if value="{{ is.jornada }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="font-size:14px;color:#5E675F">Este mês</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <sc-for list="{{ monthStats }}" as="m" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px"><div style="font-family:'Newsreader',serif;font-size:32px;line-height:1">{{ m.v }}</div><div style="font-size:13px;color:#5E675F;margin-top:6px">{{ m.l }}</div></div></sc-for>
+    </div>
+    <div style="font-size:15px;font-weight:600;margin-top:8px">Conquistas</div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      <sc-for list="{{ badges }}" as="b" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;opacity:{{ b.op }}"><div style="width:48px;height:48px;border-radius:50%;border:1.5px solid #2F5D46;background:{{ b.bg }};display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-size:16px;color:{{ b.fg }}">{{ b.i }}</div><div style="font-size:11px;line-height:1.3">{{ b.t }}</div></div></sc-for>
+    </div>
+    <div style="font-size:15px;font-weight:600;margin-top:8px">Linha do tempo</div>
+    <div>
+      <sc-for list="{{ myTimeline }}" as="t" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:14px minmax(0,1fr);gap:12px"><div style="display:flex;flex-direction:column;align-items:center"><div style="width:9px;height:9px;border-radius:50%;background:#2F5D46;margin-top:6px"></div><div style="flex:1;width:1px;background:#D8D0BF"></div></div><div style="padding-bottom:16px"><div style="font-size:14px;font-weight:500">{{ t.t }}</div><div style="font-size:12px;color:#6B746C;margin-top:2px">{{ t.d }}</div></div></div>
+      </sc-for>
+    </div>
+    <div style="font-size:12px;color:#6B746C;line-height:1.5;background:#EFE8DA;border-radius:12px;padding:12px">Sua jornada é pessoal e visível apenas para você. O CEAK não mantém rankings entre participantes.</div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.estudos }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <sc-for list="{{ courses }}" as="c" hint-placeholder-count="2">
+      <div onClick="{{ c.go }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:18px;cursor:pointer;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font-family:'Newsreader',serif;font-size:24px">{{ c.t }}</div><div style="font-family:'Newsreader',serif;font-size:24px;color:#2F5D46">{{ c.pct }}</div></div>
+        <div style="font-size:13px;color:#5E675F">{{ c.d }}</div>
+        <div style="height:6px;background:#EFE8DA;border-radius:9px"><div style="height:6px;width:{{ c.pct }};background:#2F5D46;border-radius:9px"></div></div>
+        <div style="font-size:13px">Próximo encontro: <strong style="font-weight:600">{{ c.next }}</strong></div>
+      </div>
+    </sc-for>
+    <button style="background:transparent;border:1px dashed #CFC7B6;border-radius:20px;padding:18px;font-size:15px;color:#2F5D46;font-weight:500">Inscrever-se em um novo estudo</button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.curso }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div><div style="font-family:'Newsreader',serif;font-size:24px;line-height:1.2">Estudo Sistematizado da Doutrina Espírita</div><div style="font-size:13px;color:#5E675F;margin-top:4px">Turma 2026 · Instrutora Helena Prado · segundas, 20h</div></div>
+    <div style="background:#1E3D2F;color:#F7F4EE;border-radius:18px;padding:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      <div><div style="font-family:'Newsreader',serif;font-size:24px">78%</div><div style="font-size:11px;color:#A9C2B1">progresso</div></div>
+      <div><div style="font-family:'Newsreader',serif;font-size:24px">14/16</div><div style="font-size:11px;color:#A9C2B1">presenças</div></div>
+      <div><div style="font-family:'Newsreader',serif;font-size:24px">05/10</div><div style="font-size:11px;color:#A9C2B1">próx. aula</div></div>
+    </div>
+    <div style="display:flex;gap:4px;background:#EFE8DA;border-radius:999px;padding:4px">
+      <sc-for list="{{ cTabs }}" as="tb" hint-placeholder-count="4"><button onClick="{{ tb.go }}" style="flex:1;background:{{ tb.bg }};border:0;border-radius:999px;padding:9px 4px;font-size:13px;font-weight:500;color:#1F2A24">{{ tb.label }}</button></sc-for>
+    </div>
+    <sc-if value="{{ ct.aulas }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ lessons }}" as="l" hint-placeholder-count="6"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:13px 14px;display:flex;gap:12px;align-items:center"><div style="width:26px;height:26px;border-radius:50%;flex:none;background:{{ l.bg }};color:#fff;border:1.5px solid #2F5D46;display:flex;align-items:center;justify-content:center;font-size:12px">{{ l.mark }}</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">{{ l.t }}</div><div style="font-size:12px;color:#6B746C">{{ l.d }}</div></div></div></sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ ct.materiais }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ materials }}" as="m" hint-placeholder-count="5"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:13px 14px;display:flex;gap:12px;align-items:center"><div style="width:42px;height:42px;border-radius:10px;background:#EFE8DA;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:#5E675F;flex:none">{{ m.k }}</div><div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">{{ m.t }}</div><div style="font-size:12px;color:#6B746C">{{ m.d }}</div></div></div></sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ ct.presenca }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px">
+        <div style="font-size:14px;margin-bottom:12px">Frequência mínima: 75% · <strong style="font-weight:600">Sua frequência: 88%</strong></div>
+        <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px">
+          <sc-for list="{{ attendance }}" as="a" hint-placeholder-count="20"><div style="aspect-ratio:1;border-radius:8px;background:{{ a.bg }};border:1px solid {{ a.bd }}"></div></sc-for>
+        </div>
+        <div style="display:flex;gap:14px;font-size:12px;color:#5E675F;margin-top:12px"><span>■ presente</span><span style="color:#C0654D">■ ausente</span><span style="color:#B8B09E">□ próximas</span></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ ct.calendario }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ courseCal }}" as="c" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:13px 14px;display:flex;gap:14px;align-items:center"><div style="text-align:center;min-width:44px"><div style="font-family:'Newsreader',serif;font-size:22px;line-height:1">{{ c.d }}</div><div style="font-size:11px;color:#6B746C">{{ c.m }}</div></div><div><div style="font-size:14px;font-weight:500">{{ c.t }}</div><div style="font-size:12px;color:#6B746C">20h00 · Sala 1</div></div></div></sc-for>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.palestra }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="aspect-ratio:16/9;border-radius:18px;background:#1E3D2F;color:#C9D6CD;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px"><div style="width:50px;height:50px;border-radius:50%;border:1.5px solid #C9D6CD;display:flex;align-items:center;justify-content:center">▶</div><div style="font-size:12px">Transmissão começa às 20:00</div></div>
+    <div><div style="font-size:12px;font-weight:600;color:#2F5D46;letter-spacing:.06em">PALESTRA PÚBLICA · HOJE</div><div style="font-family:'Newsreader',serif;font-size:26px;line-height:1.2;margin-top:6px">O perdão como libertação</div><div style="font-size:14px;color:#5E675F;margin-top:6px">Rogério Lima · 20:00 · Salão principal</div></div>
+    <div style="font-size:15px;line-height:1.6;color:#3F4A42">O perdão como exercício diário e o alívio que ele traz para quem perdoa, à luz de O Evangelho Segundo o Espiritismo.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button onClick="{{ go.checkin }}" style="background:#2F5D46;color:#fff;border:0;border-radius:14px;padding:14px;font-size:14px;font-weight:500">Fazer check-in</button>
+      <button style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:14px;font-size:14px;color:#1F2A24">Material (PDF)</button>
+      <button style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:14px;font-size:14px;color:#1F2A24">Adicionar à agenda</button>
+      <button style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:14px;font-size:14px;color:#1F2A24">Compartilhar</button>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1"><div style="font-size:12px;color:#6B746C">Palestra anterior · 30/09</div><div style="font-size:14px;font-weight:500;margin-top:2px">Família e Espiritualidade</div><div style="font-size:12px;color:#2F5D46;margin-top:2px">Gravação disponível</div></div>
+      <button onClick="{{ go.avaliacao }}" style="background:#EFE8DA;border:0;border-radius:999px;padding:10px 14px;font-size:13px;color:#1F2A24">Avaliar</button>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.avaliacao }}" hint-placeholder-val="{{ false }}">
+  <sc-if value="{{ npsForm }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div><div style="font-family:'Newsreader',serif;font-size:28px">Como foi sua experiência?</div><div style="font-size:13px;color:#5E675F;margin-top:4px">Família e Espiritualidade · Marta Andrade · 30/09</div></div>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:14px;line-height:1.45">De 0 a 10, quanto você recomendaria esta palestra para outra pessoa?</div>
+        <div style="display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:3px">
+          <sc-for list="{{ npsScale }}" as="n" hint-placeholder-count="11"><button onClick="{{ n.go }}" style="aspect-ratio:1;padding:0;border-radius:8px;border:1px solid {{ n.bd }};background:{{ n.bg }};color:{{ n.fg }};font-size:13px;font-weight:600">{{ n.v }}</button></sc-for>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#6B746C"><span>Pouco provável</span><span>Muito provável</span></div>
+      </div>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{ criteria }}" as="c" hint-placeholder-count="3">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:14px">{{ c.t }}</span><div style="display:flex;gap:2px"><sc-for list="{{ c.stars }}" as="st"><button onClick="{{ st.go }}" style="background:none;border:0;padding:2px;font-size:22px;color:{{ st.c }}">★</button></sc-for></div></div>
+        </sc-for>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500">O que mais chamou sua atenção?<textarea rows="3" style="border:1px solid #D8D0BF;border-radius:14px;padding:12px;background:#fff;resize:none">A explicação sobre como os laços de família continuam entre as existências.</textarea></label>
+      <label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500">Que assunto gostaria de ver futuramente?<textarea rows="2" style="border:1px solid #D8D0BF;border-radius:14px;padding:12px;background:#fff;resize:none"></textarea></label>
+      <button onClick="{{ sendNps }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:15px;font-weight:500">Enviar avaliação</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ s.npsSent }}" hint-placeholder-val="{{ false }}">
+    <div style="min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">
+      {{ okMark }}
+      <div style="font-family:'Newsreader',serif;font-size:28px;margin-top:8px">Avaliação recebida</div>
+      <div style="font-size:15px;color:#5E675F;line-height:1.5;max-width:280px">Agradecemos sua participação. As respostas são lidas pela diretoria doutrinária e orientam a programação.</div>
+      <button onClick="{{ go.home }}" style="margin-top:10px;background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:14px 28px;font-size:15px">Voltar ao início</button>
+    </div>
+  </sc-if>
+</sc-if>
+
+<sc-if value="{{ is.ia }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:12px;min-height:100%">
+    <div style="font-size:13px;color:#5E675F;line-height:1.5">Respostas com base nas informações oficiais do CEAK. Para questões pessoais, procure o atendimento fraterno.</div>
+    <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="0">
+      <div style="align-self:{{ m.al }};max-width:86%;background:{{ m.bg }};color:{{ m.fg }};border:1px solid {{ m.bd }};border-radius:18px;padding:12px 14px;font-size:14px;line-height:1.5">
+        {{ m.text }}
+        <sc-if value="{{ m.hasSrc }}"><div style="margin-top:10px;padding-top:8px;border-top:1px solid #EFE8DA;font-size:12px;color:#5E675F">Fonte consultada: <span style="color:#2F5D46;font-weight:600">{{ m.src }}</span></div></sc-if>
+      </div>
+    </sc-for>
+    <sc-if value="{{ noMsgs }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+        <div style="font-size:13px;font-weight:600">Sugestões</div>
+        <sc-for list="{{ suggestions }}" as="q" hint-placeholder-count="5"><button onClick="{{ q.go }}" style="text-align:left;background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:13px 14px;font-size:14px;color:#1F2A24">{{ q.t }}</button></sc-for>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.agenda }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ agenda }}" as="e" hint-placeholder-count="6">
+      <div onClick="{{ e.go }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:14px;display:flex;gap:14px;cursor:pointer;align-items:center">
+        <div style="text-align:center;min-width:44px"><div style="font-size:11px;color:#6B746C">{{ e.wd }}</div><div style="font-family:'Newsreader',serif;font-size:24px;line-height:1.1">{{ e.d }}</div></div>
+        <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;color:{{ e.c }};letter-spacing:.04em">{{ e.cat }}</div><div style="font-size:14px;font-weight:500;margin-top:2px">{{ e.t }}</div><div style="font-size:12px;color:#6B746C;margin-top:2px">{{ e.h }}</div></div>
+      </div>
+    </sc-for>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.biblioteca }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <input placeholder="Buscar por assunto, autor, curso ou tema" style="border:1px solid #D8D0BF;border-radius:14px;padding:14px;background:#fff"></input>
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px">
+      <sc-for list="{{ libFilters }}" as="f" hint-placeholder-count="7"><button onClick="{{ f.go }}" style="flex:none;background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }};border-radius:999px;padding:7px 13px;font-size:13px">{{ f.label }}</button></sc-for>
+    </div>
+    <sc-for list="{{ lib }}" as="b" hint-placeholder-count="6">
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center">
+        <div style="width:46px;height:58px;border-radius:8px;background:repeating-linear-gradient(135deg,#ECE5D6 0 5px,#F2ECE0 5px 10px);flex:none;display:flex;align-items:flex-end;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:#7A7363;padding-bottom:4px">{{ b.k }}</div>
+        <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500">{{ b.t }}</div><div style="font-size:12px;color:#6B746C;margin-top:2px">{{ b.a }}</div></div>
+      </div>
+    </sc-for>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.notificacoes }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="5">
+      <div style="background:{{ n.bg }};border:1px solid #E6E0D3;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between;font-size:12px;color:#6B746C"><span>{{ n.k }}</span><span>{{ n.time }}</span></div><div style="font-size:14px;font-weight:500">{{ n.t }}</div><div style="font-size:13px;color:#5E675F;line-height:1.45">{{ n.d }}</div></div>
+    </sc-for>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.perfil }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;gap:14px;align-items:center"><div style="width:64px;height:64px;border-radius:50%;background:#E4EDE6;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-size:24px;color:#2F5D46">VA</div><div><div style="font-family:'Newsreader',serif;font-size:24px">Victor Alves</div><div style="font-size:13px;color:#5E675F">Membro desde março de 2024 · Voluntário · Recepção</div></div></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;overflow:hidden">
+      <sc-for list="{{ profileLinks }}" as="p" hint-placeholder-count="6"><button onClick="{{ p.go }}" style="width:100%;display:flex;justify-content:space-between;background:none;border:0;border-bottom:1px solid #EFE8DA;padding:16px;font-size:15px;color:#1F2A24;text-align:left"><span>{{ p.t }}</span><span style="color:#9AA197">›</span></button></sc-for>
+    </div>
+    <button onClick="{{ go.login }}" style="background:transparent;border:1px solid #D8D0BF;border-radius:999px;padding:14px;font-size:15px;color:#A4473A">Sair</button>
+  </div>
+</sc-if>
+
+<sc-if value="{{ is.lives }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:12px"><div style="aspect-ratio:16/9;border-radius:18px;background:#1E3D2F;color:#C9D6CD;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative"><span style="position:absolute;left:12px;top:10px;font-size:11px;font-weight:600;letter-spacing:.1em;color:#F7F4EE;background:#C0654D;border-radius:4px;padding:2px 6px">AO VIVO 20:00</span><div style="width:50px;height:50px;border-radius:50%;border:1.5px solid #C9D6CD;display:flex;align-items:center;justify-content:center">▶</div><div style="font-size:12px">O perdão como libertação · Rogério Lima</div></div>
+  <div style="font-size:15px;font-weight:600;margin-top:6px">Próximas transmissões</div>
+  <sc-for list="{{ livePlan }}" as="l" hint-placeholder-count="3"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px;padding:12px 14px"><div style="font-size:12px;color:#6B746C">{{ l.d }}</div><div style="font-size:14px;font-weight:500;margin-top:2px">{{ l.t }}</div></div></sc-for>
+  <div style="font-size:15px;font-weight:600;margin-top:6px">Gravações</div>
+  <sc-for list="{{ recs }}" as="r" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px;padding:10px;display:flex;gap:12px;align-items:center"><div style="width:84px;aspect-ratio:16/9;border-radius:8px;background:#1E3D2F;color:#C9D6CD;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none">▶</div><div style="min-width:0"><div style="font-size:14px;font-weight:500">{{ r.t }}</div><div style="font-size:12px;color:#6B746C">{{ r.d }}</div></div></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ is.ajudar }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:12px"><div style="font-size:14px;color:#5E675F;line-height:1.5">Escolha como deseja contribuir com o CEAK.</div>
+  <div onClick="{{ go.doar }}" style="background:#1E3D2F;color:#F7F4EE;border-radius:18px;padding:18px;cursor:pointer"><div style="font-size:12px;color:#A9C2B1;letter-spacing:.08em;font-weight:600">CAMPANHA DO AGASALHO</div><div style="display:flex;justify-content:space-between;align-items:end;margin-top:8px"><div style="font-family:'Newsreader',serif;font-size:30px;line-height:1">378<span style="font-size:15px;color:#C9D6CD"> / 500 peças</span></div><span style="font-size:14px">75%</span></div><div style="height:6px;background:#335A47;border-radius:6px;margin-top:10px"><div style="height:6px;width:75%;background:#F7F4EE;border-radius:6px"></div></div></div>
+  <sc-for list="{{ helpApp }}" as="o" hint-placeholder-count="7"><button onClick="{{ o.go }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#1F2A24"><span><span style="display:block;font-size:15px;font-weight:600">{{ o.t }}</span><span style="display:block;font-size:12px;color:#6B746C;margin-top:2px">{{ o.d }}</span></span><span style="color:#9AA197">›</span></button></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ is.doar }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:12px"><sc-if value="{{ dn.s0 }}" hint-placeholder-val="{{ true }}"><div style="font-family:'Newsreader',serif;font-size:26px">Contribuir via PIX</div>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"><sc-for list="{{ amounts }}" as="a" hint-placeholder-count="5"><button onClick="{{ a.go }}" style="background:{{ a.bg }};color:{{ a.fg }};border:1px solid {{ a.bd }};border-radius:14px;padding:14px 4px;font-size:15px;font-weight:600;white-space:nowrap">{{ a.label }}</button></sc-for></div>
+  <div onClick="{{ toggleRec }}" style="display:flex;gap:12px;align-items:center;background:#fff;border:1px solid #E6E0D3;border-radius:14px;padding:14px;cursor:pointer"><div style="width:40px;height:24px;border-radius:12px;background:{{ rec.bg }};padding:3px;display:flex;justify-content:{{ rec.j }};flex:none"><div style="width:18px;height:18px;border-radius:50%;background:#fff"></div></div><div><div style="font-size:14px;font-weight:500">Tornar mensal</div><div style="font-size:12px;color:#6B746C">PIX Automático · em breve</div></div></div>
+  <select style="border:1px solid #D8D0BF;border-radius:14px;padding:14px;background:#fff;font-size:14px"><option>Destino: onde for mais necessário</option><option>Assistência social</option><option>Campanha do Agasalho</option><option>Reforma do telhado</option></select>
+  <button onClick="{{ dnNext }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:15px;font-weight:500">Gerar PIX de {{ amountLabel }}</button></sc-if>
+  <sc-if value="{{ dn.s1 }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px"><div style="font-family:'Newsreader',serif;font-size:32px">{{ amountLabel }}</div><div style="width:200px;height:200px;border-radius:14px;border:1px solid #E6E0D3;background:repeating-linear-gradient(0deg,#1F2A24 0 6px,#fff 6px 12px);display:flex;align-items:center;justify-content:center"><div style="background:#fff;padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#5E675F;border-radius:6px">QR Code PIX</div></div><button style="background:#fff;border:1px solid #CFC7B6;border-radius:999px;padding:12px 18px;font-size:14px;color:#1F2A24;width:100%">Copiar código PIX copia e cola</button><div style="font-size:12px;color:#6B746C">Favorecido: Centro Espírita Allan Kardec</div><button onClick="{{ dnNext }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:15px;width:100%">Já fiz o PIX</button></div></sc-if>
+  <sc-if value="{{ dn.s2 }}" hint-placeholder-val="{{ false }}"><div style="min-height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">{{ okMark }}<div style="font-family:'Newsreader',serif;font-size:28px;margin-top:8px">Doação recebida</div><div style="font-size:15px;color:#5E675F;line-height:1.5;max-width:280px">{{ amountLabel }} · o recibo foi enviado por e-mail e a contribuição aparece em Minha jornada.</div><button onClick="{{ go.home }}" style="margin-top:10px;background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:14px 28px;font-size:15px">Voltar ao início</button></div></sc-if></div>
+</sc-if>
+
+<sc-if value="{{ is.ajuda }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:12px"><sc-if value="{{ ah.list }}" hint-placeholder-val="{{ true }}"><div style="font-family:'Newsreader',serif;font-size:26px;line-height:1.15">Como podemos acolher você?</div><div style="font-size:14px;color:#5E675F;line-height:1.5">Atendimentos gratuitos e sigilosos.</div>
+  <sc-for list="{{ assist }}" as="a" hint-placeholder-count="6"><button onClick="{{ a.go }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px;text-align:left;color:#1F2A24"><span style="display:block;font-size:15px;font-weight:600">{{ a.t }}</span><span style="display:block;font-size:12px;color:#6B746C;margin-top:3px;line-height:1.4">{{ a.d }}</span></button></sc-for></sc-if>
+  <sc-if value="{{ ah.form }}" hint-placeholder-val="{{ false }}"><div style="font-family:'Newsreader',serif;font-size:26px">{{ s.svc }}</div><div style="font-size:14px;color:#3F4A42;line-height:1.55">Escolha a data. A equipe confirma pelo WhatsApp.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><sc-for list="{{ slots }}" as="sl" hint-placeholder-count="4"><button onClick="{{ sl.go }}" style="background:{{ sl.bg }};color:{{ sl.fg }};border:1px solid {{ sl.bd }};border-radius:14px;padding:12px;text-align:left"><span style="display:block;font-size:14px;font-weight:600">{{ sl.d }}</span><span style="display:block;font-size:12px">{{ sl.h }} · {{ sl.v }}</span></button></sc-for></div>
+  <textarea rows="3" placeholder="Se desejar, conte brevemente o motivo (opcional)" style="border:1px solid #D8D0BF;border-radius:14px;padding:12px;background:#fff;resize:none"></textarea>
+  <button onClick="{{ ahConfirm }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:15px">Confirmar solicitação</button>
+  <div style="font-size:12px;color:#6B746C;line-height:1.5">O atendimento espiritual não substitui acompanhamento médico ou psicológico quando necessário.</div></sc-if>
+  <sc-if value="{{ ah.done }}" hint-placeholder-val="{{ false }}"><div style="min-height:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center">{{ okMark }}<div style="font-family:'Newsreader',serif;font-size:28px;margin-top:8px">Solicitação confirmada</div><div style="font-size:15px;color:#5E675F;line-height:1.5;max-width:280px">{{ s.svc }} · {{ slot.d }}, {{ slot.h }}. Lembrete no WhatsApp na véspera.</div><button onClick="{{ go.home }}" style="margin-top:10px;background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:14px 28px;font-size:15px">Voltar ao início</button></div></sc-if></div>
+</sc-if>
+
+<sc-if value="{{ is.loja }}" hint-placeholder-val="{{ false }}">
+  <div style="display:flex;flex-direction:column;gap:12px"><div style="font-size:14px;color:#5E675F">Renda revertida para a assistência social. Retirada no CEAK.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><sc-for list="{{ shop }}" as="p" hint-placeholder-count="6"><a href="CEAK%20Site.dc.html#loja" style="display:flex;flex-direction:column;gap:6px;color:#1F2A24;text-decoration:none"><div style="aspect-ratio:1;border-radius:14px;background:repeating-linear-gradient(135deg,#ECE5D6 0 8px,#F2ECE0 8px 16px);display:flex;align-items:flex-start;padding:8px"><span style="background:#fff;color:#2F5D46;font-size:10px;font-weight:600;padding:3px 8px;border-radius:999px">{{ p.o }}</span></div><div style="font-size:13px;font-weight:500;line-height:1.3">{{ p.n }}</div><div style="font-size:14px;color:#2F5D46;font-weight:600">{{ p.p }}</div></a></sc-for></div></div>
+</sc-if>
+
+      </div>
+      <sc-if value="{{ hasIaInput }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:none;display:flex;gap:8px;padding:10px 14px;border-top:1px solid #E6E0D3;background:#F7F4EE">
+          <input value="{{ s.input }}" onChange="{{ setInput }}" onKeyDown="{{ inputKey }}" placeholder="Escreva sua pergunta" style="flex:1;min-width:0;border:1px solid #D8D0BF;border-radius:999px;padding:12px 16px;background:#fff"></input>
+          <button onClick="{{ send }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:0 16px;font-size:14px">Enviar</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ hasTabs }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border-top:1px solid #E6E0D3;background:#fff;padding:8px 6px 22px">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+            <button onClick="{{ t.go }}" style="background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 0;min-height:48px;color:{{ t.fg }}"><span style="width:{{ t.w }};height:{{ t.w }};border-radius:{{ t.r }};background:{{ t.dot }};border:1.5px solid {{ t.fg }}"></span><span style="font-size:11px;font-weight:{{ t.fw }}">{{ t.label }}</span></button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { dn: 0, ah: 0, amount: 50, recurring: false, svc: 'Atendimento fraterno', slot: 0, screen: 'home', ck: 0, nps: null, rate: { c: 5, cl: 4, a: 0 }, npsSent: false, msgs: [], input: '', ctab: 'aulas', lib: 'Todos', hist: [] };
+  scrollRef = React.createRef();
+  componentDidMount() { this._rs = () => { const n = window.innerWidth < 600; if (n !== this.state.narrow) this.setState({ narrow: n }); }; window.addEventListener('resize', this._rs); this._rs(); const h = location.hash.slice(1); if (h) this.setState({ screen: h }); }
+  componentWillUnmount() { window.removeEventListener('resize', this._rs); }
+  appMore(s) {
+    const brl = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const slotsRaw = [{ d: 'Ter, 06/10', h: '19h00', v: '4 vagas' }, { d: 'Qui, 08/10', h: '19h00', v: '6 vagas' }, { d: 'Ter, 13/10', h: '19h00', v: '8 vagas' }, { d: 'Qui, 15/10', h: '19h00', v: '8 vagas' }];
+    const n = !!s.narrow;
+    return {
+      fr: { outerPad: n ? '0' : '40px 20px', gap: n ? '0' : '56px', frameMax: n ? 'none' : '392px', frameH: n ? '100dvh' : '820px', frameR: n ? '0' : '52px', framePad: n ? '0' : '10px', innerR: n ? '0' : '42px', bg: n ? '#F7F4EE' : '#1F2A24' }, showSide: !n, showStatus: !n,
+      livePlan: [['Hoje · 20:00', 'O perdão como libertação — Rogério Lima'], ['Qua 07/10 · 20:00', 'A esperança que sustenta — Marta Andrade'], ['Sex 09/10 · 20:00', 'Caridade sem distinção — Paulo Mendes']].map(([d, t]) => ({ d, t })),
+      recs: [['Família e Espiritualidade', 'Marta Andrade · 30/09 · 52 min'], ['A coragem da fé', 'Antônio Ferreira · 25/09 · 48 min'], ['O bem que se faz em silêncio', 'Helena Prado · 23/09 · 45 min'], ['Os obstáculos como lições', 'Rogério Lima · 18/09 · 50 min']].map(([t, d]) => ({ t, d })),
+      helpApp: [['Contribuir financeiramente', 'PIX único ou mensal', 'doar'], ['Doar alimentos', 'Itens em falta: arroz e óleo', 'site:ajudar'], ['Doar roupas', 'Campanha do Agasalho até 31/10', 'site:campanha'], ['Doar produtos', 'Livros e utilidades para o bazar', 'site:ajudar'], ['Ser voluntário', '6 áreas de atuação', 'site:ajudar'], ['Ajudar em eventos', 'Bazar de primavera 17/10', 'site:ajudar'], ['Oferecer uma habilidade', 'Informática, cozinha, costura…', 'site:ajudar']].map(([t, d, k]) => ({ t, d, go: () => k.startsWith('site:') ? (window.location.href = 'CEAK%20Site.dc.html#' + k.slice(5)) : this.nav(k, { dn: 0 }) })),
+      amounts: [20, 50, 100, 200, 500].map(v => { const on = s.amount === v; return { label: 'R$ ' + v, go: () => this.setState({ amount: v }), bg: on ? '#2F5D46' : '#fff', fg: on ? '#fff' : '#1F2A24', bd: on ? '#2F5D46' : '#D8D0BF' }; }).concat([{ label: 'Outro', go: () => {}, bg: '#fff', fg: '#1F2A24', bd: '#D8D0BF' }]),
+      rec: { bg: s.recurring ? '#2F5D46' : '#CFC7B6', j: s.recurring ? 'flex-end' : 'flex-start' }, toggleRec: () => this.setState({ recurring: !s.recurring }),
+      amountLabel: brl(s.amount) + (s.recurring ? '/mês' : ''),
+      dn: { s0: s.dn === 0, s1: s.dn === 1, s2: s.dn === 2 }, dnNext: () => this.setState({ dn: s.dn + 1 }),
+      ah: { list: s.ah === 0, form: s.ah === 1, done: s.ah === 2 },
+      assist: [['Atendimento fraterno', 'Conversa reservada com escuta e orientação.'], ['Passe', 'Após as palestras e às terças, 19h.'], ['Tratamento espiritual', 'Encontros semanais com acompanhamento.'], ['Prece', 'Inclua um nome nas preces da reunião semanal.'], ['Orientação', 'Dúvidas sobre a doutrina e a rotina da casa.'], ['Conhecer os estudos', 'Grupos para iniciantes, jovens e crianças.']].map(([t, d]) => ({ t, d, go: () => t === 'Conhecer os estudos' ? this.nav('estudos') : this.setState({ ah: 1, svc: t }) })),
+      slots: slotsRaw.map((x, i) => ({ ...x, go: () => this.setState({ slot: i }), bg: s.slot === i ? '#2F5D46' : '#fff', fg: s.slot === i ? '#fff' : '#1F2A24', bd: s.slot === i ? '#2F5D46' : '#E6E0D3' })), slot: slotsRaw[s.slot],
+      ahConfirm: () => this.setState({ ah: 2 }),
+      shop: [['O Evangelho Segundo o Espiritismo', 'R$ 28,00', 'Livraria'], ['Pano de prato bordado', 'R$ 18,00', 'Voluntárias'], ['Nosso Lar — André Luiz', 'R$ 15,00', 'Doado'], ['Manta de crochê', 'R$ 65,00', 'Voluntárias'], ['Caneca CEAK 60 anos', 'R$ 25,00', 'Livraria'], ['Jogo de xícaras', 'R$ 40,00', 'Doado']].map(([n, p, o]) => ({ n, p, o }))
+    };
+  }
+  nav = (screen, extra = {}) => { this.setState(s => ({ screen, hist: [...s.hist, s.screen], ...extra })); if (this.scrollRef.current) this.scrollRef.current.scrollTop = 0; };
+  ask = q => {
+    const A = {
+      'Qual é a próxima palestra?': ['Hoje, sexta-feira, às 20h00: “O perdão como libertação”, com Rogério Lima, no salão principal. A próxima, na quarta-feira 07/10, será “A esperança que sustenta”, com Marta Andrade. Ambas com transmissão ao vivo.', 'Agenda CEAK · atualizada hoje, 08:12'],
+      'Como participar de um estudo?': ['O Estudo do Evangelho, aos sábados às 19h30, é aberto e não exige inscrição. Para o ESDE, as pré-inscrições da turma 2027 estão abertas até 30/11 pela aba Estudos.', 'Página Estudos · Regulamento do ESDE 2026'],
+      'Como posso ajudar?': ['É possível doar alimentos, roupas (Campanha do Agasalho até 31/10), produtos para o bazar, contribuir por PIX ou integrar uma das seis áreas de voluntariado.', 'Quero ajudar · Campanhas ativas'],
+      'Como solicitar atendimento?': ['O atendimento fraterno ocorre às terças e quintas, 19h00. A solicitação pode ser feita pelo app ou site em “Preciso de ajuda”, com escolha de data. Não é necessário ser frequentador da casa.', 'Assistência espiritual · Orientações'],
+      'Onde assistir às palestras?': ['As palestras são transmitidas ao vivo no canal do CEAK no YouTube e na página do Facebook. As gravações ficam na Biblioteca do app até 48h depois.', 'Biblioteca digital · Lives']
+    };
+    const a = A[q] || ['Localizei a informação na agenda e nos comunicados recentes. Caso necessite de orientação personalizada, a recepção atende de terça a sábado, das 19h às 21h30.', 'Comunicados CEAK'];
+    this.setState(s => ({ input: '', msgs: [...s.msgs, { me: true, text: q }, { me: false, text: a[0], src: a[1] }] }));
+  };
+  renderVals() {
+    const s = this.state;
+    const screens = ['login', 'home', 'checkin', 'jornada', 'estudos', 'curso', 'palestra', 'avaliacao', 'ia', 'agenda', 'biblioteca', 'notificacoes', 'perfil', 'lives', 'ajudar', 'doar', 'ajuda', 'loja'];
+    const titles = { checkin: 'Check-in', jornada: 'Minha jornada', estudos: 'Meus estudos', curso: 'ESDE', palestra: 'Palestra', avaliacao: 'Avaliação', ia: 'CEAK IA', agenda: 'Agenda', biblioteca: 'Biblioteca', notificacoes: 'Notificações', perfil: 'Perfil', lives: 'Lives', ajudar: 'Quero ajudar', doar: 'Doação', ajuda: 'Preciso de ajuda', loja: 'Loja solidária' };
+    const is = {}; screens.forEach(k => is[k] = s.screen === k);
+    const go = {}; screens.forEach(k => go[k] = () => this.nav(k, k === 'checkin' ? { ck: 0 } : {}));
+    go.avaliacao = () => this.nav('avaliacao', { npsSent: false });
+    go.doar = () => this.nav('doar', { dn: 0 }); go.ajuda = () => this.nav('ajuda', { ah: 0 });
+    const pill = (label, k, extra) => ({ label, go: () => this.nav(k, extra || {}), bg: s.screen === k ? '#2F5D46' : '#fff', fg: s.screen === k ? '#fff' : '#1F2A24' });
+    const okMark = React.createElement('div', { key: 'ok', style: { position: 'relative', width: 96, height: 96 } },
+      React.createElement('div', { style: { position: 'absolute', inset: 0, borderRadius: '50%', border: '2px solid #2F5D46', animation: 'ceakRing 1.4s ease-out .3s both' } }),
+      React.createElement('div', { style: { position: 'absolute', inset: 0, borderRadius: '50%', background: '#2F5D46', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, animation: 'ceakPop .6s ease-out both' } }, '✓'));
+    const scanLine = React.createElement('div', { key: 'sl', style: { position: 'absolute', left: '19%', right: '19%', height: 2, background: '#A9C2B1', animation: 'ceakScan 2.4s ease-in-out infinite' } });
+    const tabDefs = [['Início', 'home'], ['Agenda', 'agenda'], ['Check-in', 'checkin'], ['Estudos', 'estudos'], ['Perfil', 'perfil']];
+    const C = { Palestras: 'oklch(0.48 0.08 155)', Estudos: 'oklch(0.48 0.08 235)', Cursos: 'oklch(0.48 0.08 295)', Eventos: 'oklch(0.48 0.08 60)', 'Assistência': 'oklch(0.48 0.08 20)' };
+    const ratingRow = (t, k) => ({ t, stars: [1, 2, 3, 4, 5].map(n => ({ c: n <= s.rate[k] ? '#B5833A' : '#DDD5C4', go: () => this.setState(st => ({ rate: { ...st.rate, [k]: n } })) })) });
+    const libAll = [{ t: 'O Livro dos Espíritos', a: 'Allan Kardec · Livro', k: 'LIVRO', f: 'Livros' }, { t: 'Apostila ESDE — Módulo 3', a: 'Curso ESDE · PDF', k: 'PDF', f: 'PDFs' }, { t: 'Família e Espiritualidade', a: 'Marta Andrade · Palestra 30/09 · 52 min', k: 'VÍDEO', f: 'Palestras' }, { t: 'O passe: fundamentos e prática', a: 'Artigo · Diretoria doutrinária', k: 'TXT', f: 'Artigos' }, { t: 'Prece de Cáritas comentada', a: 'Áudio · 12 min', k: 'ÁUDIO', f: 'Áudios' }, { t: 'Introdução à mediunidade', a: 'Vídeo-aula · Helena Prado', k: 'VÍDEO', f: 'Vídeos' }, { t: 'O Evangelho Segundo o Espiritismo', a: 'Allan Kardec · Livro', k: 'LIVRO', f: 'Livros' }];
+    return {
+      ...this.appMore(s),
+      s, is, go, okMark, scanLine, scrollRef: this.scrollRef,
+      title: titles[s.screen] || '', hasHeader: !!titles[s.screen], hasTabs: s.screen !== 'login' && s.screen !== 'ia', hasIaInput: s.screen === 'ia',
+      back: () => this.setState(st => { const h = [...st.hist]; const p = h.pop() || 'home'; return { screen: p === st.screen ? 'home' : p, hist: h }; }),
+      journey: [pill('Login', 'login'), pill('Home', 'home'), pill('Check-in', 'checkin', { ck: 0 }), pill('Estudo', 'curso'), pill('Palestra', 'palestra'), pill('Avaliação', 'avaliacao', { npsSent: false })],
+      others: [pill('Lives', 'lives'), pill('Quero ajudar', 'ajudar'), pill('Doação PIX', 'doar', { dn: 0 }), pill('Preciso de ajuda', 'ajuda', { ah: 0 }), pill('Loja', 'loja'), pill('Minha jornada', 'jornada'), pill('Meus estudos', 'estudos'), pill('CEAK IA', 'ia'), pill('Agenda', 'agenda'), pill('Biblioteca', 'biblioteca'), pill('Notificações', 'notificacoes'), pill('Perfil', 'perfil')],
+      tabs: tabDefs.map(([label, k]) => { const on = s.screen === k; const mid = k === 'checkin'; return { label, go: () => this.nav(k, mid ? { ck: 0 } : {}), fg: on ? '#2F5D46' : '#7A8279', fw: on ? 600 : 500, dot: on ? '#2F5D46' : 'transparent', w: mid ? '22px' : '18px', r: mid ? '7px' : '50%' }; }),
+      npsPending: !s.npsSent,
+      ck: { s0: s.ck === 0, s1: s.ck === 1, s2: s.ck === 2 }, ckScan: () => this.setState({ ck: 1 }), ckDone: () => this.setState({ ck: 2 }),
+      monthStats: [{ v: 7, l: 'visitas' }, { v: 3, l: 'estudos' }, { v: 2, l: 'voluntariados' }, { v: 1, l: 'campanha apoiada' }],
+      badges: [['Primeira visita', 'I', 1], ['5 encontros', 'V', 1], ['Primeiro estudo', 'E', 1], ['Primeiro voluntariado', 'Vo', 1], ['Campanha solidária', 'C', 0]].map(([t, i, on]) => ({ t, i, bg: on ? '#E4EDE6' : 'transparent', fg: '#2F5D46', op: on ? 1 : 0.4 })),
+      myTimeline: [{ t: 'Check-in · Palestra Pública', d: 'Hoje, 19:54' }, { t: 'Doação à Campanha do Agasalho · 6 peças', d: '29/09' }, { t: 'Voluntariado · Recepção', d: '30/09 · 3h' }, { t: 'Presença · ESDE módulo 3, aula 14', d: '28/09' }, { t: 'Avaliou a palestra “A coragem da fé”', d: '24/09' }, { t: 'Conquista: 5 encontros', d: '14/09' }],
+      courses: [{ t: 'ESDE', pct: '78%', d: 'Estudo Sistematizado · Módulo 3 · Turma 2026', next: 'Seg, 05/10 às 20h', go: () => this.nav('curso') }, { t: 'Evangelho', pct: '60%', d: 'Estudo do Evangelho · Capítulo 10 de 28', next: 'Sáb, 03/10 às 19h30', go: () => this.nav('curso') }],
+      cTabs: [['Aulas', 'aulas'], ['Materiais', 'materiais'], ['Presença', 'presenca'], ['Calendário', 'calendario']].map(([label, k]) => ({ label, go: () => this.setState({ ctab: k }), bg: s.ctab === k ? '#fff' : 'transparent' })),
+      ct: { aulas: s.ctab === 'aulas', materiais: s.ctab === 'materiais', presenca: s.ctab === 'presenca', calendario: s.ctab === 'calendario' },
+      lessons: [['A pluralidade das existências', 'Aula 13 · concluída', 1], ['Esquecimento do passado', 'Aula 14 · concluída', 1], ['A justiça da reencarnação', 'Aula 15 · 05/10', 0], ['Infância e família', 'Aula 16 · 12/10', 0], ['Laços de família', 'Aula 17 · 19/10', 0], ['Revisão do módulo', 'Aula 18 · 26/10', 0]].map(([t, d, done]) => ({ t, d, bg: done ? '#2F5D46' : '#fff', mark: done ? '✓' : '' })),
+      materials: [{ k: 'PDF', t: 'Apostila — Módulo 3', d: '48 páginas · 2,1 MB' }, { k: 'VÍDEO', t: 'Aula 14 gravada', d: '58 min' }, { k: 'PDF', t: 'Roteiro de reflexão — aula 15', d: '3 páginas' }, { k: 'LINK', t: 'O Livro dos Espíritos, questões 166–222', d: 'Leitura recomendada' }, { k: 'ÁUDIO', t: 'Prece de abertura', d: '4 min' }],
+      attendance: Array.from({ length: 24 }, (_, i) => ({ bg: i < 16 ? (i === 6 || i === 11 ? '#F3DDD5' : '#2F5D46') : 'transparent', bd: i < 16 ? (i === 6 || i === 11 ? '#C0654D' : '#2F5D46') : '#D8D0BF' })),
+      courseCal: [{ d: '05', m: 'OUT', t: 'Aula 15 · A justiça da reencarnação' }, { d: '12', m: 'OUT', t: 'Aula 16 · Infância e família' }, { d: '19', m: 'OUT', t: 'Aula 17 · Laços de família' }, { d: '26', m: 'OUT', t: 'Aula 18 · Revisão do módulo' }],
+      npsForm: !s.npsSent,
+      npsScale: Array.from({ length: 11 }, (_, v) => { const on = s.nps === v; return { v, go: () => this.setState({ nps: v }), bg: on ? '#2F5D46' : '#fff', fg: on ? '#fff' : '#1F2A24', bd: on ? '#2F5D46' : '#D8D0BF' }; }),
+      criteria: [ratingRow('Conteúdo', 'c'), ratingRow('Clareza', 'cl'), ratingRow('Aplicabilidade', 'a')],
+      sendNps: () => this.setState({ npsSent: true }),
+      msgs: s.msgs.map(m => ({ text: m.text, src: m.src, hasSrc: !!m.src, al: m.me ? 'flex-end' : 'flex-start', bg: m.me ? '#2F5D46' : '#fff', fg: m.me ? '#fff' : '#1F2A24', bd: m.me ? '#2F5D46' : '#E6E0D3' })),
+      noMsgs: s.msgs.length === 0,
+      suggestions: ['Qual é a próxima palestra?', 'Como participar de um estudo?', 'Como posso ajudar?', 'Como solicitar atendimento?', 'Onde assistir às palestras?'].map(t => ({ t, go: () => this.ask(t) })),
+      setInput: e => this.setState({ input: e.target.value }),
+      inputKey: e => { if (e.key === 'Enter' && s.input.trim()) this.ask(s.input.trim()); },
+      send: () => s.input.trim() && this.ask(s.input.trim()),
+      agenda: [['SEX', '02', 'Palestras', 'Palestra Pública: O perdão como libertação', '20:00 · Salão principal'], ['SÁB', '03', 'Estudos', 'Estudo do Evangelho', '19:30 · Sala 2'], ['SEG', '05', 'Cursos', 'ESDE — Aula 15', '20:00 · Sala 1'], ['TER', '06', 'Assistência', 'Atendimento fraterno e passe', '19:00 · Recepção'], ['QUA', '07', 'Palestras', 'Palestra Pública: A esperança que sustenta', '20:00 · Salão principal'], ['SÁB', '17', 'Eventos', 'Bazar beneficente de primavera', '08:00 às 12:00 · Pátio']].map(([wd, d, cat, t, h]) => ({ wd, d, cat, t, h, c: C[cat], go: () => this.nav('palestra') })),
+      libFilters: ['Todos', 'Livros', 'PDFs', 'Artigos', 'Vídeos', 'Áudios', 'Palestras'].map(f => ({ label: f, go: () => this.setState({ lib: f }), bg: s.lib === f ? '#2F5D46' : '#fff', fg: s.lib === f ? '#fff' : '#1F2A24', bd: s.lib === f ? '#2F5D46' : '#D8D0BF' })),
+      lib: libAll.filter(b => s.lib === 'Todos' || b.f === s.lib),
+      notifs: [{ k: 'Lembrete', time: '18:00', t: 'Palestra hoje às 20:00', d: '“O perdão como libertação”, com Rogério Lima. Transmissão ao vivo disponível.', bg: '#fff' }, { k: 'Estudos', time: 'Ontem', t: 'Nova apostila disponível', d: 'Roteiro de reflexão da aula 15 do ESDE.', bg: '#fff' }, { k: 'Campanha', time: '29/09', t: 'Campanha do Agasalho: 75% da meta', d: 'Faltam 122 peças. Coleta drive-thru aos sábados.', bg: '#F7F4EE' }, { k: 'Voluntariado', time: '27/09', t: 'Escala de outubro publicada', d: 'Recepção: quartas 07/10 e 21/10, 19h00.', bg: '#F7F4EE' }],
+      profileLinks: [['Minha jornada', 'jornada'], ['Meus estudos', 'estudos'], ['Notificações', 'notificacoes'], ['Biblioteca', 'biblioteca'], ['Dados pessoais', 'perfil'], ['Minhas contribuições', 'jornada']].map(([t, k]) => ({ t, go: () => this.nav(k) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

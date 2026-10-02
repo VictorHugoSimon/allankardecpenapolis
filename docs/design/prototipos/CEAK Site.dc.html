@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F7F4EE;color:#1F2A24;font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#2F5D46;text-decoration:none}a:hover{color:#1E3D2F;text-decoration:underline}
+button{font-family:inherit;cursor:pointer}input,textarea,select{font-family:inherit;font-size:15px}
+@keyframes ceakPulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes ceakPop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column">
+<header style="position:sticky;top:0;z-index:20;background:rgba(247,244,238,.95);backdrop-filter:blur(8px);border-bottom:1px solid #E6E0D3">
+  <div style="max-width:1240px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+    <div onClick="{{ go.home }}" style="display:flex;align-items:center;gap:12px;cursor:pointer">
+      <div style="width:42px;height:42px;border-radius:50%;background:#2F5D46;color:#F7F4EE;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-size:16px;font-weight:600">AK</div>
+      <div style="line-height:1.15"><div style="font-family:'Newsreader',serif;font-size:18px;font-weight:600">Centro Espírita Allan Kardec</div><div style="font-size:11px;color:#5E675F;letter-spacing:.1em">PENÁPOLIS · DESDE 1962</div></div>
+    </div>
+    <sc-if value="{{ navShow }}" hint-placeholder-val="{{ true }}"><nav style="display:flex;gap:2px;flex-wrap:wrap;flex:1 1 auto;justify-content:center;order:{{ navOrder }};flex-direction:{{ navDir }};width:{{ navW }}">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="7">
+        <button onClick="{{ n.go }}" style="background:{{ n.bg }};color:#1F2A24;border:0;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:500;white-space:nowrap">{{ n.label }}</button>
+      </sc-for>
+    </nav></sc-if>
+    <div style="display:flex;gap:8px;align-items:center;margin-left:auto">
+      <sc-if value="{{ narrow }}" hint-placeholder-val="{{ false }}"><button onClick="{{ toggleMenu }}" style="background:#fff;border:1px solid #CFC7B6;border-radius:999px;padding:9px 14px;font-size:14px;color:#1F2A24">Menu</button></sc-if>
+      <button onClick="{{ go.carrinho }}" style="background:transparent;border:1px solid #CFC7B6;border-radius:999px;padding:9px 14px;font-size:14px;color:#1F2A24;white-space:nowrap">Carrinho · {{ cartCount }}</button>
+      <a href="CEAK%20App.dc.html#login" style="background:#2F5D46;color:#fff;border-radius:999px;padding:10px 16px;font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap">Área do membro</a>
+    </div>
+  </div>
+</header>
+
+<main style="flex:1">
+
+<sc-if value="{{ is.home }}" hint-placeholder-val="{{ true }}">
+  <section style="max-width:1240px;margin:0 auto;padding:64px 24px 56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:48px;align-items:center">
+    <div>
+      <div style="font-size:13px;letter-spacing:.14em;color:#2F5D46;font-weight:600">CEAK · PENÁPOLIS – SP</div>
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(40px,5.4vw,66px);line-height:1.04;margin:18px 0 20px;text-wrap:balance;letter-spacing:-.01em">Centro Espírita Allan Kardec — Penápolis</h1>
+      <p style="font-size:21px;color:#4F5A52;margin:0 0 34px;line-height:1.5">Estudo, acolhimento, fraternidade e caridade.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button onClick="{{ go.sobre }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:14px 24px;font-size:16px;font-weight:500;white-space:nowrap">Conheça o CEAK</button>
+        <button onClick="{{ go.agenda }}" style="background:#fff;color:#1F2A24;border:1px solid #CFC7B6;border-radius:999px;padding:14px 24px;font-size:16px;font-weight:500;white-space:nowrap">Ver programação</button>
+        <button onClick="{{ go.ajudar }}" style="background:#fff;color:#1F2A24;border:1px solid #CFC7B6;border-radius:999px;padding:14px 24px;font-size:16px;font-weight:500;white-space:nowrap">Quero ajudar</button>
+        <button onClick="{{ go.ajuda }}" style="background:#fff;color:#1F2A24;border:1px solid #CFC7B6;border-radius:999px;padding:14px 24px;font-size:16px;font-weight:500;white-space:nowrap">Preciso de ajuda</button>
+      </div>
+    </div>
+    <div style="aspect-ratio:5/4;border-radius:24px;background:repeating-linear-gradient(135deg,#ECE5D6 0 10px,#F2ECE0 10px 20px);display:flex;align-items:flex-end;padding:18px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#7A7363">foto da fachada ou do salão do CEAK</div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:0 24px">
+    <div style="background:#1E3D2F;color:#F7F4EE;border-radius:20px;padding:22px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.12em;font-weight:600">{{ liveDot }} AO VIVO</div>
+      <div style="flex:1;min-width:220px"><div style="font-family:'Newsreader',serif;font-size:24px">Estamos ao vivo</div><div style="font-size:15px;color:#C9D6CD;margin-top:2px">Palestra Pública: O perdão como libertação · Rogério Lima · hoje, 20h</div></div>
+      <button onClick="{{ go.lives }}" style="background:#F7F4EE;color:#1E3D2F;border:0;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:600">Assistir transmissão</button>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:72px 24px 0">
+    <div style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:24px">
+      <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:38px;margin:0">Próximas atividades</h2>
+      <button onClick="{{ go.agenda }}" style="background:transparent;border:0;color:#2F5D46;font-size:15px;font-weight:600;padding:0">Ver agenda completa →</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">
+      <sc-for list="{{ upcoming }}" as="e" hint-placeholder-count="4">
+        <div onClick="{{ e.go }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:22px;cursor:pointer;display:flex;flex-direction:column;gap:12px" style-hover="border-color:#2F5D46">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.06em;color:{{ e.color }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ e.color }}"></span>{{ e.cat }}</div>
+          <div style="font-family:'Newsreader',serif;font-size:22px;line-height:1.2">{{ e.t }}</div>
+          <div style="margin-top:auto;font-size:15px;color:#4F5A52">{{ e.wd }} · {{ e.h }}</div>
+          <div style="font-size:13px;color:#7A8279">{{ e.loc }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:72px 24px 0">
+    <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:38px;margin:0 0 8px">Estudos</h2>
+    <p style="font-size:17px;color:#5E675F;margin:0 0 24px;max-width:620px">Grupos abertos a todos. Não é preciso conhecimento prévio — basta vontade de aprender.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+      <sc-for list="{{ studies }}" as="c" hint-placeholder-count="3">
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:14px">
+          <div style="font-size:12px;font-weight:600;color:#2F5D46;letter-spacing:.06em">{{ c.tag }}</div>
+          <div style="font-family:'Newsreader',serif;font-size:23px;line-height:1.2">{{ c.t }}</div>
+          <div style="font-size:14px;color:#5E675F">{{ c.turma }}</div>
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;color:#5E675F;margin-bottom:6px"><span>{{ c.mod }}</span><span>{{ c.pct }}%</span></div><div style="height:6px;background:#EFE8DA;border-radius:9px"><div style="height:6px;border-radius:9px;background:#2F5D46;width:{{ c.w }}"></div></div></div>
+          <div style="font-size:14px;border-top:1px solid #EFE8DA;padding-top:12px">Próximo encontro: <strong style="font-weight:600">{{ c.next }}</strong></div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:72px 24px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:20px">
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:24px;padding:32px">
+      <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0 0 6px">Quero ajudar</h2>
+      <p style="font-size:16px;color:#5E675F;margin:0 0 22px">Conheça as formas de contribuir com o CEAK.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">
+        <sc-for list="{{ helpHome }}" as="h" hint-placeholder-count="5">
+          <button onClick="{{ h.go }}" style="text-align:left;background:#F7F4EE;border:1px solid #EAE3D5;border-radius:14px;padding:16px;font-size:15px;font-weight:500;color:#1F2A24;display:flex;flex-direction:column;gap:4px" style-hover="border-color:#2F5D46"><span>{{ h.t }}</span><span style="font-size:13px;font-weight:400;color:#6B746C">{{ h.d }}</span></button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="background:#E4EDE6;border-radius:24px;padding:32px">
+      <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0 0 6px">Preciso de ajuda</h2>
+      <p style="font-size:16px;color:#4F5A52;margin:0 0 22px">Atendimentos gratuitos, abertos a todos.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">
+        <sc-for list="{{ needHome }}" as="h" hint-placeholder-count="6">
+          <button onClick="{{ h.go }}" style="text-align:left;background:#fff;border:1px solid #D3E0D6;border-radius:14px;padding:16px;font-size:15px;font-weight:500;color:#1F2A24" style-hover="border-color:#2F5D46">{{ h.t }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:72px 24px 0">
+    <div style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:24px"><h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:38px;margin:0">Notícias e blog</h2><button onClick="{{ go.blog }}" style="background:transparent;border:0;color:#2F5D46;font-size:15px;font-weight:600;padding:0">Ver todas →</button></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px">
+      <sc-for list="{{ blogHome }}" as="p" hint-placeholder-count="3">
+        <article onClick="{{ p.go }}" style="display:flex;flex-direction:column;gap:12px;cursor:pointer">
+          <div style="aspect-ratio:16/10;border-radius:16px;background:repeating-linear-gradient(135deg,#ECE5D6 0 10px,#F2ECE0 10px 20px);display:flex;align-items:flex-end;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7A7363">{{ p.img }}</div>
+          <div style="font-size:13px;color:#6B746C">{{ p.date }} · {{ p.cat }}</div>
+          <div style="font-family:'Newsreader',serif;font-size:22px;line-height:1.25">{{ p.t }}</div>
+        </article>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:72px 24px 0">
+    <div style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:24px">
+      <div><h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:38px;margin:0">Loja solidária</h2><p style="font-size:16px;color:#5E675F;margin:6px 0 0">Toda a renda é revertida para a assistência social do CEAK.</p></div>
+      <button onClick="{{ go.loja }}" style="background:transparent;border:0;color:#2F5D46;font-size:15px;font-weight:600;padding:0">Ver loja →</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px">
+      <sc-for list="{{ featured }}" as="p" hint-placeholder-count="4">
+        <div onClick="{{ p.go }}" style="cursor:pointer;display:flex;flex-direction:column;gap:8px">
+          <div style="aspect-ratio:1;border-radius:16px;background:repeating-linear-gradient(135deg,#ECE5D6 0 10px,#F2ECE0 10px 20px);display:flex;align-items:flex-end;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7A7363">foto do produto</div>
+          <div style="font-size:15px;font-weight:500">{{ p.n }}</div>
+          <div style="font-size:15px;color:#2F5D46;font-weight:600">{{ p.price }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width:1240px;margin:0 auto;padding:72px 24px 80px">
+    <div style="background:#EFE8DA;border-radius:24px;padding:36px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:28px;align-items:start">
+      <div><div style="font-size:13px;letter-spacing:.12em;font-weight:600;color:#2F5D46">TRANSPARÊNCIA</div><div style="font-family:'Newsreader',serif;font-size:28px;margin-top:8px;line-height:1.2">Setembro de 2026</div><button onClick="{{ go.transparencia }}" style="background:none;border:0;padding:0;margin-top:10px;color:#2F5D46;font-size:14px;font-weight:600">Ver prestação de contas →</button></div>
+      <div><div style="font-family:'Newsreader',serif;font-size:40px">R$ 8.420</div><div style="font-size:15px;color:#4F5A52">recebidos em doações</div></div>
+      <div><div style="font-family:'Newsreader',serif;font-size:40px">126</div><div style="font-size:15px;color:#4F5A52">famílias assistidas no trimestre</div></div>
+      <div><div style="font-family:'Newsreader',serif;font-size:40px">378 / 500</div><div style="font-size:15px;color:#4F5A52">peças na Campanha do Agasalho</div><div style="height:6px;background:#fff;border-radius:9px;margin-top:10px"><div style="height:6px;width:75%;border-radius:9px;background:#2F5D46"></div></div></div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.sobre }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1040px;margin:0 auto;padding:64px 24px 24px">
+    <div style="font-size:13px;letter-spacing:.14em;color:#2F5D46;font-weight:600">O CEAK</div>
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(38px,5vw,56px);line-height:1.08;margin:14px 0 24px;text-wrap:balance">Mais de seis décadas dedicadas ao estudo e à caridade em Penápolis</h1>
+    <p style="font-size:19px;line-height:1.65;color:#3F4A42;max-width:760px;margin:0">O Centro Espírita Allan Kardec foi fundado em 1962 por um pequeno grupo que se reunia para estudar as obras básicas da Doutrina Espírita. Desde então, a casa cresceu sem perder o que a originou: o estudo sério, o acolhimento a quem chega e o trabalho voluntário em favor de quem precisa.</p>
+  </section>
+  <section style="max-width:1040px;margin:0 auto;padding:32px 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:26px"><div style="font-family:'Newsreader',serif;font-size:24px;margin-bottom:10px">Missão</div><div style="font-size:16px;line-height:1.6;color:#4F5A52">Divulgar e vivenciar a Doutrina Espírita por meio do estudo, do acolhimento fraterno e da prática da caridade.</div></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:26px"><div style="font-family:'Newsreader',serif;font-size:24px;margin-bottom:10px">Valores</div><div style="font-size:16px;line-height:1.6;color:#4F5A52">Fraternidade, humildade, estudo, respeito à diversidade, trabalho voluntário e transparência.</div></div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:26px"><div style="font-family:'Newsreader',serif;font-size:24px;margin-bottom:10px">Estrutura</div><div style="font-size:16px;line-height:1.6;color:#4F5A52">Salão de palestras para 220 pessoas, 4 salas de estudo, biblioteca, sala de passe, bazar e cozinha da assistência social.</div></div>
+  </section>
+  <section style="max-width:1040px;margin:0 auto;padding:40px 24px">
+    <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0 0 28px">Linha do tempo</h2>
+    <div style="display:flex;flex-direction:column">
+      <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="7">
+        <div style="display:grid;grid-template-columns:88px 24px minmax(0,1fr);gap:16px">
+          <div style="font-family:'Newsreader',serif;font-size:26px;color:#2F5D46;padding-bottom:28px">{{ t.y }}</div>
+          <div style="display:flex;flex-direction:column;align-items:center"><div style="width:12px;height:12px;border-radius:50%;background:#2F5D46;margin-top:10px"></div><div style="flex:1;width:1px;background:#D8D0BF"></div></div>
+          <div style="padding-bottom:28px"><div style="font-size:18px;font-weight:600;margin-top:4px">{{ t.t }}</div><div style="font-size:15px;color:#5E675F;margin-top:4px;line-height:1.55">{{ t.d }}</div></div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+  <section style="max-width:1040px;margin:0 auto;padding:24px 24px 80px">
+    <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:34px;margin:0 0 24px">Diretoria 2025–2027</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px">
+      <sc-for list="{{ board }}" as="b" hint-placeholder-count="5">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="aspect-ratio:1;border-radius:50%;background:repeating-linear-gradient(135deg,#ECE5D6 0 8px,#F2ECE0 8px 16px);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7A7363">foto</div>
+          <div style="font-size:16px;font-weight:600;text-align:center">{{ b.n }}</div><div style="font-size:14px;color:#5E675F;text-align:center">{{ b.r }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.agenda }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:48px;margin:0 0 8px">Agenda</h1>
+    <p style="font-size:17px;color:#5E675F;margin:0 0 24px">Outubro de 2026 · todas as atividades são gratuitas e abertas ao público.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px">
+      <sc-for list="{{ filters }}" as="f" hint-placeholder-count="7">
+        <button onClick="{{ f.go }}" style="background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }};border-radius:999px;padding:9px 16px;font-size:14px;font-weight:500">{{ f.label }}</button>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:28px;align-items:start">
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:22px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font-family:'Newsreader',serif;font-size:24px">Outubro 2026</div><div style="font-size:13px;color:#6B746C">Hoje: sex, 02</div></div>
+        <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;font-size:12px;color:#7A8279;text-align:center;margin-bottom:6px"><div>D</div><div>S</div><div>T</div><div>Q</div><div>Q</div><div>S</div><div>S</div></div>
+        <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+          <sc-for list="{{ cal }}" as="c" hint-placeholder-count="35">
+            <div style="aspect-ratio:1;border-radius:10px;background:{{ c.bg }};border:1px solid {{ c.bd }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:14px;color:{{ c.fg }}">{{ c.n }}<div style="display:flex;gap:3px;height:5px"><sc-for list="{{ c.dots }}" as="d"><span style="width:5px;height:5px;border-radius:50%;background:{{ d.c }}"></span></sc-for></div></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{ eventList }}" as="e" hint-placeholder-count="6">
+          <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:20px;display:grid;grid-template-columns:64px minmax(0,1fr);gap:18px">
+            <div style="text-align:center;border-right:1px solid #EFE8DA;padding-right:14px"><div style="font-size:12px;color:#6B746C;text-transform:uppercase">{{ e.wds }}</div><div style="font-family:'Newsreader',serif;font-size:32px;line-height:1.1">{{ e.day }}</div><div style="font-size:12px;color:#6B746C">OUT</div></div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:{{ e.color }}"><span style="width:7px;height:7px;border-radius:50%;background:{{ e.color }}"></span>{{ e.cat }}</div>
+              <div style="font-family:'Newsreader',serif;font-size:21px;line-height:1.25">{{ e.t }}</div>
+              <div style="font-size:14px;color:#5E675F">{{ e.h }} · {{ e.loc }} · {{ e.who }}</div>
+              <div style="font-size:14px;color:#5E675F;line-height:1.5">{{ e.desc }}</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+                <button onClick="{{ e.go }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:500">Detalhes e inscrição</button>
+                <button style="background:#fff;border:1px solid #D8D0BF;border-radius:999px;padding:8px 14px;font-size:13px;color:#1F2A24">Adicionar ao calendário</button>
+                <button style="background:#fff;border:1px solid #D8D0BF;border-radius:999px;padding:8px 14px;font-size:13px;color:#1F2A24">Compartilhar</button>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.palestra }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:40px 24px 80px">
+    <div style="font-size:14px;color:#6B746C;margin-bottom:20px"><span onClick="{{ go.agenda }}" style="cursor:pointer;color:#2F5D46">Agenda</span> / {{ ev.cat }}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
+      <div style="flex:2 1 520px;min-width:0;display:flex;flex-direction:column;gap:28px">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:{{ ev.color }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ ev.color }}"></span>{{ ev.cat }}</div>
+          <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(34px,4.4vw,52px);line-height:1.08;margin:12px 0 0;text-wrap:balance">{{ ev.t }}</h1>
+        </div>
+        <div style="aspect-ratio:16/9;border-radius:20px;background:#1E3D2F;color:#C9D6CD;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+          <div style="width:64px;height:64px;border-radius:50%;border:1.5px solid #C9D6CD;display:flex;align-items:center;justify-content:center;font-size:20px">▶</div>
+          <div style="font-size:15px">Transmissão ao vivo pelo YouTube · {{ ev.wd }}, {{ ev.h }}</div>
+        </div>
+        <div><h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:26px;margin:0 0 10px">Resumo</h2><p style="font-size:17px;line-height:1.7;color:#3F4A42;margin:0">{{ ev.desc }} A palestra propõe uma reflexão à luz de O Evangelho Segundo o Espiritismo, com espaço ao final para perguntas do público presente e de quem acompanha online.</p></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+          <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px"><div style="font-size:13px;color:#6B746C;margin-bottom:6px">Material de apoio</div><div style="font-size:16px;font-weight:500">Roteiro da palestra (PDF, 2 págs.)</div><div style="font-size:14px;color:#2F5D46;margin-top:8px">Disponível no dia</div></div>
+          <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px"><div style="font-size:13px;color:#6B746C;margin-bottom:6px">Gravação</div><div style="font-size:16px;font-weight:500">Publicada na biblioteca até 48h depois</div><div style="font-size:14px;color:#2F5D46;margin-top:8px">Avisaremos pelo app</div></div>
+          <div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:20px"><div style="font-size:13px;color:#6B746C;margin-bottom:6px">Avaliação pós-evento</div><div style="font-size:16px;font-weight:500">Conte como foi sua experiência</div><a href="CEAK%20App.dc.html#avaliacao" style="display:inline-block;font-size:14px;margin-top:8px;font-weight:600">Avaliar no CEAK App →</a></div>
+        </div>
+      </div>
+      <aside style="flex:1 1 300px;position:sticky;top:96px;background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:grid;grid-template-columns:100px minmax(0,1fr);gap:10px 12px;font-size:15px">
+          <div style="color:#6B746C">Data</div><div style="font-weight:500">{{ ev.wd }}, {{ ev.day }} de outubro</div>
+          <div style="color:#6B746C">Horário</div><div style="font-weight:500">{{ ev.h }}</div>
+          <div style="color:#6B746C">Local</div><div style="font-weight:500">{{ ev.loc }}</div>
+          <div style="color:#6B746C">Com</div><div style="font-weight:500">{{ ev.who }}</div>
+        </div>
+        <button onClick="{{ go.cadastro }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:14px;font-size:16px;font-weight:500">Fazer inscrição</button>
+        <a href="CEAK%20App.dc.html#checkin" style="text-align:center;border:1px solid #CFC7B6;border-radius:999px;padding:13px;font-size:15px;font-weight:500;color:#1F2A24;text-decoration:none">Fazer check-in no dia</a>
+        <div style="display:flex;gap:8px"><button style="flex:1;background:#F7F4EE;border:1px solid #EAE3D5;border-radius:12px;padding:11px;font-size:14px;color:#1F2A24">Adicionar ao calendário</button><button style="flex:1;background:#F7F4EE;border:1px solid #EAE3D5;border-radius:12px;padding:11px;font-size:14px;color:#1F2A24">Compartilhar</button></div>
+        <div style="font-size:13px;color:#6B746C;line-height:1.5">A inscrição é opcional e ajuda a organizar o salão. Entrada gratuita.</div>
+      </aside>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.cadastro }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:620px;margin:0 auto;padding:64px 24px 80px">
+    <sc-if value="{{ regForm }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:14px;color:#6B746C">Inscrição · {{ ev.t }}</div>
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:42px;margin:10px 0 8px">Inscrição na atividade</h1>
+      <p style="font-size:17px;color:#5E675F;margin:0 0 28px">{{ ev.wd }}, {{ ev.day }} de outubro · {{ ev.h }} · {{ ev.loc }}</p>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:16px">
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500">Nome<input value="Carla Nogueira" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px 14px;background:#FCFBF8"></input></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500">WhatsApp<input value="(18) 99712-4408" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px 14px;background:#FCFBF8"></input></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500">E-mail (opcional)<input value="carla.nogueira@email.com" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px 14px;background:#FCFBF8"></input></label>
+        <label style="display:flex;gap:10px;align-items:center;font-size:15px;color:#3F4A42"><input type="checkbox" checked></input>É minha primeira vez no CEAK</label>
+        <button onClick="{{ register }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:14px;font-size:16px;font-weight:500;margin-top:6px">Confirmar inscrição</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ s.regDone }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px">
+        {{ okMark }}
+        <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:42px;margin:8px 0 0">Inscrição confirmada</h1>
+        <p style="font-size:17px;color:#5E675F;margin:0;max-width:440px;line-height:1.6">Enviamos os detalhes para o seu WhatsApp. Apresente-se na recepção no dia da atividade.</p>
+        <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:28px;margin-top:20px;display:grid;grid-template-columns:96px minmax(0,1fr);gap:20px;text-align:left;align-items:center;width:100%">
+          <div style="aspect-ratio:1;border-radius:22px;background:#2F5D46;color:#F7F4EE;display:flex;align-items:center;justify-content:center;font-family:'Newsreader',serif;font-size:28px">AK</div>
+          <div><div style="font-family:'Newsreader',serif;font-size:24px">Instale o CEAK App</div><div style="font-size:15px;color:#5E675F;margin:6px 0 14px;line-height:1.5">Agenda, check-in, estudos e avisos da casa no seu celular. Não ocupa espaço da loja de aplicativos.</div><a href="CEAK%20App.dc.html#login" style="display:inline-block;background:#2F5D46;color:#fff;border-radius:999px;padding:11px 20px;font-size:15px;font-weight:500;text-decoration:none">Abrir o CEAK App</a></div>
+        </div>
+      </div>
+    </sc-if>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.ajuda }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1040px;margin:0 auto;padding:72px 24px 80px">
+    <div style="text-align:center;max-width:640px;margin:0 auto 44px">
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(38px,5vw,56px);line-height:1.08;margin:0 0 16px">Como podemos acolher você?</h1>
+      <p style="font-size:18px;color:#4F5A52;line-height:1.6;margin:0">Não é preciso ser espírita nem ter feito qualquer contato antes. Todos os atendimentos são gratuitos e sigilosos.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px">
+      <sc-for list="{{ needs }}" as="n" hint-placeholder-count="6">
+        <div onClick="{{ n.go }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:26px;cursor:pointer;display:flex;flex-direction:column;gap:10px" style-hover="border-color:#2F5D46">
+          <div style="width:40px;height:40px;border-radius:50%;background:#E4EDE6"></div>
+          <div style="font-family:'Newsreader',serif;font-size:24px">{{ n.t }}</div>
+          <div style="font-size:15px;color:#5E675F;line-height:1.55">{{ n.d }}</div>
+          <div style="font-size:14px;color:#2F5D46;font-weight:600;margin-top:auto">{{ n.cta }} →</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:28px;background:#E4EDE6;border-radius:20px;padding:24px 28px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+      <div style="font-size:17px">Dúvidas sobre qual atendimento procurar? A recepção pode orientar.</div>
+      <div style="font-size:15px;color:#3F4A42">Ter. a sáb., 19h às 21h30 · WhatsApp (18) 3652-0000</div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.tratamento }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:760px;margin:0 auto;padding:48px 24px 80px">
+    <div style="font-size:14px;color:#6B746C;margin-bottom:20px"><span onClick="{{ go.ajuda }}" style="cursor:pointer;color:#2F5D46">Preciso de ajuda</span> / {{ s.svc }}</div>
+    <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:36px">
+      <sc-for list="{{ tSteps }}" as="st" hint-placeholder-count="5">
+        <div style="display:flex;flex-direction:column;gap:8px"><div style="height:4px;border-radius:4px;background:{{ st.bar }}"></div><div style="font-size:13px;color:{{ st.fg }};font-weight:500">{{ st.label }}</div></div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ t.s0 }}" hint-placeholder-val="{{ true }}">
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:44px;margin:0 0 16px">{{ s.svc }}</h1>
+      <p style="font-size:18px;line-height:1.7;color:#3F4A42;margin:0 0 16px">{{ svcInfo }}</p>
+      <p style="font-size:18px;line-height:1.7;color:#3F4A42;margin:0">O atendimento acontece em ambiente tranquilo, com trabalhadores preparados pela casa. Você pode vir sozinho ou acompanhado.</p>
+    </sc-if>
+    <sc-if value="{{ t.s1 }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:40px;margin:0 0 20px">Algumas orientações</h1>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <sc-for list="{{ orient }}" as="o" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:16px;padding:18px 20px;font-size:17px;line-height:1.5;display:flex;gap:14px"><span style="font-family:'Newsreader',serif;color:#2F5D46;font-size:20px">{{ o.n }}</span>{{ o.t }}</div></sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ t.s2 }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:40px;margin:0 0 20px">Solicitar atendimento</h1>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:16px">
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500">Nome<input value="Carla Nogueira" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px 14px;background:#FCFBF8"></input></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500">WhatsApp<input value="(18) 99712-4408" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px 14px;background:#FCFBF8"></input></label>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500">Se quiser, conte brevemente o que está vivendo (opcional)<textarea rows="4" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px 14px;background:#FCFBF8;resize:vertical">Perdi minha mãe há dois meses e tenho tido dificuldade para dormir.</textarea></label>
+        <div style="font-size:13px;color:#6B746C">Suas informações são vistas apenas pela equipe de assistência.</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ t.s3 }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:40px;margin:0 0 20px">Escolha uma data</h1>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+        <sc-for list="{{ slots }}" as="sl" hint-placeholder-count="6">
+          <button onClick="{{ sl.go }}" style="background:{{ sl.bg }};color:{{ sl.fg }};border:1px solid {{ sl.bd }};border-radius:16px;padding:18px;text-align:left;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:600">{{ sl.d }}</span><span style="font-size:14px">{{ sl.h }}</span><span style="font-size:12px;opacity:.8">{{ sl.v }}</span></button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ t.s4 }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:40px;margin:0 0 20px">Confirme sua solicitação</h1>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:26px;display:grid;grid-template-columns:130px minmax(0,1fr);gap:12px;font-size:16px">
+        <div style="color:#6B746C">Atendimento</div><div style="font-weight:500">{{ s.svc }}</div>
+        <div style="color:#6B746C">Data</div><div style="font-weight:500">{{ slot.d }}, {{ slot.h }}</div>
+        <div style="color:#6B746C">Nome</div><div style="font-weight:500">Carla Nogueira</div>
+        <div style="color:#6B746C">Contato</div><div style="font-weight:500">(18) 99712-4408</div>
+        <div style="color:#6B746C">Local</div><div style="font-weight:500">Recepção do CEAK · chegue 15 min antes</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ t.s5 }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 0">
+        {{ okMark }}
+        <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:40px;margin:6px 0 0">Solicitação confirmada</h1>
+        <p style="font-size:17px;color:#5E675F;margin:0;max-width:460px;line-height:1.6">{{ s.svc }} · {{ slot.d }}, {{ slot.h }}. Você receberá um lembrete no WhatsApp na véspera.</p>
+        <button onClick="{{ go.home }}" style="margin-top:12px;background:#fff;color:#1F2A24;border:1px solid #CFC7B6;border-radius:999px;padding:12px 22px;font-size:15px">Voltar ao início</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ t.nav }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;justify-content:space-between;gap:12px;margin-top:32px">
+        <button onClick="{{ tBack }}" style="background:transparent;color:#1F2A24;border:1px solid #CFC7B6;border-radius:999px;padding:13px 22px;font-size:15px">Voltar</button>
+        <button onClick="{{ tNext }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:13px 26px;font-size:15px;font-weight:500">{{ tNextLabel }}</button>
+      </div>
+    </sc-if>
+    <div style="margin-top:40px;padding-top:18px;border-top:1px solid #E6E0D3;font-size:14px;color:#6B746C;line-height:1.55">O atendimento espiritual não substitui acompanhamento médico ou psicológico quando necessário.</div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.ajudar }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:64px 24px 80px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(38px,5vw,56px);margin:0 0 12px">Quero ajudar</h1>
+    <p style="font-size:18px;color:#5E675F;margin:0 0 36px;max-width:620px;line-height:1.6">Escolha a forma que combina com você. Tudo o que chega ao CEAK é registrado e prestado contas.</p>
+    <div style="background:#1E3D2F;color:#F7F4EE;border-radius:24px;padding:32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:28px;align-items:center;margin-bottom:28px">
+      <div><div style="font-size:13px;letter-spacing:.12em;font-weight:600;color:#A9C2B1">CAMPANHA ATIVA</div><div style="font-family:'Newsreader',serif;font-size:36px;margin:8px 0">Campanha do Agasalho</div><div style="font-size:16px;color:#C9D6CD;line-height:1.55">Casacos, cobertores e meias para as 126 famílias acompanhadas pela assistência social. Até 31 de outubro.</div></div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:10px"><div><div style="font-size:13px;color:#A9C2B1">Arrecadado</div><div style="font-family:'Newsreader',serif;font-size:44px;line-height:1">378</div></div><div style="text-align:right"><div style="font-size:13px;color:#A9C2B1">Meta</div><div style="font-size:20px">500 peças</div></div></div>
+        <div style="height:8px;background:#335A47;border-radius:9px"><div style="height:8px;width:75%;background:#F7F4EE;border-radius:9px"></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap"><span style="font-size:15px">75% · <span onClick="{{ go.campanha }}" style="cursor:pointer;text-decoration:underline">ver campanha</span></span><button onClick="{{ pickRoupas }}" style="background:#F7F4EE;color:#1E3D2F;border:0;border-radius:999px;padding:11px 20px;font-size:15px;font-weight:600">Quero ajudar</button></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px">
+      <sc-for list="{{ helpOpts }}" as="h" hint-placeholder-count="7">
+        <button onClick="{{ h.go }}" style="text-align:left;background:{{ h.bg }};border:1px solid {{ h.bd }};border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:6px;color:#1F2A24"><span style="font-family:'Newsreader',serif;font-size:22px">{{ h.t }}</span><span style="font-size:14px;color:#5E675F;line-height:1.5">{{ h.d }}</span></button>
+      </sc-for>
+    </div>
+    <sc-if value="{{ helpDetail.show }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top:20px;background:#fff;border:1px solid #2F5D46;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:14px">
+        <div style="font-family:'Newsreader',serif;font-size:26px">{{ helpDetail.t }}</div>
+        <div style="font-size:16px;color:#3F4A42;line-height:1.6">{{ helpDetail.d }}</div>
+        <sc-if value="{{ helpDetail.skills }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ skills }}" as="k" hint-placeholder-count="12"><button onClick="{{ k.go }}" style="background:{{ k.bg }};color:{{ k.fg }};border:1px solid {{ k.bd }};border-radius:999px;padding:8px 14px;font-size:14px">{{ k.t }}</button></sc-for>
+          </div>
+        </sc-if>
+        <div><button onClick="{{ go.cadastro }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:12px 22px;font-size:15px;font-weight:500">{{ helpDetail.cta }}</button></div>
+      </div>
+    </sc-if>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.doacao }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:640px;margin:0 auto;padding:56px 24px 80px">
+    <sc-if value="{{ d.s0 }}" hint-placeholder-val="{{ true }}">
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:44px;margin:0 0 8px">Contribuir financeiramente</h1>
+      <p style="font-size:17px;color:#5E675F;margin:0 0 28px;line-height:1.6">Sua doação mantém a casa aberta e a assistência social funcionando.</p>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:20px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px">
+          <sc-for list="{{ amounts }}" as="a" hint-placeholder-count="5"><button onClick="{{ a.go }}" style="background:{{ a.bg }};color:{{ a.fg }};border:1px solid {{ a.bd }};border-radius:14px;padding:16px 8px;font-size:17px;font-weight:600">{{ a.label }}</button></sc-for>
+        </div>
+        <sc-if value="{{ isOther }}" hint-placeholder-val="{{ false }}"><input value="{{ s.other }}" onChange="{{ setOther }}" placeholder="R$ 0,00" style="border:1px solid #D8D0BF;border-radius:12px;padding:14px;font-size:18px;background:#FCFBF8"></input></sc-if>
+        <label style="display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:500">Destino<select style="border:1px solid #D8D0BF;border-radius:12px;padding:13px;background:#FCFBF8"><option>Onde for mais necessário</option><option>Assistência social</option><option>Campanha do Agasalho</option><option>Manutenção da sede</option></select></label>
+        <div onClick="{{ toggleRec }}" style="display:flex;gap:14px;align-items:center;background:#F7F4EE;border-radius:14px;padding:16px;cursor:pointer">
+          <div style="width:42px;height:24px;border-radius:12px;background:{{ rec.bg }};padding:3px;display:flex;justify-content:{{ rec.j }}"><div style="width:18px;height:18px;border-radius:50%;background:#fff"></div></div>
+          <div><div style="font-size:15px;font-weight:500">Tornar mensal</div><div style="font-size:13px;color:#6B746C">Doação recorrente via PIX Automático · em breve</div></div>
+        </div>
+        <div style="font-size:14px;color:#6B746C">Pagamento por PIX</div>
+        <button onClick="{{ donNext }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:16px;font-weight:500">Doar {{ amountLabel }} via PIX</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ d.s1 }}" hint-placeholder-val="{{ false }}">
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:40px;margin:0 0 8px">Pague com PIX</h1>
+      <p style="font-size:17px;color:#5E675F;margin:0 0 24px">Abra o app do seu banco e escaneie o código.</p>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:28px;display:flex;flex-direction:column;align-items:center;gap:18px">
+        <div style="font-family:'Newsreader',serif;font-size:38px">{{ amountLabel }}</div>
+        <div style="width:220px;height:220px;border-radius:14px;border:1px solid #E6E0D3;background:repeating-linear-gradient(0deg,#1F2A24 0 6px,#fff 6px 12px),#fff;background-blend-mode:normal;display:flex;align-items:center;justify-content:center"><div style="background:#fff;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#5E675F;border-radius:6px">QR Code PIX</div></div>
+        <div style="width:100%;display:flex;gap:8px"><div style="flex:1;min-width:0;background:#F7F4EE;border-radius:12px;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#5E675F;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">00020126580014BR.GOV.BCB.PIX0136ceak-penapolis@pix.org.br5204000053039865802BR</div><button style="background:#fff;border:1px solid #CFC7B6;border-radius:12px;padding:0 14px;font-size:14px;color:#1F2A24">Copiar</button></div>
+        <div style="font-size:14px;color:#6B746C">Favorecido: Centro Espírita Allan Kardec · CNPJ 00.000.000/0001-00</div>
+        <button onClick="{{ donNext }}" style="width:100%;background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:16px;font-weight:500">Já fiz o PIX</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ d.s2 }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:20px">
+        {{ okMark }}
+        <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:42px;margin:6px 0 0">Obrigado pela sua doação</h1>
+        <p style="font-size:17px;color:#5E675F;margin:0;max-width:440px;line-height:1.6">Recebemos {{ amountLabel }}. O comprovante foi enviado por e-mail e a doação aparece no relatório de transparência do mês.</p>
+        <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;justify-content:center"><button onClick="{{ go.home }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:12px 22px;font-size:15px">Voltar ao início</button><button onClick="{{ go.ajudar }}" style="background:#fff;color:#1F2A24;border:1px solid #CFC7B6;border-radius:999px;padding:12px 22px;font-size:15px">Outras formas de ajudar</button></div>
+      </div>
+    </sc-if>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.loja }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:48px;margin:0 0 8px">Loja solidária</h1>
+    <p style="font-size:17px;color:#5E675F;margin:0 0 24px">Livros, artesanato feito por voluntárias e itens doados. Retirada no CEAK.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px">
+      <sc-for list="{{ cats }}" as="f" hint-placeholder-count="7"><button onClick="{{ f.go }}" style="background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }};border-radius:999px;padding:9px 16px;font-size:14px;font-weight:500">{{ f.label }}</button></sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px">
+      <sc-for list="{{ shop }}" as="p" hint-placeholder-count="8">
+        <div onClick="{{ p.go }}" style="cursor:pointer;display:flex;flex-direction:column;gap:8px">
+          <div style="aspect-ratio:1;border-radius:18px;background:repeating-linear-gradient(135deg,#ECE5D6 0 10px,#F2ECE0 10px 20px);display:flex;flex-direction:column;justify-content:space-between;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7A7363"><span style="align-self:flex-start;background:#fff;color:#2F5D46;font-family:'Instrument Sans',sans-serif;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px">{{ p.origin }}</span><span>foto do produto</span></div>
+          <div style="font-size:12px;color:#6B746C">{{ p.cat }} · {{ p.st }}</div>
+          <div style="font-size:16px;font-weight:500;line-height:1.3">{{ p.n }}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:16px;color:#2F5D46;font-weight:600">{{ p.price }}</span><span style="font-size:12px;color:{{ p.avc }}">{{ p.av }}</span></div>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.produto }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:40px 24px 80px">
+    <div style="font-size:14px;color:#6B746C;margin-bottom:20px"><span onClick="{{ go.loja }}" style="cursor:pointer;color:#2F5D46">Loja</span> / {{ prod.cat }}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:48px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="aspect-ratio:1;border-radius:22px;background:repeating-linear-gradient(135deg,#ECE5D6 0 10px,#F2ECE0 10px 20px);display:flex;align-items:flex-end;padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#7A7363">foto {{ imgN }} de 4 · {{ prod.n }}</div>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+          <sc-for list="{{ thumbs }}" as="th" hint-placeholder-count="4"><div onClick="{{ th.go }}" style="aspect-ratio:1;border-radius:12px;cursor:pointer;background:repeating-linear-gradient(135deg,#ECE5D6 0 6px,#F2ECE0 6px 12px);border:2px solid {{ th.bd }}"></div></sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <span style="align-self:flex-start;background:#E4EDE6;color:#1E3D2F;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px">{{ prod.origin }}</span>
+        <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:42px;line-height:1.1;margin:0">{{ prod.n }}</h1>
+        <div style="font-family:'Newsreader',serif;font-size:34px;color:#2F5D46">{{ prod.price }}</div>
+        <p style="font-size:17px;line-height:1.65;color:#3F4A42;margin:0">{{ prod.desc }}</p>
+        <div style="display:grid;grid-template-columns:130px minmax(0,1fr);gap:10px;font-size:15px;border-top:1px solid #E6E0D3;border-bottom:1px solid #E6E0D3;padding:16px 0">
+          <div style="color:#6B746C">Estado</div><div>{{ prod.st }}</div>
+          <div style="color:#6B746C">Estoque</div><div>{{ prod.av }}</div>
+          <div style="color:#6B746C">Origem</div><div>{{ prod.origin }}</div>
+          <div style="color:#6B746C">Entrega</div><div>Retirada no CEAK, ter. a sáb., 19h às 21h30</div>
+        </div>
+        <button onClick="{{ addCart }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:16px;font-weight:500">Adicionar ao carrinho</button>
+        <div style="font-size:14px;color:#6B746C">100% da renda vai para a assistência social.</div>
+      </div>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.carrinho }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1040px;margin:0 auto;padding:56px 24px 80px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:44px;margin:0 0 28px">Carrinho</h1>
+    <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+      <div style="flex:2 1 480px;min-width:0;display:flex;flex-direction:column;gap:10px">
+        <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:28px;font-size:16px;color:#5E675F">Seu carrinho está vazio. <span onClick="{{ go.loja }}" style="color:#2F5D46;cursor:pointer;font-weight:600">Ver a loja</span></div></sc-if>
+        <sc-for list="{{ cartRows }}" as="r" hint-placeholder-count="2">
+          <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:16px;display:grid;grid-template-columns:80px minmax(0,1fr) auto;gap:16px;align-items:center">
+            <div style="aspect-ratio:1;border-radius:12px;background:repeating-linear-gradient(135deg,#ECE5D6 0 6px,#F2ECE0 6px 12px)"></div>
+            <div><div style="font-size:16px;font-weight:500">{{ r.n }}</div><div style="font-size:13px;color:#6B746C;margin-top:2px">{{ r.st }} · {{ r.price }} cada</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:10px"><button onClick="{{ r.dec }}" style="width:32px;height:32px;border-radius:50%;border:1px solid #D8D0BF;background:#fff;font-size:16px">−</button><span style="min-width:16px;text-align:center">{{ r.q }}</span><button onClick="{{ r.inc }}" style="width:32px;height:32px;border-radius:50%;border:1px solid #D8D0BF;background:#fff;font-size:16px">+</button><button onClick="{{ r.rm }}" style="background:none;border:0;color:#A4473A;font-size:13px;margin-left:8px">Remover</button></div></div>
+            <div style="font-size:17px;font-weight:600">{{ r.total }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <aside style="flex:1 1 280px;background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;justify-content:space-between;font-size:15px"><span style="color:#5E675F">Subtotal</span><span>{{ subtotal }}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:15px"><span style="color:#5E675F">Entrega</span><span>Retirada no CEAK · grátis</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:20px;font-weight:600;border-top:1px solid #E6E0D3;padding-top:12px"><span>Total</span><span>{{ subtotal }}</span></div>
+        <div style="font-size:14px;color:#6B746C">Pagamento via PIX</div>
+        <button onClick="{{ go.checkout }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:16px;font-weight:500">Finalizar pedido</button>
+      </aside>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.checkout }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:640px;margin:0 auto;padding:56px 24px 80px">
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:40px;margin:0 0 24px">Checkout</h1>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:16px;margin-bottom:16px">
+      <div style="font-size:15px;font-weight:600">Quem vai retirar</div>
+      <input value="Carla Nogueira" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px 14px;background:#FCFBF8"></input>
+      <input value="(18) 99712-4408" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px 14px;background:#FCFBF8"></input>
+      <div style="background:#F7F4EE;border-radius:12px;padding:14px;font-size:14px;color:#3F4A42">Retirada no CEAK · ter. a sáb., 19h às 21h30 · apresente o número do pedido</div>
+    </div>
+    <div style="background:#fff;border:1px solid #E6E0D3;border-radius:20px;padding:26px;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div style="font-size:15px;color:#5E675F">Total via PIX</div>
+      <div style="font-family:'Newsreader',serif;font-size:38px">{{ subtotal }}</div>
+      <div style="width:200px;height:200px;border-radius:14px;border:1px solid #E6E0D3;background:repeating-linear-gradient(0deg,#1F2A24 0 6px,#fff 6px 12px);display:flex;align-items:center;justify-content:center"><div style="background:#fff;padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#5E675F;border-radius:6px">QR Code PIX</div></div>
+      <button style="background:#fff;border:1px solid #CFC7B6;border-radius:999px;padding:10px 18px;font-size:14px;color:#1F2A24">Copiar código PIX</button>
+      <button onClick="{{ go.pedido }}" style="width:100%;background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:15px;font-size:16px;font-weight:500">Já fiz o PIX</button>
+    </div>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.pedido }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:640px;margin:0 auto;padding:72px 24px 80px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px">
+    {{ okMark }}
+    <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:42px;margin:6px 0 0">Pedido nº 1042 confirmado</h1>
+    <p style="font-size:17px;color:#5E675F;margin:0;max-width:460px;line-height:1.6">Pagamento de {{ subtotal }} recebido. Seu pedido estará separado na recepção a partir de amanhã, 19h.</p>
+    <button onClick="{{ go.loja }}" style="margin-top:10px;background:#fff;color:#1F2A24;border:1px solid #CFC7B6;border-radius:999px;padding:12px 22px;font-size:15px">Continuar na loja</button>
+  </section>
+</sc-if>
+
+<sc-if value="{{ is.palestras }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(36px,5vw,52px);line-height:1.08;margin:0 0 10px">Palestras públicas</h1><p style="font-size:17px;color:#5E675F;margin:0 0 32px;max-width:680px;line-height:1.6">Quartas e sextas-feiras, às 20h, no salão principal. Entrada gratuita, com transmissão ao vivo.</p>
+  <div style="display:flex;flex-direction:column;gap:12px"><sc-for list="{{ palList }}" as="e" hint-placeholder-count="7"><div onClick="{{ e.go }}" style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;padding:20px;display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:18px;align-items:center;cursor:pointer" style-hover="border-color:#2F5D46"><div style="text-align:center"><div style="font-size:12px;color:#6B746C;text-transform:uppercase">{{ e.wds }}</div><div style="font-family:'Newsreader',serif;font-size:32px;line-height:1.1">{{ e.day }}</div><div style="font-size:12px;color:#6B746C">OUT</div></div><div style="min-width:0"><div style="font-family:'Newsreader',serif;font-size:22px;line-height:1.25">{{ e.t }}</div><div style="font-size:14px;color:#5E675F;margin-top:4px">{{ e.who }} · {{ e.h }} · {{ e.loc }}</div></div><span style="font-size:14px;color:#2F5D46;font-weight:600;white-space:nowrap">Detalhes ›</span></div></sc-for></div>
+  <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:32px;margin:48px 0 20px">Gravações recentes</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px"><sc-for list="{{ recs }}" as="r" hint-placeholder-count="3"><div onClick="{{ go.lives }}" style="cursor:pointer;display:flex;flex-direction:column;gap:8px"><div style="aspect-ratio:16/9;border-radius:14px;background:#1E3D2F;color:#C9D6CD;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative">▶<span style="position:absolute;right:10px;bottom:8px;font-size:11px;background:rgba(0,0,0,.35);padding:2px 6px;border-radius:4px">{{ r.dur }}</span></div><div style="font-size:16px;font-weight:500">{{ r.t }}</div><div style="font-size:13px;color:#6B746C">{{ r.who }} · {{ r.d }}</div></div></sc-for></div></section>
+</sc-if>
+
+<sc-if value="{{ is.lives }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px">
+  <div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
+    <div style="flex:2 1 560px;min-width:0;display:flex;flex-direction:column;gap:16px">
+      <div style="aspect-ratio:16/9;border-radius:20px;background:#1E3D2F;color:#C9D6CD;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;position:relative"><span style="position:absolute;left:16px;top:14px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.1em;color:#F7F4EE">{{ liveDot }} AO VIVO</span><div style="width:68px;height:68px;border-radius:50%;border:1.5px solid #C9D6CD;display:flex;align-items:center;justify-content:center;font-size:22px">▶</div><div style="font-size:14px">Transmissão YouTube · 214 assistindo</div></div>
+      <div><div style="font-size:13px;font-weight:600;color:#2F5D46;letter-spacing:.06em">PALESTRA PÚBLICA · HOJE, 20H</div><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(30px,4vw,42px);margin:8px 0">O perdão como libertação</h1><div style="font-size:16px;color:#5E675F">Rogério Lima · Salão principal</div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><a href="CEAK%20App.dc.html#checkin" style="background:#2F5D46;color:#fff;border-radius:999px;padding:12px 20px;font-size:15px;text-decoration:none;white-space:nowrap">Estou no CEAK — fazer check-in</a><button style="background:#fff;border:1px solid #CFC7B6;border-radius:999px;padding:12px 20px;font-size:15px;color:#1F2A24;white-space:nowrap">Compartilhar</button><a href="https://www.facebook.com/CEAKDEPENAPOLIS" style="border:1px solid #CFC7B6;border-radius:999px;padding:12px 20px;font-size:15px;color:#1F2A24;text-decoration:none;white-space:nowrap">Assistir no Facebook</a></div>
+    </div>
+    <aside style="flex:1 1 300px;background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:4px"><div style="font-size:15px;font-weight:600;margin-bottom:8px">Próximas transmissões</div><sc-for list="{{ livePlan }}" as="l" hint-placeholder-count="4"><div style="padding:12px 0;border-bottom:1px solid #EFE8DA"><div style="font-size:13px;color:#6B746C">{{ l.d }} · {{ l.h }}</div><div style="font-size:15px;font-weight:500;margin-top:2px">{{ l.t }}</div><div style="font-size:13px;color:#6B746C">{{ l.who }}</div></div></sc-for><div style="font-size:13px;color:#6B746C;margin-top:10px">Ative as notificações no CEAK App para ser avisado quando a transmissão começar.</div></aside>
+  </div>
+  <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:32px;margin:48px 0 20px">Gravações</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px"><sc-for list="{{ recs }}" as="r" hint-placeholder-count="3"><div onClick="{{ go.lives }}" style="cursor:pointer;display:flex;flex-direction:column;gap:8px"><div style="aspect-ratio:16/9;border-radius:14px;background:#1E3D2F;color:#C9D6CD;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative">▶<span style="position:absolute;right:10px;bottom:8px;font-size:11px;background:rgba(0,0,0,.35);padding:2px 6px;border-radius:4px">{{ r.dur }}</span></div><div style="font-size:16px;font-weight:500">{{ r.t }}</div><div style="font-size:13px;color:#6B746C">{{ r.who }} · {{ r.d }}</div></div></sc-for></div></section>
+</sc-if>
+
+<sc-if value="{{ is.estudos }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(36px,5vw,52px);line-height:1.08;margin:0 0 10px">Estudos</h1><p style="font-size:17px;color:#5E675F;margin:0 0 32px;max-width:680px;line-height:1.6">A casa oferece grupos de estudo para todas as idades. Todos são gratuitos. Não é preciso conhecimento prévio.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px"><sc-for list="{{ programs }}" as="p" hint-placeholder-count="6"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:10px"><span style="align-self:flex-start;background:#E4EDE6;color:#1E3D2F;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600">{{ p.st }}</span><div style="font-family:'Newsreader',serif;font-size:24px;line-height:1.2">{{ p.t }}</div><div style="font-size:15px;color:#4F5A52;line-height:1.55">{{ p.d }}</div><div style="display:grid;grid-template-columns:90px minmax(0,1fr);gap:6px;font-size:14px;border-top:1px solid #EFE8DA;padding-top:12px;margin-top:auto"><span style="color:#6B746C">Público</span><span>{{ p.pub }}</span><span style="color:#6B746C">Encontros</span><span>{{ p.when }}</span><span style="color:#6B746C">Duração</span><span>{{ p.dur }}</span></div><button onClick="{{ p.go }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:12px;font-size:15px;margin-top:6px">Quero participar</button></div></sc-for></div>
+  <div style="margin-top:40px;background:#EFE8DA;border-radius:22px;padding:32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px"><div><div style="font-family:'Newsreader',serif;font-size:28px">Como funciona</div></div><div><div style="font-family:'Newsreader',serif;font-size:22px;color:#2F5D46">1</div><div style="font-size:16px;font-weight:600;margin:4px 0">Inscrição</div><div style="font-size:14px;color:#4F5A52;line-height:1.5">Pelo site, pelo CEAK App ou na recepção.</div></div><div><div style="font-family:'Newsreader',serif;font-size:22px;color:#2F5D46">2</div><div style="font-size:16px;font-weight:600;margin:4px 0">Acolhimento</div><div style="font-size:14px;color:#4F5A52;line-height:1.5">A coordenação entra em contato e indica a turma adequada.</div></div><div><div style="font-family:'Newsreader',serif;font-size:22px;color:#2F5D46">3</div><div style="font-size:16px;font-weight:600;margin:4px 0">Acompanhamento</div><div style="font-size:14px;color:#4F5A52;line-height:1.5">Materiais, presença e progresso ficam disponíveis no app.</div></div></div></section>
+</sc-if>
+
+<sc-if value="{{ is.biblioteca }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(36px,5vw,52px);line-height:1.08;margin:0 0 10px">Biblioteca digital</h1><p style="font-size:17px;color:#5E675F;margin:0 0 32px;max-width:680px;line-height:1.6">Livros, apostilas, artigos, vídeos, áudios e gravações de palestras. O acervo físico, com mais de 3 mil títulos, pode ser emprestado gratuitamente.</p>
+  <input value="{{ libQ }}" onChange="{{ setLibQ }}" placeholder="Buscar por assunto, autor, curso ou tema" style="width:100%;border:1px solid #D8D0BF;border-radius:14px;padding:16px 18px;background:#fff;font-size:16px;margin-bottom:16px"></input>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px"><sc-for list="{{ libTypes }}" as="f" hint-placeholder-count="6"><button onClick="{{ f.go }}" style="background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }};border-radius:999px;padding:9px 16px;font-size:14px;font-weight:500;white-space:nowrap">{{ f.label }}</button></sc-for></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:-8px 0 24px"><select style="border:1px solid #D8D0BF;border-radius:10px;padding:10px;background:#fff"><option>Assunto: todos</option><option>Reencarnação</option><option>Mediunidade</option><option>Família</option><option>Prece</option></select><select style="border:1px solid #D8D0BF;border-radius:10px;padding:10px;background:#fff"><option>Autor: todos</option><option>Allan Kardec</option><option>André Luiz</option><option>Emmanuel</option></select><select style="border:1px solid #D8D0BF;border-radius:10px;padding:10px;background:#fff"><option>Curso: todos</option><option>ESDE</option><option>Evangelho</option><option>Mediunidade</option></select><select style="border:1px solid #D8D0BF;border-radius:10px;padding:10px;background:#fff"><option>Tema: todos</option><option>Obras básicas</option><option>Vida espiritual</option></select></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px"><sc-for list="{{ lib }}" as="b" hint-placeholder-count="8"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;padding:18px;display:flex;gap:14px"><div style="width:56px;height:74px;border-radius:8px;background:repeating-linear-gradient(135deg,#ECE5D6 0 5px,#F2ECE0 5px 10px);flex:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#7A7363">{{ b.k }}</div><div style="min-width:0;display:flex;flex-direction:column;gap:3px"><div style="font-size:15px;font-weight:600;line-height:1.3">{{ b.t }}</div><div style="font-size:13px;color:#6B746C">{{ b.a }}</div><div style="font-size:12px;color:#6B746C">{{ b.tema }}</div><div style="font-size:13px;color:#2F5D46;font-weight:600;margin-top:6px">{{ b.cta }} ›</div></div></div></sc-for></div>
+  <sc-if value="{{ libEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:28px;text-align:center;color:#6B746C">Nenhum item encontrado para esta busca.</div></sc-if></section>
+</sc-if>
+
+<sc-if value="{{ is.blog }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(36px,5vw,52px);line-height:1.08;margin:0 0 10px">Notícias e blog</h1><p style="font-size:17px;color:#5E675F;margin:0 0 32px;max-width:680px;line-height:1.6">Resumos de palestras, comunicados e notícias da casa.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px"><sc-for list="{{ blogCats }}" as="f" hint-placeholder-count="6"><button onClick="{{ f.go }}" style="background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.bd }};border-radius:999px;padding:9px 16px;font-size:14px;font-weight:500;white-space:nowrap">{{ f.label }}</button></sc-for></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px"><sc-for list="{{ blogList }}" as="p" hint-placeholder-count="6"><article onClick="{{ p.go }}" style="cursor:pointer;display:flex;flex-direction:column;gap:10px"><div style="aspect-ratio:16/10;border-radius:16px;background:repeating-linear-gradient(135deg,#ECE5D6 0 10px,#F2ECE0 10px 20px);display:flex;align-items:flex-end;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7A7363">{{ p.img }}</div><div style="font-size:13px;color:#6B746C">{{ p.date }} · {{ p.cat }}</div><div style="font-family:'Newsreader',serif;font-size:23px;line-height:1.25">{{ p.t }}</div><div style="font-size:15px;color:#5E675F;line-height:1.5">{{ p.lead }}</div></article></sc-for></div></section>
+</sc-if>
+
+<sc-if value="{{ is.post }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:800px;margin:0 auto;padding:56px 24px 80px">
+  <div style="font-size:14px;color:#6B746C;margin-bottom:20px"><span onClick="{{ go.blog }}" style="cursor:pointer;color:#2F5D46">Blog</span> / {{ post.cat }}</div>
+  <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(34px,5vw,50px);line-height:1.1;margin:0 0 14px;text-wrap:balance">{{ post.t }}</h1>
+  <div style="font-size:15px;color:#6B746C;margin-bottom:28px">{{ post.date }} · {{ post.au }}</div>
+  <div style="aspect-ratio:16/9;border-radius:20px;background:repeating-linear-gradient(135deg,#ECE5D6 0 10px,#F2ECE0 10px 20px);display:flex;align-items:flex-end;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7A7363">{{ post.img }}</div>
+  <p style="font-family:'Newsreader',serif;font-size:23px;line-height:1.5;margin:32px 0 20px">{{ post.lead }}</p>
+  <sc-for list="{{ post.body }}" as="b" hint-placeholder-count="3"><p style="font-size:18px;line-height:1.75;color:#3F4A42;margin:0 0 18px">{{ b.t }}</p></sc-for>
+  <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap"><button style="background:#fff;border:1px solid #CFC7B6;border-radius:999px;padding:10px 18px;font-size:14px;color:#1F2A24">Compartilhar</button><button onClick="{{ go.blog }}" style="background:#fff;border:1px solid #CFC7B6;border-radius:999px;padding:10px 18px;font-size:14px;color:#1F2A24">Voltar ao blog</button></div>
+  <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:32px;margin:48px 0 20px">Leia também</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px"><sc-for list="{{ related }}" as="p" hint-placeholder-count="3"><div onClick="{{ p.go }}" style="cursor:pointer;display:flex;flex-direction:column;gap:6px"><div style="font-size:12px;color:#6B746C">{{ p.date }}</div><div style="font-family:'Newsreader',serif;font-size:19px;line-height:1.3">{{ p.t }}</div></div></sc-for></div></section>
+</sc-if>
+
+<sc-if value="{{ is.contato }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(36px,5vw,52px);line-height:1.08;margin:0 0 10px">Contato</h1><p style="font-size:17px;color:#5E675F;margin:0 0 32px;max-width:680px;line-height:1.6">A recepção atende presencialmente de terça a sábado, das 19h às 21h30.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start">
+    <div style="flex:1 1 340px;display:flex;flex-direction:column;gap:16px">
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px"><div style="font-size:13px;color:#6B746C;margin-bottom:6px">Endereço</div><div style="font-size:17px;font-weight:500">Centro Espírita Allan Kardec</div><div style="font-size:15px;color:#4F5A52;margin-top:4px">Penápolis – SP · endereço a confirmar</div><a href="https://share.google/ELrVUYHEiXnuNoDge" style="display:inline-block;margin-top:10px;font-size:14px;font-weight:600">Ver no Google ›</a></div>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px"><div style="font-size:13px;color:#6B746C;margin-bottom:10px">Programação semanal</div><sc-for list="{{ hours }}" as="h" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:90px minmax(0,1fr);gap:10px;font-size:14px;padding:7px 0;border-bottom:1px solid #F2ECE0"><span style="font-weight:600">{{ h.d }}</span><span>{{ h.t }}</span></div></sc-for></div>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:8px;font-size:15px"><div style="font-size:13px;color:#6B746C">Canais</div><a href="https://www.facebook.com/CEAKDEPENAPOLIS">facebook.com/CEAKDEPENAPOLIS</a><a href="https://www.instagram.com/ceakpenapolis/">instagram.com/ceakpenapolis</a><span>contato@allankardecpenapolis.com.br</span></div>
+    </div>
+    <div style="flex:1.4 1 380px;display:flex;flex-direction:column;gap:16px">
+      <div style="aspect-ratio:16/9;border-radius:18px;background:repeating-linear-gradient(135deg,#ECE5D6 0 10px,#F2ECE0 10px 20px);display:flex;align-items:flex-end;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7A7363">mapa de localização</div>
+      <sc-if value="{{ contactForm }}" hint-placeholder-val="{{ true }}"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;display:flex;flex-direction:column;gap:12px"><div style="font-family:'Newsreader',serif;font-size:24px">Envie uma mensagem</div><input value="Carla Nogueira" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px;background:#FCFBF8"></input><input value="carla.nogueira@email.com" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px;background:#FCFBF8"></input><select style="border:1px solid #D8D0BF;border-radius:12px;padding:13px;background:#FCFBF8"><option>Assunto: informações gerais</option><option>Estudos</option><option>Doações</option><option>Voluntariado</option><option>Imprensa</option></select><textarea rows="4" style="border:1px solid #D8D0BF;border-radius:12px;padding:13px;background:#FCFBF8">Gostaria de saber se há estacionamento próximo ao salão.</textarea><button onClick="{{ sendContact }}" style="background:#2F5D46;color:#fff;border:0;border-radius:999px;padding:14px;font-size:15px">Enviar mensagem</button></div></sc-if>
+      <sc-if value="{{ contactSent }}" hint-placeholder-val="{{ false }}"><div style="background:#E4EDE6;border-radius:18px;padding:24px;font-size:16px;color:#1E3D2F">Mensagem recebida. A secretaria responderá em até 2 dias úteis.</div></sc-if>
+    </div>
+  </div></section>
+</sc-if>
+
+<sc-if value="{{ is.campanha }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px">
+  <div style="font-size:14px;color:#6B746C;margin-bottom:20px"><span onClick="{{ go.ajudar }}" style="cursor:pointer;color:#2F5D46">Quero ajudar</span> / Campanha</div>
+  <div style="display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start">
+    <div style="flex:1.4 1 440px;min-width:0;display:flex;flex-direction:column;gap:20px"><div style="aspect-ratio:16/10;border-radius:20px;background:repeating-linear-gradient(135deg,#ECE5D6 0 10px,#F2ECE0 10px 20px);display:flex;align-items:flex-end;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7A7363">foto da triagem de agasalhos</div>
+      <h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(36px,5vw,52px);margin:0">Campanha do Agasalho</h1>
+      <p style="font-size:18px;line-height:1.7;color:#3F4A42;margin:0">As peças arrecadadas são entregues às 126 famílias acompanhadas pela assistência social do CEAK. A triagem é feita pelas voluntárias do bazar, que separam por tamanho e estado de conservação.</p>
+      <div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px"><div style="font-size:15px;font-weight:600;margin-bottom:12px">O que mais precisamos</div><sc-for list="{{ needs2 }}" as="n" hint-placeholder-count="4"><div style="padding:8px 0"><div style="display:flex;justify-content:space-between;font-size:14px"><span>{{ n.t }}</span><span>{{ n.v }} de {{ n.m }}</span></div><div style="height:6px;background:#EFE8DA;border-radius:4px;margin-top:6px"><div style="height:6px;width:{{ n.w }};background:#2F5D46;border-radius:4px"></div></div></div></sc-for></div>
+    </div>
+    <aside style="flex:1 1 300px;background:#1E3D2F;color:#F7F4EE;border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:14px;position:sticky;top:96px">
+      <div style="display:flex;justify-content:space-between"><div><div style="font-size:13px;color:#A9C2B1">Arrecadado</div><div style="font-family:'Newsreader',serif;font-size:48px;line-height:1">378</div></div><div style="text-align:right"><div style="font-size:13px;color:#A9C2B1">Meta</div><div style="font-size:20px">500 peças</div></div></div>
+      <div style="height:8px;background:#335A47;border-radius:9px"><div style="height:8px;width:75%;background:#F7F4EE;border-radius:9px"></div></div><div style="font-size:15px">75% · até 31 de outubro</div>
+      <div style="font-size:14px;color:#C9D6CD;line-height:1.6;border-top:1px solid #335A47;padding-top:14px">Coleta drive-thru: sábados, 9h às 12h, portão lateral.<br>Recepção: terça a sábado, 19h às 21h30.</div>
+      <button onClick="{{ pickRoupas }}" style="background:#F7F4EE;color:#1E3D2F;border:0;border-radius:999px;padding:14px;font-size:15px;font-weight:600">Quero ajudar</button>
+      <button onClick="{{ go.doacao }}" style="background:transparent;color:#F7F4EE;border:1px solid #5F8A72;border-radius:999px;padding:13px;font-size:15px">Contribuir via PIX</button>
+    </aside>
+  </div></section>
+</sc-if>
+
+<sc-if value="{{ is.transparencia }}" hint-placeholder-val="{{ false }}">
+  <section style="max-width:1240px;margin:0 auto;padding:56px 24px 80px"><h1 style="font-family:'Newsreader',serif;font-weight:500;font-size:clamp(36px,5vw,52px);line-height:1.08;margin:0 0 10px">Transparência</h1><p style="font-size:17px;color:#5E675F;margin:0 0 32px;max-width:680px;line-height:1.6">Prestação de contas mensal aprovada pela diretoria. Referência: setembro de 2026.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:24px"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px"><div style="font-size:13px;color:#6B746C">Receitas</div><div style="font-family:'Newsreader',serif;font-size:36px">R$ 18.840</div></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px"><div style="font-size:13px;color:#6B746C">Despesas</div><div style="font-family:'Newsreader',serif;font-size:36px">R$ 13.290</div></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px"><div style="font-size:13px;color:#6B746C">Resultado</div><div style="font-family:'Newsreader',serif;font-size:36px;color:#2F5D46">R$ 5.550</div></div></div>
+  <div style="display:flex;flex-wrap:wrap;gap:16px"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;flex:1 1 320px"><div style="font-size:15px;font-weight:600;margin-bottom:10px">Origem dos recursos</div><sc-for list="{{ transp.rec }}" as="r" hint-placeholder-count="5"><div style="display:flex;justify-content:space-between;font-size:15px;padding:9px 0;border-bottom:1px solid #F2ECE0"><span>{{ r.l }}</span><span>{{ r.v }}</span></div></sc-for></div><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;flex:1 1 320px"><div style="font-size:15px;font-weight:600;margin-bottom:10px">Aplicação dos recursos</div><sc-for list="{{ transp.desp }}" as="r" hint-placeholder-count="6"><div style="display:flex;justify-content:space-between;font-size:15px;padding:9px 0;border-bottom:1px solid #F2ECE0"><span>{{ r.l }}</span><span>{{ r.v }}</span></div></sc-for></div></div>
+  <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:32px;margin:48px 0 20px">Impacto no mês</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px"><sc-for list="{{ transp.impact }}" as="i" hint-placeholder-count="4"><div style="background:#EFE8DA;border-radius:18px;padding:22px"><div style="font-family:'Newsreader',serif;font-size:40px">{{ i.v }}</div><div style="font-size:15px;color:#4F5A52">{{ i.l }}</div></div></sc-for></div>
+  <h2 style="font-family:'Newsreader',serif;font-weight:500;font-size:32px;margin:48px 0 20px">Documentos</h2><div style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ transp.docs }}" as="d" hint-placeholder-count="4"><div style="background:#fff;border:1px solid #E6E0D3;border-radius:18px;padding:24px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><div style="font-size:15px;font-weight:500">{{ d.t }}</div><div style="font-size:13px;color:#6B746C">{{ d.d }}</div></div><button style="background:#fff;border:1px solid #CFC7B6;border-radius:999px;padding:8px 16px;font-size:14px;color:#1F2A24">Baixar</button></div></sc-for></div></section>
+</sc-if>
+
+</main>
+
+<footer style="background:#1E3D2F;color:#C9D6CD">
+  <div style="max-width:1240px;margin:0 auto;padding:48px 24px 32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px">
+    <div><div style="font-family:'Newsreader',serif;font-size:22px;color:#F7F4EE">Centro Espírita Allan Kardec</div><div style="font-size:14px;margin-top:8px;line-height:1.6">Penápolis – SP<br>allankardecpenapolis.com.br</div></div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:14px"><div style="color:#F7F4EE;font-weight:600">Participe</div><span onClick="{{ go.agenda }}" style="cursor:pointer">Agenda</span><span onClick="{{ go.palestras }}" style="cursor:pointer">Palestras</span><span onClick="{{ go.lives }}" style="cursor:pointer">Lives</span><span onClick="{{ go.estudos }}" style="cursor:pointer">Estudos</span><span onClick="{{ go.biblioteca }}" style="cursor:pointer">Biblioteca</span><span onClick="{{ go.blog }}" style="cursor:pointer">Blog</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:14px"><div style="color:#F7F4EE;font-weight:600">Solidariedade</div><span onClick="{{ go.ajudar }}" style="cursor:pointer">Quero ajudar</span><span onClick="{{ go.ajuda }}" style="cursor:pointer">Preciso de ajuda</span><span onClick="{{ go.loja }}" style="cursor:pointer">Loja solidária</span><span onClick="{{ go.campanha }}" style="cursor:pointer">Campanha do Agasalho</span><span onClick="{{ go.transparencia }}" style="cursor:pointer">Transparência</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:14px"><div style="color:#F7F4EE;font-weight:600">Contato</div><span onClick="{{ go.contato }}" style="cursor:pointer">Fale conosco</span><span onClick="{{ go.sobre }}" style="cursor:pointer">O CEAK</span><a href="https://www.facebook.com/CEAKDEPENAPOLIS" style="color:#C9D6CD">Facebook</a><a href="https://www.instagram.com/ceakpenapolis/" style="color:#C9D6CD">Instagram</a><a href="https://share.google/ELrVUYHEiXnuNoDge" style="color:#C9D6CD">Google</a><a href="CEAK%20Gestao.dc.html" style="color:#C9D6CD">Acesso da equipe</a></div>
+  </div>
+  <div style="max-width:1240px;margin:0 auto;padding:16px 24px 28px;border-top:1px solid #335A47;font-size:13px">© 2026 CEAK · Parte do ecossistema CEAK Digital</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: 'home', filter: 'Todos', evt: 0, regDone: false, svc: 'Tratamento espiritual', tStep: 0, slot: 1, helpOpt: null, skills: ['Informática', 'Fotografia'], amount: 50, other: '', recurring: false, donStep: 0, cat: 'Todos', prod: 0, img: 0, cart: [{ i: 0, q: 1 }, { i: 4, q: 2 }] };
+  componentDidMount() { this._rs = () => { const n = window.innerWidth < 980; if (n !== this.state.narrow) this.setState({ narrow: n }); }; window.addEventListener('resize', this._rs); this._rs(); const h = decodeURIComponent(location.hash.slice(1)); if (h) this.setState({ page: h }); }
+  go = (page, extra = {}) => { this.setState({ page, menu: false, ...extra }); window.scrollTo({ top: 0 }); };
+  componentWillUnmount() { window.removeEventListener('resize', this._rs); }
+  siteMore(s, raw, brl, go) {
+    const chip = (label, on, fn) => ({ label, go: fn, bg: on ? '#2F5D46' : '#fff', fg: on ? '#fff' : '#1F2A24', bd: on ? '#2F5D46' : '#D8D0BF' });
+    const recs = [['Família e Espiritualidade', 'Marta Andrade', '30/09', '52 min'], ['A coragem da fé', 'Antônio Ferreira', '25/09', '48 min'], ['O bem que se faz em silêncio', 'Helena Prado', '23/09', '45 min'], ['Os obstáculos como lições', 'Rogério Lima', '18/09', '50 min'], ['Paz interior em tempos difíceis', 'Lúcia Moraes', '16/09', '47 min'], ['O que é o Espiritismo', 'Paulo Mendes', '11/09', '55 min']].map(([t, who, d, dur]) => ({ t, who, d, dur }));
+    const posts = [
+      { t: 'Campanha do Agasalho chega a 75% da meta', date: '29 set 2026', cat: 'Solidariedade', au: 'Assistência social', img: 'foto da triagem de roupas', lead: 'Faltam 122 peças para atingir a meta de 500 casacos, cobertores e meias até 31 de outubro.', body: ['A Campanha do Agasalho 2026 alcançou 378 peças arrecadadas, o equivalente a 75% da meta. As doações são triadas pelas voluntárias do bazar e entregues às 126 famílias acompanhadas pela assistência social do CEAK.', 'Os itens mais necessários neste momento são casacos infantis, cobertores de casal e meias. O ponto de coleta drive-thru funciona aos sábados, das 9h às 12h, no portão lateral; durante a semana, as doações podem ser entregues na recepção, de terça a sábado, das 19h às 21h30.', 'A prestação de contas da campanha será publicada na página de Transparência ao final de novembro.'] },
+      { t: 'Resumo da palestra “A coragem da fé”', date: '26 set 2026', cat: 'Palestras', au: 'Paulo Mendes', img: 'foto do salão', lead: 'Antônio Ferreira tratou da fé raciocinada como apoio nas decisões do cotidiano.', body: ['Na palestra pública de 25 de setembro, o presidente do CEAK, Antônio Ferreira, partiu do capítulo XIX de O Evangelho Segundo o Espiritismo para distinguir a fé cega da fé raciocinada, que “pode encarar a razão face a face”.', 'O palestrante destacou que a coragem da fé não está na ausência de medo, mas na disposição de agir com confiança e responsabilidade. A gravação completa está disponível na Biblioteca.'] },
+      { t: 'Pré-inscrição aberta para as turmas do ESDE 2027', date: '18 set 2026', cat: 'Estudos', au: 'Helena Prado', img: 'foto de grupo de estudo', lead: 'Novas turmas às segundas e quintas, com início em fevereiro.', body: ['Estão abertas, até 30 de novembro, as pré-inscrições para as turmas 2027 do Estudo Sistematizado da Doutrina Espírita. O curso tem duração de dois anos, com encontros semanais de 1h30.', 'Não é necessário conhecimento prévio. As inscrições podem ser feitas pelo CEAK App ou na recepção.'] },
+      { t: 'Bazar beneficente de primavera acontece em 17 de outubro', date: '15 set 2026', cat: 'Eventos', au: 'Lúcia Moraes', img: 'foto do bazar', lead: 'Roupas, livros e utilidades doadas a preços simbólicos.', body: ['O bazar será realizado no pátio do CEAK, das 8h às 12h. Toda a renda é revertida para as cestas básicas da assistência social.'] },
+      { t: 'Como funciona o atendimento fraterno', date: '09 set 2026', cat: 'Assistência', au: 'Diretoria doutrinária', img: 'foto da sala de atendimento', lead: 'Uma conversa reservada, gratuita e sem pré-requisitos.', body: ['O atendimento fraterno é o primeiro acolhimento oferecido pela casa a quem chega em momento de dificuldade. Acontece às terças e quintas, a partir das 19h, sem necessidade de agendamento prévio.', 'O atendimento espiritual não substitui acompanhamento médico ou psicológico quando necessário.'] },
+      { t: 'Biblioteca amplia horário de empréstimos', date: '02 set 2026', cat: 'Institucional', au: 'Secretaria', img: 'foto da biblioteca', lead: 'Agora também aos sábados, das 18h às 19h30.', body: ['A biblioteca do CEAK, com mais de 3 mil títulos, passa a funcionar também aos sábados antes do Estudo do Evangelho. O empréstimo é gratuito, por 15 dias, mediante cadastro.'] }
+    ];
+    const blogCats = ['Todos', 'Palestras', 'Estudos', 'Solidariedade', 'Eventos', 'Assistência', 'Institucional'];
+    const libAll = [['O Livro dos Espíritos', 'Allan Kardec', 'Livros', 'Obras básicas'], ['O Evangelho Segundo o Espiritismo', 'Allan Kardec', 'Livros', 'Obras básicas'], ['O Livro dos Médiuns', 'Allan Kardec', 'Livros', 'Mediunidade'], ['Apostila ESDE — Módulo 3', 'FEB / CEAK', 'PDFs', 'ESDE'], ['Roteiro: Família e Espiritualidade', 'Marta Andrade', 'PDFs', 'Família'], ['O passe: fundamentos e prática', 'Diretoria doutrinária', 'Artigos', 'Passe'], ['Reencarnação e justiça divina', 'Helena Prado', 'Artigos', 'Reencarnação'], ['Introdução à mediunidade', 'Helena Prado', 'Vídeos', 'Mediunidade'], ['Prece de Cáritas comentada', 'Lúcia Moraes', 'Áudios', 'Prece'], ['Família e Espiritualidade', 'Marta Andrade', 'Palestras', 'Família'], ['A coragem da fé', 'Antônio Ferreira', 'Palestras', 'Fé'], ['Nosso Lar', 'André Luiz / Chico Xavier', 'Livros', 'Vida espiritual']];
+    const q = (s.libQ || '').toLowerCase();
+    const lib = libAll.filter(r => (s.libType === 'Todos' || !s.libType || r[2] === s.libType) && (!q || r.join(' ').toLowerCase().includes(q))).map(([t, a, k, tema]) => ({ t, a, k, tema, cta: k === 'Livros' ? 'Reservar empréstimo' : (k === 'Vídeos' || k === 'Palestras' ? 'Assistir' : k === 'Áudios' ? 'Ouvir' : 'Abrir') }));
+    const post = posts[s.post || 0];
+    return {
+      palList: raw.filter(e => e.cat === 'Palestras'),
+      recs, recsShort: recs.slice(0, 3),
+      livePlan: [['Hoje', '20h00', 'O perdão como libertação', 'Rogério Lima'], ['Qua 07/10', '20h00', 'A esperança que sustenta', 'Marta Andrade'], ['Sex 09/10', '20h00', 'Caridade sem distinção', 'Paulo Mendes'], ['Sáb 10/10', '19h30', 'Estudo do Evangelho', 'Paulo Mendes']].map(([d, h, t, who]) => ({ d, h, t, who })),
+      programs: [
+        { t: 'Estudo Sistematizado da Doutrina Espírita (ESDE)', pub: 'Adultos · iniciantes', when: 'Segundas ou quintas, 20h', dur: '2 anos · 5 módulos', d: 'Percurso completo pelas obras básicas de Allan Kardec, com roteiros, leituras e discussão em grupo.', st: 'Pré-inscrição 2027 aberta' },
+        { t: 'Estudo do Evangelho', pub: 'Aberto a todos', when: 'Sábados, 19h30', dur: 'Contínuo', d: 'Leitura comentada de O Evangelho Segundo o Espiritismo, capítulo a capítulo. Não exige inscrição.', st: 'Participação livre' },
+        { t: 'Educação mediúnica', pub: 'Concluintes do ESDE', when: 'Terças, 20h', dur: '3 anos', d: 'Estudo de O Livro dos Médiuns e prática orientada, com acompanhamento da diretoria doutrinária.', st: 'Turma em andamento' },
+        { t: 'Mocidade Espírita', pub: 'Jovens de 14 a 21 anos', when: 'Domingos, 9h30', dur: 'Ciclos anuais', d: 'Encontros com estudo, música, debates e participação nas ações solidárias da casa.', st: 'Inscrições abertas' },
+        { t: 'Evangelização infantil', pub: 'Crianças de 5 a 12 anos', when: 'Domingos, 9h30', dur: 'Ciclos anuais', d: 'Atividades lúdicas e histórias que transmitem valores do Evangelho, separadas por faixa etária.', st: 'Inscrições abertas' },
+        { t: 'Estudo das obras complementares', pub: 'Adultos', when: 'Quartas, 18h30', dur: 'Semestral', d: 'Leitura de obras de André Luiz, Emmanuel e outros autores, relacionadas às obras básicas.', st: 'Próxima turma em março' }
+      ].map(p => ({ ...p, go: () => this.go('cadastro', { regDone: false }) })),
+      libTypes: ['Todos', 'Livros', 'PDFs', 'Artigos', 'Vídeos', 'Áudios', 'Palestras'].map(t => chip(t, (s.libType || 'Todos') === t, () => this.setState({ libType: t }))),
+      lib, libEmpty: lib.length === 0, setLibQ: e => this.setState({ libQ: e.target.value }), libQ: s.libQ || '',
+      blogCats: blogCats.map(c => chip(c, (s.blogCat || 'Todos') === c, () => this.setState({ blogCat: c }))),
+      blogList: posts.map((p, i) => ({ ...p, go: () => this.go('post', { post: i }) })).filter(p => !s.blogCat || s.blogCat === 'Todos' || p.cat === s.blogCat),
+      blogHome: posts.slice(0, 3).map((p, i) => ({ ...p, go: () => this.go('post', { post: i }) })),
+      post: { ...post, body: post.body.map(t => ({ t })) },
+      related: posts.filter((_, i) => i !== (s.post || 0)).slice(0, 3).map(p => ({ ...p, go: () => this.go('post', { post: posts.indexOf(p) }) })),
+      hours: [['Terça', 'Atendimento fraterno e passe · 19h'], ['Quarta', 'Palestra pública · 20h'], ['Quinta', 'Tratamento espiritual · 19h'], ['Sexta', 'Palestra pública · 20h'], ['Sábado', 'Estudo do Evangelho · 19h30 · Biblioteca 18h'], ['Domingo', 'Mocidade e evangelização infantil · 9h30']].map(([d, t]) => ({ d, t })),
+      contactSent: !!s.contactSent, contactForm: !s.contactSent, sendContact: () => this.setState({ contactSent: true }),
+      needs2: [['Casacos infantis', 62, 120], ['Casacos adultos', 148, 180], ['Cobertores', 96, 120], ['Meias', 72, 80]].map(([t, v, m]) => ({ t, v, m, w: Math.round(v / m * 100) + '%' })),
+      transp: {
+        rec: [['Doações', 'R$ 8.420'], ['Loja e bazar', 'R$ 4.820'], ['Contribuições de associados', 'R$ 3.150'], ['Eventos', 'R$ 1.680'], ['Outras', 'R$ 770']].map(([l, v]) => ({ l, v })),
+        desp: [['Assistência social', 'R$ 4.980'], ['Energia e água', 'R$ 2.360'], ['Manutenção da sede', 'R$ 2.140'], ['Material de consumo', 'R$ 1.420'], ['Tecnologia', 'R$ 890'], ['Outras', 'R$ 1.500']].map(([l, v]) => ({ l, v })),
+        impact: [['126', 'famílias com cesta mensal'], ['42', 'atendimentos fraternos no mês'], ['147', 'alunos em estudos'], ['68', 'voluntários ativos']].map(([v, l]) => ({ v, l })),
+        docs: [['Prestação de contas — setembro/2026', 'PDF · 1,2 MB'], ['Prestação de contas — agosto/2026', 'PDF · 1,1 MB'], ['Balanço anual 2025', 'PDF · 2,4 MB'], ['Estatuto social', 'PDF · 380 KB']].map(([t, d]) => ({ t, d }))
+      }
+    };
+  }
+  renderVals() {
+    const s = this.state, brl = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const C = { Palestras: 'oklch(0.48 0.08 155)', Estudos: 'oklch(0.48 0.08 235)', Cursos: 'oklch(0.48 0.08 295)', Eventos: 'oklch(0.48 0.08 60)', 'Assistência': 'oklch(0.48 0.08 20)', Campanhas: 'oklch(0.48 0.08 195)' };
+    const WD = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    const raw = [
+      { day: 2, t: 'Palestra Pública: O perdão como libertação', cat: 'Palestras', h: '20h00', who: 'Rogério Lima', loc: 'Salão principal', desc: 'O perdão como exercício diário e o alívio que ele traz para quem perdoa.' },
+      { day: 3, t: 'Estudo do Evangelho', cat: 'Estudos', h: '19h30', who: 'Coord. Paulo Mendes', loc: 'Sala 2', desc: 'Leitura comentada de O Evangelho Segundo o Espiritismo, capítulo X — Bem-aventurados os misericordiosos.' },
+      { day: 5, t: 'ESDE — Turma 2026, módulo 3', cat: 'Cursos', h: '20h00', who: 'Instrutora Helena Prado', loc: 'Sala 1', desc: 'Estudo Sistematizado da Doutrina Espírita: a justiça da reencarnação.' },
+      { day: 6, t: 'Atendimento fraterno e passe', cat: 'Assistência', h: '19h00', who: 'Equipe de assistência', loc: 'Recepção', desc: 'Escuta fraterna e passe. Sem agendamento prévio — chegada até 19h30.' },
+      { day: 7, t: 'Palestra Pública: A esperança que sustenta', cat: 'Palestras', h: '20h00', who: 'Marta Andrade', loc: 'Salão principal', desc: 'A esperança como força ativa diante das provas, à luz do Evangelho.' },
+      { day: 9, t: 'Palestra Pública: Caridade sem distinção', cat: 'Palestras', h: '20h00', who: 'Paulo Mendes', loc: 'Salão principal', desc: 'A caridade material e moral como base da vivência espírita.' },
+      { day: 10, t: 'Ponto de coleta — Campanha do Agasalho', cat: 'Campanhas', h: '9h às 12h', who: 'Assistência social', loc: 'Portão lateral', desc: 'Recebimento drive-thru de casacos, cobertores e meias em bom estado.' },
+      { day: 10, t: 'Estudo do Evangelho', cat: 'Estudos', h: '19h30', who: 'Coord. Paulo Mendes', loc: 'Sala 2', desc: 'Capítulo XI — Amar o próximo como a si mesmo.' },
+      { day: 14, t: 'Palestra Pública: Mediunidade com Jesus', cat: 'Palestras', h: '20h00', who: 'Antônio Ferreira', loc: 'Salão principal', desc: 'A mediunidade como instrumento de serviço, à luz das obras de Allan Kardec.' },
+      { day: 17, t: 'Bazar beneficente de primavera', cat: 'Eventos', h: '8h às 12h', who: 'Voluntárias do bazar', loc: 'Pátio', desc: 'Roupas, livros e utilidades doadas a preços simbólicos.' },
+      { day: 21, t: 'Palestra Pública: A lei de causa e efeito', cat: 'Palestras', h: '20h00', who: 'Helena Prado', loc: 'Salão principal', desc: 'Responsabilidade, escolhas e a justiça divina sem culpa nem medo.' },
+      { day: 28, t: 'Palestra Pública: O valor da prece', cat: 'Palestras', h: '20h00', who: 'Lúcia Moraes', loc: 'Salão principal', desc: 'A prece como conversa sincera e fonte de equilíbrio.' }
+    ].map((e, i) => ({ ...e, color: C[e.cat], wd: WD[(e.day + 3) % 7], wds: WD[(e.day + 3) % 7].slice(0, 3), go: () => this.go('palestra', { evt: i }) }));
+    const groupMap = { Estudos: ['Estudos', 'Cursos'] };
+    const fOk = e => s.filter === 'Todos' || (groupMap[s.filter] || [s.filter]).includes(e.cat);
+    const eventList = raw.filter(fOk);
+    const cal = Array.from({ length: 35 }, (_, i) => { const n = i - 3; const ok = n >= 1 && n <= 31; const evs = ok ? eventList.filter(e => e.day === n) : []; return { n: ok ? n : '', dots: evs.map(e => ({ c: e.color })), bg: n === 2 ? '#E4EDE6' : (evs.length ? '#FCFBF8' : 'transparent'), bd: n === 2 ? '#2F5D46' : 'transparent', fg: ok ? '#1F2A24' : 'transparent' }; });
+    const products = [
+      { n: 'O Evangelho Segundo o Espiritismo', cat: 'Livros', pv: 28, st: 'Novo', av: '12 em estoque', origin: 'Livraria CEAK', desc: 'Edição de bolso com tradução de Guillon Ribeiro. Ideal para acompanhar as reuniões de estudo do Evangelho.' },
+      { n: 'O Livro dos Espíritos', cat: 'Livros', pv: 32, st: 'Novo', av: '8 em estoque', origin: 'Livraria CEAK', desc: 'A obra fundamental da Doutrina Espírita, com as 1.019 perguntas respondidas pelos Espíritos.' },
+      { n: 'Nosso Lar — André Luiz', cat: 'Livros', pv: 15, st: 'Usado, bom estado', av: '3 disponíveis', origin: 'Produto doado', desc: 'Exemplar doado, com marcas leves de uso na capa. Miolo íntegro, sem anotações.' },
+      { n: 'Casaco de lã infantil, tam. 6', cat: 'Roupas', pv: 12, st: 'Seminovo', av: 'Última unidade', origin: 'Produto doado', desc: 'Casaco de lã na cor verde-musgo, lavado e revisado pela equipe do bazar.' },
+      { n: 'Pano de prato bordado à mão', cat: 'Artesanato', pv: 18, st: 'Novo', av: '15 em estoque', origin: 'Feito por voluntárias', desc: 'Bordado em ponto cruz pelo grupo de costura das quintas-feiras. Algodão 100%.' },
+      { n: 'Caneca CEAK 60 anos', cat: 'Objetos', pv: 25, st: 'Novo', av: '20 em estoque', origin: 'Livraria CEAK', desc: 'Caneca de cerâmica comemorativa, 300 ml.' },
+      { n: 'Jogo de xícaras de porcelana', cat: 'Itens doados', pv: 40, st: 'Usado, ótimo estado', av: 'Última unidade', origin: 'Produto doado', desc: 'Seis xícaras com pires, porcelana branca com friso dourado. Sem lascas.' },
+      { n: 'Manta de crochê', cat: 'Artesanato', pv: 65, st: 'Novo', av: '4 em estoque', origin: 'Feito por voluntárias', desc: 'Manta 1,20 × 1,50 m em fio de algodão cru.' }
+    ].map((p, i) => ({ ...p, price: brl(p.pv), avc: p.av.startsWith('Última') ? '#A4473A' : '#6B746C', go: () => this.go('produto', { prod: i, img: 0 }) }));
+    const chip = (label, on, go) => ({ label, go, bg: on ? '#2F5D46' : '#fff', fg: on ? '#fff' : '#1F2A24', bd: on ? '#2F5D46' : '#D8D0BF' });
+    const svcInfo = { 'Atendimento fraterno': 'Uma conversa reservada com um trabalhador da casa, que escuta sem julgamento e oferece orientação à luz do Evangelho.', 'Passe': 'O passe é uma transmissão de energias por meio da prece e da imposição de mãos, oferecido gratuitamente após as palestras.', 'Tratamento espiritual': 'O tratamento espiritual é um conjunto de encontros semanais que combina atendimento fraterno, passe e prece, com acompanhamento de uma equipe da casa.', 'Prece': 'Você pode pedir que o seu nome ou de alguém querido seja incluído nas preces da reunião semanal.', 'Orientação': 'Orientação sobre a Doutrina Espírita, a rotina da casa e como participar das atividades.' };
+    const tLabels = ['Conheça', 'Orientações', 'Solicitação', 'Data', 'Confirmar'];
+    const slotsRaw = [{ d: 'Ter, 06/10', h: '19h00', v: '4 vagas' }, { d: 'Qui, 08/10', h: '19h00', v: '6 vagas' }, { d: 'Sáb, 10/10', h: '15h00', v: '2 vagas' }, { d: 'Ter, 13/10', h: '19h00', v: '8 vagas' }, { d: 'Qui, 15/10', h: '19h00', v: '8 vagas' }, { d: 'Sáb, 17/10', h: '15h00', v: '5 vagas' }];
+    const helpRaw = [
+      { k: 'alimentos', t: 'Quero doar alimentos', d: 'Arroz, feijão, óleo e leite são os mais necessários.', det: 'Entregue na recepção de terça a sábado, das 19h às 21h30. Os alimentos compõem as 126 cestas mensais da assistência social. Itens em falta agora: arroz e óleo.', cta: 'Avisar que vou doar' },
+      { k: 'roupas', t: 'Quero doar roupas', d: 'Campanha do Agasalho até 31/10.', det: 'Aceitamos roupas limpas e em bom estado, especialmente casacos, cobertores e meias. Ponto de coleta drive-thru aos sábados, 9h às 12h.', cta: 'Avisar que vou doar' },
+      { k: 'produtos', t: 'Quero doar produtos', d: 'Livros, objetos e utilidades para o bazar.', det: 'Itens doados são revisados pela equipe do bazar e vendidos na loja solidária. Para móveis, combine a retirada pelo WhatsApp.', cta: 'Combinar entrega' },
+      { k: 'financeira', t: 'Quero contribuir financeiramente', d: 'PIX único ou mensal.' },
+      { k: 'voluntario', t: 'Quero ser voluntário', d: 'Recepção, assistência, comunicação e mais.', det: 'Hoje temos 68 voluntários em seis áreas. Depois do cadastro, a coordenação entra em contato para uma conversa de acolhimento.', cta: 'Fazer cadastro de voluntário' },
+      { k: 'eventos', t: 'Quero ajudar em eventos', d: 'Bazar, festas e campanhas.', det: 'Precisamos de ajuda no Bazar de primavera (17/10): montagem às 7h, atendimento e organização.', cta: 'Quero participar' },
+      { k: 'habilidade', t: 'Tenho uma habilidade para oferecer', d: 'Seu talento pode servir à casa.', det: 'Marque o que você sabe fazer. Avisaremos quando surgir uma necessidade compatível.', cta: 'Enviar minhas habilidades', skills: true }
+    ];
+    const hd = helpRaw.find(h => h.k === s.helpOpt);
+    const skillList = ['Elétrica', 'Informática', 'Fotografia', 'Cozinha', 'Organização', 'Limpeza', 'Transporte', 'Música', 'Costura', 'Atendimento', 'Ensino', 'Outras'];
+    const amt = s.amount === 'outro' ? (parseFloat(String(s.other).replace(',', '.')) || 0) : s.amount;
+    const cartRows = s.cart.map((c, idx) => { const p = products[c.i]; const upd = d => this.setState(st => ({ cart: st.cart.map((x, j) => j === idx ? { ...x, q: Math.max(1, x.q + d) } : x) })); return { n: p.n, st: p.st, price: p.price, q: c.q, total: brl(p.pv * c.q), inc: () => upd(1), dec: () => upd(-1), rm: () => this.setState(st => ({ cart: st.cart.filter((_, j) => j !== idx) })) }; });
+    const sub = s.cart.reduce((a, c) => a + products[c.i].pv * c.q, 0);
+    const pages = ['home', 'sobre', 'agenda', 'palestra', 'cadastro', 'ajuda', 'tratamento', 'ajudar', 'doacao', 'loja', 'produto', 'carrinho', 'checkout', 'pedido', 'palestras', 'lives', 'estudos', 'biblioteca', 'blog', 'post', 'contato', 'campanha', 'transparencia'];
+    const is = {}; pages.forEach(p => is[p] = s.page === p);
+    const go = {}; pages.forEach(p => go[p] = () => this.go(p));
+    go.cadastro = () => this.go('cadastro', { regDone: false });
+    go.palestra = () => this.go('palestra', { evt: 0 });
+    go.agenda = () => this.go('agenda', { filter: 'Todos' });
+    const navItems = [['O CEAK', 'sobre'], ['Agenda', 'agenda', 'Todos'], ['Palestras', 'palestras'], ['Estudos', 'estudos'], ['Biblioteca', 'biblioteca'], ['Loja', 'loja'], ['Quero ajudar', 'ajudar'], ['Preciso de ajuda', 'ajuda']];
+    const toSvc = svc => () => this.go('tratamento', { svc, tStep: 0 });
+    const prod = products[s.prod];
+    const okMark = React.createElement('div', { key: 'ok', style: { width: 76, height: 76, borderRadius: '50%', background: '#2F5D46', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, animation: 'ceakPop .6s ease-out both' } }, '✓');
+    return {
+      s, is, go, okMark, cartCount: s.cart.reduce((a, c) => a + c.q, 0),
+      liveDot: React.createElement('span', { key: 'ld', style: { width: 9, height: 9, borderRadius: '50%', background: '#E07A5F', display: 'inline-block', animation: 'ceakPulse 1.6s ease-in-out infinite' } }),
+      ...this.siteMore(s, raw, brl, go),
+      narrow: !!s.narrow, navShow: !s.narrow || !!s.menu, navOrder: s.narrow ? 10 : 0, navDir: s.narrow ? 'column' : 'row', navW: s.narrow ? '100%' : 'auto', toggleMenu: () => this.setState({ menu: !s.menu }),
+      nav: navItems.map(([label, p, f]) => ({ label, go: () => this.go(p, f ? { filter: f, menu: false } : { menu: false }), bg: (s.page === p && (!f || s.filter === f)) ? '#E4EDE6' : 'transparent' })),
+      upcoming: raw.slice(0, 4),
+      studies: [
+        { tag: 'CURSO · 2 ANOS', t: 'Estudo Sistematizado da Doutrina Espírita (ESDE)', turma: 'Turma 2026 · segundas, 20h · 32 participantes', mod: 'Módulo 3 de 5', pct: 58, w: '58%', next: 'Seg, 05/10 às 20h' },
+        { tag: 'ABERTO A TODOS', t: 'Estudo do Evangelho', turma: 'Sábados, 19h30 · sem inscrição', mod: 'Capítulo 10 de 28', pct: 36, w: '36%', next: 'Sáb, 03/10 às 19h30' },
+        { tag: 'JOVENS 14–21', t: 'Mocidade Espírita', turma: 'Domingos, 9h30 · 21 jovens', mod: 'Ciclo 2 de 4', pct: 50, w: '50%', next: 'Dom, 04/10 às 9h30' }
+      ],
+      helpHome: [{ t: 'Doar dinheiro', d: 'PIX único ou mensal', go: () => this.go('doacao', { donStep: 0 }) }, { t: 'Doar alimentos', d: 'Cestas da assistência', go: () => this.go('ajudar', { helpOpt: 'alimentos' }) }, { t: 'Doar roupas', d: 'Campanha do Agasalho', go: () => this.go('ajudar', { helpOpt: 'roupas' }) }, { t: 'Doar produtos', d: 'Para o bazar', go: () => this.go('ajudar', { helpOpt: 'produtos' }) }, { t: 'Ser voluntário', d: '6 áreas de atuação', go: () => this.go('ajudar', { helpOpt: 'voluntario' }) }],
+      needHome: ['Atendimento fraterno', 'Passe', 'Tratamento espiritual', 'Orientação', 'Prece'].map(t => ({ t, go: toSvc(t) })).concat([{ t: 'Conhecer o Centro', go: () => this.go('sobre') }]),
+      needs: [
+        { t: 'Atendimento fraterno', d: 'Uma conversa reservada, com escuta e acolhimento.', cta: 'Solicitar', go: toSvc('Atendimento fraterno') },
+        { t: 'Passe', d: 'Oferecido após as palestras de quarta e no atendimento de terça.', cta: 'Saber mais', go: toSvc('Passe') },
+        { t: 'Tratamento espiritual', d: 'Encontros semanais com acompanhamento da equipe.', cta: 'Conhecer o tratamento', go: toSvc('Tratamento espiritual') },
+        { t: 'Prece', d: 'Inclua um nome nas preces da reunião semanal.', cta: 'Pedir prece', go: toSvc('Prece') },
+        { t: 'Orientação', d: 'Tire dúvidas sobre a doutrina e a rotina da casa.', cta: 'Conversar', go: toSvc('Orientação') },
+        { t: 'Conhecer os estudos', d: 'Grupos para iniciantes, jovens e aprofundamento.', cta: 'Ver estudos', go: () => this.go('agenda', { filter: 'Estudos' }) }
+      ],
+      posts: [{ t: 'Campanha do Agasalho chega a 75% da meta', date: '29 set 2026', cat: 'Solidariedade', img: 'foto da triagem de roupas' }, { t: 'Resumo da palestra "A coragem da fé"', date: '24 set 2026', cat: 'Palestras', img: 'foto do salão' }, { t: 'Novas turmas do ESDE para 2027: pré-inscrição aberta', date: '18 set 2026', cat: 'Estudos', img: 'foto de grupo de estudo' }],
+      featured: [products[0], products[4], products[2], products[7]],
+      timeline: [{ y: '1962', t: 'Fundação', d: 'Primeiras reuniões de estudo na casa de um dos fundadores.' }, { y: '1969', t: 'Reestruturação', d: 'Estatuto, diretoria eleita e início das palestras públicas semanais.' }, { y: '1972', t: 'Sede própria', d: 'Inauguração do prédio atual, construído com doações e trabalho voluntário.' }, { y: '1988', t: 'Assistência social', d: 'Começa a distribuição mensal de cestas e o bazar beneficente.' }, { y: '2004', t: 'Biblioteca', d: 'Acervo organizado com mais de 3 mil títulos para empréstimo.' }, { y: '2020', t: 'Transmissões ao vivo', d: 'Palestras passam a ser transmitidas pelo YouTube e Facebook.' }, { y: '2026', t: 'CEAK Digital', d: 'Portal, aplicativo e sistema de gestão integrados.' }],
+      board: [{ n: 'Antônio Ferreira', r: 'Presidente' }, { n: 'Lúcia Moraes', r: 'Vice-presidente' }, { n: 'Maria Silva', r: 'Tesoureira' }, { n: 'Paulo Mendes', r: 'Secretário' }, { n: 'Marta Andrade', r: 'Diretora doutrinária' }],
+      filters: ['Todos', 'Palestras', 'Estudos', 'Cursos', 'Eventos', 'Assistência', 'Campanhas'].map(f => chip(f, s.filter === f, () => this.setState({ filter: f }))),
+      cal, eventList, ev: raw[s.evt],
+      regForm: !s.regDone, register: () => this.setState({ regDone: true }),
+      svcInfo: svcInfo[s.svc] || svcInfo['Tratamento espiritual'],
+      tSteps: tLabels.map((label, i) => ({ label, bar: i <= s.tStep ? '#2F5D46' : '#E6E0D3', fg: i <= s.tStep ? '#1F2A24' : '#9AA197' })),
+      t: { s0: s.tStep === 0, s1: s.tStep === 1, s2: s.tStep === 2, s3: s.tStep === 3, s4: s.tStep === 4, s5: s.tStep === 5, nav: s.tStep < 5 },
+      orient: ['Chegue com 15 minutos de antecedência e procure a recepção.', 'Use roupas confortáveis. Não é preciso trazer nada.', 'Evite bebidas alcoólicas no dia do atendimento.', 'Continue normalmente qualquer tratamento médico ou psicológico em curso.'].map((t, i) => ({ t, n: i + 1 })),
+      slots: slotsRaw.map((x, i) => ({ ...x, go: () => this.setState({ slot: i }), bg: s.slot === i ? '#2F5D46' : '#fff', fg: s.slot === i ? '#fff' : '#1F2A24', bd: s.slot === i ? '#2F5D46' : '#E6E0D3' })),
+      slot: slotsRaw[s.slot],
+      tBack: () => s.tStep === 0 ? this.go('ajuda') : this.setState({ tStep: s.tStep - 1 }),
+      tNext: () => { this.setState({ tStep: s.tStep + 1 }); window.scrollTo({ top: 0 }); },
+      tNextLabel: ['Ver orientações', 'Solicitar atendimento', 'Escolher data', 'Revisar', 'Confirmar'][s.tStep] || '',
+      helpOpts: helpRaw.map(h => ({ ...h, bg: s.helpOpt === h.k ? '#E4EDE6' : '#fff', bd: s.helpOpt === h.k ? '#2F5D46' : '#E6E0D3', go: () => h.k === 'financeira' ? this.go('doacao', { donStep: 0 }) : this.setState({ helpOpt: h.k }) })),
+      helpDetail: hd ? { show: true, t: hd.t, d: hd.det, cta: hd.cta, skills: !!hd.skills } : { show: false },
+      pickRoupas: () => this.setState({ helpOpt: 'roupas' }),
+      skills: skillList.map(t => { const on = s.skills.includes(t); return { t, bg: on ? '#2F5D46' : '#fff', fg: on ? '#fff' : '#1F2A24', bd: on ? '#2F5D46' : '#D8D0BF', go: () => this.setState(st => ({ skills: on ? st.skills.filter(x => x !== t) : [...st.skills, t] })) }; }),
+      amounts: [20, 50, 100, 200, 'outro'].map(v => { const on = s.amount === v; return { label: v === 'outro' ? 'Outro valor' : 'R$ ' + v, go: () => this.setState({ amount: v }), bg: on ? '#2F5D46' : '#fff', fg: on ? '#fff' : '#1F2A24', bd: on ? '#2F5D46' : '#D8D0BF' }; }),
+      isOther: s.amount === 'outro', setOther: e => this.setState({ other: e.target.value }),
+      rec: { bg: s.recurring ? '#2F5D46' : '#CFC7B6', j: s.recurring ? 'flex-end' : 'flex-start' }, toggleRec: () => this.setState({ recurring: !s.recurring }),
+      amountLabel: brl(amt) + (s.recurring ? '/mês' : ''),
+      d: { s0: s.donStep === 0, s1: s.donStep === 1, s2: s.donStep === 2 },
+      donNext: () => { this.setState({ donStep: s.donStep + 1 }); window.scrollTo({ top: 0 }); },
+      cats: ['Todos', 'Livros', 'Roupas', 'Artesanato', 'Objetos', 'Itens doados', 'Outros'].map(c => chip(c, s.cat === c, () => this.setState({ cat: c }))),
+      shop: products.filter(p => s.cat === 'Todos' || p.cat === s.cat),
+      prod, imgN: s.img + 1,
+      thumbs: [0, 1, 2, 3].map(i => ({ bd: s.img === i ? '#2F5D46' : 'transparent', go: () => this.setState({ img: i }) })),
+      addCart: () => this.setState(st => { const ex = st.cart.find(c => c.i === st.prod); return { page: 'carrinho', cart: ex ? st.cart.map(c => c.i === st.prod ? { ...c, q: c.q + 1 } : c) : [...st.cart, { i: st.prod, q: 1 }] }; }),
+      cartRows, cartEmpty: s.cart.length === 0, subtotal: brl(sub)
+    };
+  }
+}
+</script>
+</body>
+</html>
