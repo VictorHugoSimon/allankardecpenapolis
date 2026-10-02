@@ -88,9 +88,25 @@ A página **`/ui`** do Gestão mostra todos os componentes.
   - `muted-2`: de `#6B746C` para `#606861`.
   - Legenda dos placeholders: de `#7A7363` para `#6B6557`.
 
+## Site público (Fase 1)
+
+Rotas: `/`, `/o-ceak`, `/agenda` (filtro e mês por query string, `.ics` em `/agenda/[slug]/calendario.ics`), `/palestras` e `/palestras/[slug]`, `/lives`, `/estudos`, `/biblioteca`, `/blog` e `/blog/[slug]`, `/inscricao`, `/preciso-de-ajuda` e `/preciso-de-ajuda/[servico]` (5 etapas), `/quero-ajudar`, `/campanhas/[slug]`, `/doar` e `/doar/[id]`, `/loja` e `/loja/[produto]`, `/carrinho`, `/checkout`, `/pedido/[id]`, `/transparencia`, `/contato` e `/privacidade`.
+
+- **Só conteúdo aprovado é público.** O blog lista apenas conteúdos `PUBLICADO`. A agenda omite atividades em rascunho, canceladas ou aguardando aprovação (por isso "Caridade sem distinção", que aguarda aprovação no seed, não aparece no site).
+- **PIX.** A doação e o pedido criam a cobrança no `PaymentProvider` e mostram o QR Code real (gerado do BR Code) e o copia e cola. A confirmação chega pelo webhook `POST /api/pix/webhook` (assinatura em `x-ceak-assinatura`). Com o PSP simulado, o botão "Já fiz o PIX" dispara esse webhook, como o banco faria. O webhook é idempotente, confere o valor e, no pedido, baixa o estoque com movimentação, alerta de mínimo e auditoria.
+- **Formulários.** Validação no servidor (Zod), consentimento LGPD obrigatório, campo-isca contra robôs e limite de envios por IP.
+- **Assistência.** A vaga é reservada com bloqueio de linha (não há duas reservas para a última vaga). O relato fica na tabela restrita e a auditoria registra a solicitação sem o conteúdo do relato.
+- **Doação mensal.** O controle "Tornar mensal" aparece desativado com o aviso "em breve" até o PIX Automático ser integrado.
+- **SEO.** Metadata por página, `sitemap.xml`, `robots.txt`, imagem Open Graph e JSON-LD (`Organization`, `Event`, `BlogPosting`, `Product`). Lighthouse (perfil móvel) em produção: 93–99 em Performance e 100 em Acessibilidade, Boas práticas e SEO nas páginas principais.
+
 ## Dados institucionais pendentes
 
 Endereço, CNPJ, telefones, chave PIX, diretoria, histórico/linha do tempo, programação semanal, logo e fotos estão centralizados em **[`packages/core/config/instituicao.ts`](packages/core/config/instituicao.ts)**, com os valores fictícios dos protótipos marcados como `PENDENTE`.
+
+## Pendências de conteúdo e revisão
+
+- O texto de `/privacidade` é uma base escrita a partir das regras do sistema e precisa de revisão jurídica da diretoria.
+- Fotos reais (fachada, produtos, diretoria, blog) e o logo oficial: hoje são placeholders com a legenda do que deve entrar.
 
 ## Decisões pendentes de implementação
 
