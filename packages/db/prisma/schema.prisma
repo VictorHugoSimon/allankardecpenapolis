@@ -1048,7 +1048,7 @@ model SolicitacaoAssistencia {
 }
 
 /// Relato da solicitação (dado sensível). Tabela separada para o RLS restringir
-/// a leitura à coordenação de assistência; todo acesso é auditado.
+/// a leitura à coordenação de assistência, ao Administrador e à Diretoria; todo acesso é auditado.
 model RelatoAssistencia {
   solicitacaoId String   @id @map("solicitacao_id") @db.Uuid
   texto         String

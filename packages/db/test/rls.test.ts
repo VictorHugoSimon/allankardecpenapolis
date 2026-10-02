@@ -56,14 +56,17 @@ describe.skipIf(!temBanco)('RLS por perfil', () => {
     ).rejects.toThrow();
   });
 
-  it('assistência: relato só para a coordenação de assistência', async () => {
+  it('assistência: relato só para coordenação de assistência, Administrador e Diretoria', async () => {
     const relatos = (nome: string) => comRls(ctx[nome]!, (tx) => tx.relatoAssistencia.count());
     const solicitacoes = (nome: string) =>
       comRls(ctx[nome]!, (tx) => tx.solicitacaoAssistencia.count());
 
     expect(await relatos('Sueli Andrade')).toBe(6); // coordenação de assistência
-    expect(await relatos('Antônio Ferreira')).toBe(0); // Administrador vê solicitações, não relatos
+    expect(await relatos('Antônio Ferreira')).toBe(6); // Administrador
+    expect(await relatos('Lúcia Moraes')).toBe(6); // Diretoria
     expect(await relatos('Renata Campos')).toBe(0); // Coordenador sem a função de assistência
+    expect(await relatos('Paulo Mendes')).toBe(0); // Secretaria
+    expect(await relatos('Victor Alves')).toBe(0); // Voluntário
     expect(await solicitacoes('Antônio Ferreira')).toBe(6);
     expect(await solicitacoes('Renata Campos')).toBe(6);
     expect(await solicitacoes('Victor Alves')).toBe(0); // Voluntário: só a escala

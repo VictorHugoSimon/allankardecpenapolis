@@ -80,7 +80,7 @@ A página **`/ui`** do Gestão mostra todos os componentes.
   2. As páginas repetem a verificação no servidor (`exigirModulo`).
   3. O banco aplica **RLS**: consultas sensíveis rodam em `comRls(contexto, fn)`, que troca para o papel `ceak_app` (sem `BYPASSRLS`) e define `app.perfil`, `app.pessoa_id` e `app.coord_assistencia`. As policies estão em `packages/db/prisma/migrations/*_rls`.
 - **Dados sensíveis.**
-  - O relato da assistência fica em `relato_assistencia`, legível só pela coordenação de assistência.
+  - O relato da assistência fica em `relato_assistencia`, legível só pela coordenação de assistência, pelo Administrador e pela Diretoria (decisão de 02/10/2026).
   - Senhas (`credencial`), códigos de acesso e segredos de integração ficam em tabelas sem nenhum acesso pelo papel `ceak_app`.
   - A auditoria é somente inserção: uma trigger impede alterações.
 - **Adapters.** PIX (BR Code EMV válido + webhook HMAC), IA (RAG simples, sempre cita a fonte e encaminha questões pessoais ao atendimento fraterno), push, e-mail, WhatsApp e redes sociais têm versão mock em `packages/core/src/adapters`. Os provedores reais entram nas fases 4 e 5. Até lá, configurar um provedor diferente de `mock` gera erro explícito.
@@ -91,3 +91,7 @@ A página **`/ui`** do Gestão mostra todos os componentes.
 ## Dados institucionais pendentes
 
 Endereço, CNPJ, telefones, chave PIX, diretoria, histórico/linha do tempo, programação semanal, logo e fotos estão centralizados em **[`packages/core/config/instituicao.ts`](packages/core/config/instituicao.ts)**, com os valores fictícios dos protótipos marcados como `PENDENTE`.
+
+## Decisões pendentes de implementação
+
+- **Seletor de perfil (Fase 3):** aparece só para quem tem duas ou mais funções e lista apenas os perfis que a pessoa realmente tem. Quem tem uma função só não vê o seletor.
