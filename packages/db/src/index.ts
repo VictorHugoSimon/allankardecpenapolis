@@ -5,3 +5,5 @@ export { criarLocalAuthProvider, type LocalAuthDeps } from './auth-local';
 export { sessaoParaIdentidade } from './sessao';
 export * from './generated/prisma/enums';
 export type * from './generated/prisma/models';
+export { logSinkBanco } from './log-sink';
+export * from './servicos';

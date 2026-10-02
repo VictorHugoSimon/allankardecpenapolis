@@ -86,17 +86,19 @@ describe.skipIf(!temBanco)('RLS por perfil', () => {
     const helena = await comRls(ctx['Helena Prado']!, (tx) =>
       tx.pessoa.findMany({ select: { nome: true } }),
     );
-    expect(helena.map((p) => p.nome).sort()).toEqual(
-      [
-        'Cláudia Ribeiro',
-        'Helena Prado',
-        'João Batista Rocha',
-        'Marcos Tavares',
-        'Renata Campos',
-        'Sueli Andrade',
-        'Victor Alves',
-      ].sort(),
-    );
+    const nomes = helena.map((p) => p.nome);
+    expect(nomes).toHaveLength(33); // ela mesma + 32 alunos do ESDE 2026
+    for (const n of [
+      'Helena Prado',
+      'Victor Alves',
+      'Renata Campos',
+      'João Batista Rocha',
+      'Marcos Tavares',
+    ]) {
+      expect(nomes).toContain(n);
+    }
+    expect(nomes).not.toContain('Maria Silva');
+    expect(nomes).not.toContain('Carla Nogueira');
     const joao = await comRls(ctx['João Batista Rocha']!, (tx) =>
       tx.pessoa.findMany({ select: { nome: true } }),
     );

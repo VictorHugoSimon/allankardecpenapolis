@@ -45,3 +45,54 @@ describe('validação', () => {
     expect(centavos.safeParse('-1').success).toBe(false);
   });
 });
+
+describe('formulários do site', async () => {
+  const { inscricaoSchema, solicitacaoAjudaSchema, doacaoSchema, checkoutSchema } =
+    await import('../src/validacao');
+
+  it('inscrição exige consentimento e WhatsApp; e-mail é opcional', () => {
+    const base = { nome: 'Carla Nogueira', whatsapp: '(18) 99712-4408', consentimento: true };
+    expect(inscricaoSchema.parse({ ...base, email: '' }).email).toBeUndefined();
+    expect(inscricaoSchema.parse(base).whatsapp).toBe('+5518997124408');
+    expect(inscricaoSchema.safeParse({ ...base, consentimento: false }).success).toBe(false);
+    expect(inscricaoSchema.safeParse({ ...base, email: 'x' }).success).toBe(false);
+  });
+
+  it('rejeita robôs pelo campo-isca', () => {
+    const r = inscricaoSchema.safeParse({
+      nome: 'Robô',
+      whatsapp: '18997124408',
+      consentimento: true,
+      site: 'http://spam',
+    });
+    expect(r.success).toBe(false);
+  });
+
+  it('solicitação de ajuda exige data e limita o relato', () => {
+    const base = {
+      nome: 'Carla Nogueira',
+      whatsapp: '18997124408',
+      consentimento: true,
+      vagaId: '7f9c0f4e-1d1a-4c55-9a43-0a6c2f4b8a11',
+    };
+    expect(solicitacaoAjudaSchema.parse({ ...base, relato: '  ' }).relato).toBeUndefined();
+    expect(solicitacaoAjudaSchema.safeParse({ ...base, vagaId: 'x' }).success).toBe(false);
+    expect(solicitacaoAjudaSchema.safeParse({ ...base, relato: 'a'.repeat(2001) }).success).toBe(
+      false,
+    );
+  });
+
+  it('doação tem valor mínimo', () => {
+    expect(
+      doacaoSchema.safeParse({ valorCentavos: 50, destino: 'Assistência social' }).success,
+    ).toBe(false);
+    expect(
+      doacaoSchema.parse({ valorCentavos: 5000, destino: 'Assistência social' }).valorCentavos,
+    ).toBe(5000);
+  });
+
+  it('checkout exige itens', () => {
+    const base = { nome: 'Carla Nogueira', whatsapp: '18997124408', consentimento: true };
+    expect(checkoutSchema.safeParse({ ...base, itens: [] }).success).toBe(false);
+  });
+});

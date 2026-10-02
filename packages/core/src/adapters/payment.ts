@@ -36,6 +36,11 @@ export interface PaymentProvider {
   consultar(id: string): Promise<CobrancaPix | null>;
   /** Valida a assinatura e interpreta o webhook. Lança erro se a assinatura for inválida. */
   lerWebhook(corpo: string, assinatura: string | null): Promise<EventoWebhookPix>;
+  /** Só no provedor mock: simula o PSP enviando o webhook de pagamento confirmado. */
+  simularPagamento?(c: Pick<CobrancaPix, 'id' | 'referencia' | 'valorCentavos'>): {
+    corpo: string;
+    assinatura: string;
+  };
 }
 
 export interface MockPaymentConfig {
@@ -46,6 +51,8 @@ export interface MockPaymentConfig {
 }
 
 /** PSP simulado: gera BR Code válido e aceita webhooks assinados com HMAC-SHA256. */
+export type MockPaymentProvider = ReturnType<typeof criarMockPaymentProvider>;
+
 export function criarMockPaymentProvider(cfg: MockPaymentConfig) {
   const cobrancas = new Map<string, CobrancaPix>();
 
@@ -53,8 +60,14 @@ export function criarMockPaymentProvider(cfg: MockPaymentConfig) {
     createHmac('sha256', cfg.webhookSecret).update(corpo).digest('hex');
 
   const provider: PaymentProvider & {
-    /** Simula o PSP confirmando o pagamento: devolve corpo e assinatura do webhook. */
-    simularPagamento(id: string): { corpo: string; assinatura: string };
+    /**
+     * Simula o PSP confirmando o pagamento: devolve corpo e assinatura do webhook.
+     * Recebe os dados da cobrança (o mapa em memória não sobrevive a reinícios).
+     */
+    simularPagamento(c: Pick<CobrancaPix, 'id' | 'referencia' | 'valorCentavos'>): {
+      corpo: string;
+      assinatura: string;
+    };
   } = {
     nome: 'mock',
     async criarCobranca(i) {
@@ -89,13 +102,12 @@ export function criarMockPaymentProvider(cfg: MockPaymentConfig) {
       if (c) c.status = e.status;
       return { ...e, pagoEm: e.pagoEm ? new Date(e.pagoEm) : undefined };
     },
-    simularPagamento(id) {
-      const c = cobrancas.get(id);
+    simularPagamento(c) {
       const corpo = JSON.stringify({
-        cobrancaId: id,
-        referencia: c?.referencia ?? '',
+        cobrancaId: c.id,
+        referencia: c.referencia,
         status: 'PAGO',
-        valorCentavos: c?.valorCentavos ?? 0,
+        valorCentavos: c.valorCentavos,
         pagoEm: new Date().toISOString(),
       });
       return { corpo, assinatura: assinar(corpo) };

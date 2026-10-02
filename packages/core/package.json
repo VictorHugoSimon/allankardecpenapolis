@@ -13,7 +13,8 @@
     "./adapters": "./src/adapters/index.ts",
     "./format": "./src/format/index.ts",
     "./config/instituicao": "./config/instituicao.ts",
-    "./auth/sessao": "./src/auth/sessao.ts"
+    "./auth/sessao": "./src/auth/sessao.ts",
+    "./regras": "./src/regras/index.ts"
   },
   "scripts": {
     "lint": "eslint .",

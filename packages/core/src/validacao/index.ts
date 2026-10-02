@@ -57,3 +57,98 @@ export const centavos = z.union([z.number(), z.string()]).transform((v, ctx) => 
   }
   return Math.round(n * 100);
 });
+
+// ─── Formulários do site público ──────────────────────────────────────
+
+const nome = z.string().trim().min(3, 'Informe seu nome.').max(120);
+const emailOpcional = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .max(200)
+  .optional()
+  .transform((v) => (v ? v : undefined))
+  .pipe(z.string().email('Informe um e-mail válido.').optional());
+const consentimento = z.literal(true, {
+  error: 'Para continuar, autorize o uso dos seus dados.',
+});
+/** Campo-isca contra robôs: precisa chegar vazio. */
+const isca = z
+  .string()
+  .optional()
+  .refine((v) => !v, 'Envio inválido.');
+
+export const inscricaoSchema = z.object({
+  nome,
+  whatsapp: telefoneBR,
+  email: emailOpcional,
+  primeiraVez: z.boolean().default(false),
+  consentimento,
+  site: isca,
+});
+export type InscricaoInput = z.infer<typeof inscricaoSchema>;
+
+export const solicitacaoAjudaSchema = z.object({
+  nome,
+  whatsapp: telefoneBR,
+  relato: z
+    .string()
+    .trim()
+    .max(2000, 'Use no máximo 2.000 caracteres.')
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+  vagaId: z.string().uuid('Escolha uma data.'),
+  consentimento,
+  site: isca,
+});
+export type SolicitacaoAjudaInput = z.infer<typeof solicitacaoAjudaSchema>;
+
+export const doacaoSchema = z.object({
+  valorCentavos: z
+    .number()
+    .int()
+    .min(100, 'O valor mínimo é R$ 1,00.')
+    .max(10_000_000, 'Para valores acima de R$ 100.000, fale com a tesouraria.'),
+  destino: z.string().trim().min(3).max(80),
+  nome: z
+    .string()
+    .trim()
+    .max(120)
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+  email: emailOpcional,
+  site: isca,
+});
+export type DoacaoInput = z.infer<typeof doacaoSchema>;
+
+export const checkoutSchema = z.object({
+  nome,
+  whatsapp: telefoneBR,
+  itens: z
+    .array(z.object({ produtoId: z.string().uuid(), quantidade: z.number().int().min(1).max(20) }))
+    .min(1, 'Seu carrinho está vazio.')
+    .max(30),
+  consentimento,
+  site: isca,
+});
+export type CheckoutInput = z.infer<typeof checkoutSchema>;
+
+export const contatoSchema = z.object({
+  nome,
+  email,
+  assunto: z.string().trim().min(3).max(80),
+  mensagem: z.string().trim().min(5, 'Escreva sua mensagem.').max(4000),
+  consentimento,
+  site: isca,
+});
+export type ContatoInput = z.infer<typeof contatoSchema>;
+
+export const intencaoAjudaSchema = z.object({
+  tipo: z.enum(['ALIMENTOS', 'ROUPAS', 'PRODUTOS', 'VOLUNTARIO', 'EVENTOS', 'HABILIDADE']),
+  nome,
+  whatsapp: telefoneBR,
+  habilidades: z.array(z.string().max(40)).max(20).default([]),
+  consentimento,
+  site: isca,
+});
+export type IntencaoAjudaInput = z.infer<typeof intencaoAjudaSchema>;

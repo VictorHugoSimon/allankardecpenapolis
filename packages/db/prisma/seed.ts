@@ -258,9 +258,11 @@ async function main() {
     titulo: string;
     tipo: (typeof TipoEvento)[keyof typeof TipoEvento];
     inicio: string;
+    fim?: string;
     local: string;
     descricao: string;
     palestrante?: string;
+    gravacao?: { url: string; duracaoMin: number };
     responsavel?: string;
     status?: (typeof StatusEvento)[keyof typeof StatusEvento];
     etapa?: (typeof EtapaFluxoPalestra)[keyof typeof EtapaFluxoPalestra];
@@ -272,6 +274,7 @@ async function main() {
         titulo: e.titulo,
         tipo: e.tipo,
         inicio: d(e.inicio),
+        fim: e.fim ? d(e.fim) : undefined,
         local: e.local,
         descricao: e.descricao,
         palestranteId: e.palestrante ? pid(e.palestrante) : undefined,
@@ -282,8 +285,62 @@ async function main() {
           e.tipo === TipoEvento.PALESTRA
             ? 'https://www.youtube.com/@ceakpenapolis/live'
             : undefined,
+        gravacaoUrl: e.gravacao?.url,
+        gravacaoDuracaoMin: e.gravacao?.duracaoMin,
       },
     });
+
+  // Gravações de setembro (palestras encerradas).
+  const gravacoes = [
+    [
+      'A coragem da fé',
+      'Antônio Ferreira',
+      '2026-09-25T20:00',
+      48,
+      'A fé raciocinada como apoio nas decisões do cotidiano.',
+    ],
+    [
+      'O bem que se faz em silêncio',
+      'Helena Prado',
+      '2026-09-23T20:00',
+      45,
+      'A caridade discreta, que não espera reconhecimento.',
+    ],
+    [
+      'Os obstáculos como lições',
+      'Rogério Lima',
+      '2026-09-18T20:00',
+      50,
+      'As dificuldades como oportunidades de aprendizado.',
+    ],
+    [
+      'Paz interior em tempos difíceis',
+      'Lúcia Moraes',
+      '2026-09-16T20:00',
+      47,
+      'Serenidade e confiança diante das provas.',
+    ],
+    [
+      'O que é o Espiritismo',
+      'Paulo Mendes',
+      '2026-09-11T20:00',
+      55,
+      'Uma introdução à Doutrina Espírita para quem chega.',
+    ],
+  ] as const;
+  for (const [titulo, palestrante, inicio, duracaoMin, descricao] of gravacoes) {
+    await ev({
+      titulo,
+      tipo: TipoEvento.PALESTRA,
+      inicio,
+      local: 'Salão principal',
+      palestrante,
+      descricao,
+      status: StatusEvento.ENCERRADO,
+      etapa: EtapaFluxoPalestra.PUBLICADA,
+      gravacao: { url: 'https://www.youtube.com/@ceakpenapolis/videos', duracaoMin },
+    });
+  }
 
   const familia = await ev({
     titulo: 'Família e Espiritualidade',
@@ -295,10 +352,7 @@ async function main() {
     descricao: 'A família como espaço de reencontro entre espíritos.',
     status: StatusEvento.ENCERRADO,
     etapa: EtapaFluxoPalestra.APROVACAO_PUBLICACAO,
-  });
-  await prisma.evento.update({
-    where: { id: familia.id },
-    data: { gravacaoUrl: 'https://www.youtube.com/watch?v=exemplo' },
+    gravacao: { url: 'https://www.youtube.com/@ceakpenapolis/videos', duracaoMin: 52 },
   });
   const perdao = await ev({
     titulo: 'O perdão como libertação',
@@ -359,6 +413,7 @@ async function main() {
     titulo: 'Ponto de coleta — Campanha do Agasalho',
     tipo: TipoEvento.CAMPANHA,
     inicio: '2026-10-10T09:00',
+    fim: '2026-10-10T12:00',
     local: 'Portão lateral',
     responsavel: 'Assistência social',
     descricao: 'Recebimento drive-thru de casacos, cobertores e meias em bom estado.',
@@ -384,8 +439,9 @@ async function main() {
     titulo: 'Bazar beneficente de primavera',
     tipo: TipoEvento.EVENTO,
     inicio: '2026-10-17T08:00',
+    fim: '2026-10-17T12:00',
     local: 'Pátio',
-    responsavel: 'Lúcia Moraes',
+    responsavel: 'Voluntárias do bazar',
     descricao: 'Roupas, livros e utilidades doadas a preços simbólicos.',
   });
   await ev({
@@ -467,6 +523,10 @@ async function main() {
     {
       nome: 'Estudo Sistematizado da Doutrina Espírita (ESDE)',
       sigla: 'ESDE',
+      tag: 'CURSO · 2 ANOS',
+      encontros: 'Segundas ou quintas, 20h',
+      statusInscricao: 'Pré-inscrição 2027 aberta',
+      destaque: true,
       publico: 'Adultos · iniciantes',
       duracao: '2 anos · 5 módulos',
       descricao:
@@ -475,6 +535,10 @@ async function main() {
     {
       nome: 'Estudo do Evangelho',
       sigla: 'Evangelho',
+      tag: 'ABERTO A TODOS',
+      encontros: 'Sábados, 19h30',
+      statusInscricao: 'Participação livre',
+      destaque: true,
       publico: 'Aberto a todos',
       duracao: 'Contínuo',
       descricao:
@@ -483,6 +547,9 @@ async function main() {
     {
       nome: 'Educação mediúnica',
       sigla: 'Mediunidade',
+      tag: 'CONCLUINTES DO ESDE',
+      encontros: 'Terças, 20h',
+      statusInscricao: 'Turma em andamento',
       publico: 'Concluintes do ESDE',
       duracao: '3 anos',
       descricao:
@@ -491,6 +558,10 @@ async function main() {
     {
       nome: 'Mocidade Espírita',
       sigla: 'Mocidade',
+      tag: 'JOVENS 14–21',
+      encontros: 'Domingos, 9h30',
+      statusInscricao: 'Inscrições abertas',
+      destaque: true,
       publico: 'Jovens de 14 a 21 anos',
       duracao: 'Ciclos anuais',
       descricao:
@@ -499,6 +570,9 @@ async function main() {
     {
       nome: 'Evangelização infantil',
       sigla: 'Evangelização',
+      tag: 'CRIANÇAS 5–12',
+      encontros: 'Domingos, 9h30',
+      statusInscricao: 'Inscrições abertas',
       publico: 'Crianças de 5 a 12 anos',
       duracao: 'Ciclos anuais',
       descricao:
@@ -507,6 +581,9 @@ async function main() {
     {
       nome: 'Estudo das obras complementares',
       sigla: 'Complementares',
+      tag: 'ADULTOS',
+      encontros: 'Quartas, 18h30',
+      statusInscricao: 'Próxima turma em março',
       publico: 'Adultos',
       duracao: 'Semestral',
       descricao:
@@ -533,6 +610,27 @@ async function main() {
     ['Mocidade', 'Jovens 14–21', 'Renata Campos', 'Dom 9h30', 'Ciclo 2/4', StatusTurma.ATIVA],
     ['Evangelização', 'Infantil 5–12', 'Sueli Andrade', 'Dom 9h30', 'Ano 2026', StatusTurma.ATIVA],
   ] as const;
+  // Resumo público dos cards de estudo da home ("{n}" = número de matrículas).
+  const publico: Record<
+    string,
+    { resumoPublico: string; etapaAtual: string; progressoPct: number }
+  > = {
+    'Turma 2026 — seg': {
+      resumoPublico: 'Turma 2026 · segundas, 20h · {n} participantes',
+      etapaAtual: 'Módulo 3 de 5',
+      progressoPct: 58,
+    },
+    'Sábado aberto': {
+      resumoPublico: 'Sábados, 19h30 · sem inscrição',
+      etapaAtual: 'Capítulo 10 de 28',
+      progressoPct: 36,
+    },
+    'Jovens 14–21': {
+      resumoPublico: 'Domingos, 9h30 · {n} jovens',
+      etapaAtual: 'Ciclo 2 de 4',
+      progressoPct: 50,
+    },
+  };
   const T: Record<string, string> = {};
   for (const [curso, nome, instrutor, encontros, progresso, status] of turmas) {
     const t = await prisma.turma.create({
@@ -544,6 +642,7 @@ async function main() {
         progresso,
         status,
         inicio: d('2026-02-02'),
+        ...publico[nome],
       },
     });
     T[nome] = t.id;
@@ -559,11 +658,37 @@ async function main() {
         titulo: `Aula ${n}`,
         modulo: n <= 6 ? 'Módulo 1' : n <= 11 ? 'Módulo 2' : 'Módulo 3',
         data: new Date(d('2026-06-15T20:00').getTime() + (n - 1) * 7 * 86_400_000),
-        eventoId: n === 16 ? esdeAula.id : undefined,
       },
     });
     aulas.push(a.id);
   }
+  // Próximos encontros (exibidos na home).
+  await prisma.aula.create({
+    data: {
+      turmaId: turmaEsde,
+      numero: 17,
+      titulo: 'Aula 17',
+      modulo: 'Módulo 3',
+      data: d('2026-10-05T20:00'),
+      eventoId: esdeAula.id,
+    },
+  });
+  await prisma.aula.create({
+    data: {
+      turmaId: T['Sábado aberto']!,
+      numero: 11,
+      titulo: 'Capítulo X',
+      data: d('2026-10-03T19:30'),
+    },
+  });
+  await prisma.aula.create({
+    data: {
+      turmaId: T['Jovens 14–21']!,
+      numero: 1,
+      titulo: 'Encontro',
+      data: d('2026-10-04T09:30'),
+    },
+  });
   await prisma.material.create({
     data: {
       cursoId: C.ESDE,
@@ -593,6 +718,97 @@ async function main() {
   await prisma.matricula.create({
     data: { turmaId: T['Sábado aberto']!, pessoaId: pid('Victor Alves'), progresso: 60 },
   });
+
+  // Demais alunos (nomes fictícios) para chegar às turmas do protótipo: ESDE 32, Mocidade 21.
+  const nomes = [
+    'Ana',
+    'Bruno',
+    'Camila',
+    'Daniel',
+    'Elaine',
+    'Fábio',
+    'Gabriela',
+    'Henrique',
+    'Isabela',
+    'José',
+    'Karina',
+    'Leonardo',
+    'Mariana',
+    'Nelson',
+    'Olívia',
+    'Pedro',
+    'Raquel',
+    'Sérgio',
+    'Tatiane',
+    'Vinícius',
+    'Aline',
+    'Caio',
+    'Débora',
+    'Eduardo',
+    'Fernanda',
+    'Gustavo',
+    'Helena',
+    'Igor',
+    'Juliana',
+    'Lucas',
+    'Mônica',
+    'Natália',
+    'Otávio',
+    'Patrícia',
+    'Rafael',
+    'Simone',
+    'Thiago',
+    'Vanessa',
+    'Wagner',
+    'Yasmin',
+    'André',
+    'Beatriz',
+    'César',
+    'Diana',
+    'Felipe',
+    'Giovana',
+    'Hugo',
+  ];
+  const sobrenomes = [
+    'Almeida',
+    'Barbosa',
+    'Cardoso',
+    'Duarte',
+    'Esteves',
+    'Freitas',
+    'Gomes',
+    'Honorato',
+    'Lopes',
+    'Martins',
+    'Nunes',
+    'Oliveira',
+    'Pacheco',
+    'Queiroz',
+    'Ribeiro',
+    'Santos',
+    'Teixeira',
+    'Vieira',
+  ];
+  let k = 0;
+  const novoAluno = async (turmaId: string, nascimento: string) => {
+    const nome = `${nomes[k % nomes.length]} ${sobrenomes[(k * 7) % sobrenomes.length]}`;
+    k++;
+    const pessoa = await prisma.pessoa.create({
+      data: {
+        nome,
+        perfil: Perfil.MEMBRO,
+        status: StatusPessoa.ATIVO,
+        cidade: 'Penápolis – SP',
+        nascimento: d(nascimento),
+        ...consent,
+      },
+    });
+    await prisma.matricula.create({
+      data: { turmaId, pessoaId: pessoa.id, progresso: 50 + (k % 40) },
+    });
+  };
+  for (let i = alunos.length; i < 32; i++) await novoAluno(turmaEsde, '1980-03-10');
+  for (let i = 0; i < 21; i++) await novoAluno(T['Jovens 14–21']!, '2009-08-20');
 
   // Conquistas da "Minha jornada".
   const conquistas = [
@@ -681,22 +897,6 @@ async function main() {
       [Canal.INSTAGRAM, Canal.GOOGLE_BUSINESS],
     ],
     [
-      'Pré-inscrição ESDE 2027',
-      'Estudos',
-      StatusConteudo.PUBLICADO,
-      '2026-09-18T10:00',
-      false,
-      [Canal.BLOG, Canal.PUSH],
-    ],
-    [
-      'Resumo “A coragem da fé”',
-      'Gravação YouTube',
-      StatusConteudo.PUBLICADO,
-      '2026-09-24T10:00',
-      true,
-      [Canal.BLOG],
-    ],
-    [
       'Mensagem da semana — Cap. X',
       'Estudo do Evangelho',
       StatusConteudo.PROCESSANDO,
@@ -731,7 +931,6 @@ async function main() {
         geradoPorIa: ia,
         criadoEm: d(quando),
         agendadoPara: status === StatusConteudo.AGENDADO ? d(quando) : undefined,
-        publicadoEm: status === StatusConteudo.PUBLICADO ? d(quando) : undefined,
         erro:
           status === StatusConteudo.ERRO
             ? 'instagram.graph: token expirado (OAuthException 190)'
@@ -741,6 +940,110 @@ async function main() {
       },
     });
     conteudoIds[titulo] = c.id;
+  }
+
+  // Artigos publicados no blog (já aprovados por um responsável).
+  const posts = [
+    {
+      titulo: 'Campanha do Agasalho chega a 75% da meta',
+      data: '2026-09-29T10:00',
+      categoria: 'Solidariedade',
+      autor: 'Assistência social',
+      fonte: 'Campanhas',
+      ia: false,
+      lead: 'Faltam 122 peças para atingir a meta de 500 casacos, cobertores e meias até 31 de outubro.',
+      corpo: [
+        'A Campanha do Agasalho 2026 alcançou 378 peças arrecadadas, o equivalente a 75% da meta. As doações são triadas pelas voluntárias do bazar e entregues às 126 famílias acompanhadas pela assistência social do CEAK.',
+        'Os itens mais necessários neste momento são casacos infantis, cobertores de casal e meias. O ponto de coleta drive-thru funciona aos sábados, das 9h às 12h, no portão lateral; durante a semana, as doações podem ser entregues na recepção, de terça a sábado, das 19h às 21h30.',
+        'A prestação de contas da campanha será publicada na página de Transparência ao final de novembro.',
+      ],
+    },
+    {
+      titulo: 'Resumo da palestra “A coragem da fé”',
+      data: '2026-09-26T10:00',
+      categoria: 'Palestras',
+      autor: 'Paulo Mendes',
+      fonte: 'Gravação YouTube',
+      ia: true,
+      lead: 'Antônio Ferreira tratou da fé raciocinada como apoio nas decisões do cotidiano.',
+      corpo: [
+        'Na palestra pública de 25 de setembro, o presidente do CEAK, Antônio Ferreira, partiu do capítulo XIX de O Evangelho Segundo o Espiritismo para distinguir a fé cega da fé raciocinada, que “pode encarar a razão face a face”.',
+        'O palestrante destacou que a coragem da fé não está na ausência de medo, mas na disposição de agir com confiança e responsabilidade. A gravação completa está disponível na Biblioteca.',
+      ],
+    },
+    {
+      titulo: 'Pré-inscrição aberta para as turmas do ESDE 2027',
+      data: '2026-09-18T10:00',
+      categoria: 'Estudos',
+      autor: 'Helena Prado',
+      fonte: 'Estudos',
+      ia: false,
+      lead: 'Novas turmas às segundas e quintas, com início em fevereiro.',
+      corpo: [
+        'Estão abertas, até 30 de novembro, as pré-inscrições para as turmas 2027 do Estudo Sistematizado da Doutrina Espírita. O curso tem duração de dois anos, com encontros semanais de 1h30.',
+        'Não é necessário conhecimento prévio. As inscrições podem ser feitas pelo CEAK App ou na recepção.',
+      ],
+    },
+    {
+      titulo: 'Bazar beneficente de primavera acontece em 17 de outubro',
+      data: '2026-09-15T10:00',
+      categoria: 'Eventos',
+      autor: 'Lúcia Moraes',
+      fonte: 'Agenda',
+      ia: false,
+      lead: 'Roupas, livros e utilidades doadas a preços simbólicos.',
+      corpo: [
+        'O bazar será realizado no pátio do CEAK, das 8h às 12h. Toda a renda é revertida para as cestas básicas da assistência social.',
+      ],
+    },
+    {
+      titulo: 'Como funciona o atendimento fraterno',
+      data: '2026-09-09T10:00',
+      categoria: 'Assistência',
+      autor: 'Diretoria doutrinária',
+      fonte: 'Assistência',
+      ia: false,
+      lead: 'Uma conversa reservada, gratuita e sem pré-requisitos.',
+      corpo: [
+        'O atendimento fraterno é o primeiro acolhimento oferecido pela casa a quem chega em momento de dificuldade. Acontece às terças e quintas, a partir das 19h, sem necessidade de agendamento prévio.',
+        'O atendimento espiritual não substitui acompanhamento médico ou psicológico quando necessário.',
+      ],
+    },
+    {
+      titulo: 'Biblioteca amplia horário de empréstimos',
+      data: '2026-09-02T10:00',
+      categoria: 'Institucional',
+      autor: 'Secretaria',
+      fonte: 'Secretaria',
+      ia: false,
+      lead: 'Agora também aos sábados, das 18h às 19h30.',
+      corpo: [
+        'A biblioteca do CEAK, com mais de 3 mil títulos, passa a funcionar também aos sábados antes do Estudo do Evangelho. O empréstimo é gratuito, por 15 dias, mediante cadastro.',
+      ],
+    },
+  ];
+  for (const p of posts) {
+    await prisma.conteudo.create({
+      data: {
+        titulo: p.titulo,
+        slug: slug(p.titulo),
+        categoria: p.categoria,
+        autorExibicao: p.autor,
+        lead: p.lead,
+        fonte: p.fonte,
+        status: StatusConteudo.PUBLICADO,
+        geradoPorIa: p.ia,
+        criadoEm: d(p.data),
+        publicadoEm: d(p.data),
+        seoDescricao: p.lead,
+        tags: [p.categoria.toLowerCase()],
+        fontes: [],
+        responsavelId: uid('Paulo Mendes'),
+        versoes: {
+          create: [{ canal: Canal.BLOG, texto: p.corpo.join('\n\n'), publicadoEm: d(p.data) }],
+        },
+      },
+    });
   }
 
   const aprovacoes = [
@@ -882,17 +1185,18 @@ async function main() {
     });
   const agasalho = await camp('Campanha do Agasalho', UnidadeMedida.PECA, 500, 378, '2026-10-31', {
     descricao:
-      'Arrecadação de casacos, cobertores e meias para as famílias atendidas pela assistência social.',
+      'As peças arrecadadas são entregues às 126 famílias acompanhadas pela assistência social do CEAK. A triagem é feita pelas voluntárias do bazar, que separam por tamanho e estado de conservação.',
+    destaque: true,
     pontosColeta: [
-      'Recepção do CEAK — ter. a sáb., 19h às 21h30',
-      'Drive-thru no portão lateral — sábados, 9h às 12h',
+      'Coleta drive-thru: sábados, 9h às 12h, portão lateral.',
+      'Recepção: terça a sábado, 19h às 21h30.',
     ],
     itens: {
       create: [
-        { nome: 'Casacos adultos', meta: 200, recebido: 168, unidade: 'peças' },
-        { nome: 'Cobertores', meta: 120, recebido: 74, unidade: 'peças' },
-        { nome: 'Casacos infantis', meta: 100, recebido: 86, unidade: 'peças' },
-        { nome: 'Meias', meta: 80, recebido: 50, unidade: 'pares' },
+        { nome: 'Casacos infantis', meta: 120, recebido: 62, unidade: 'peças' },
+        { nome: 'Casacos adultos', meta: 180, recebido: 148, unidade: 'peças' },
+        { nome: 'Cobertores', meta: 120, recebido: 96, unidade: 'peças' },
+        { nome: 'Meias', meta: 80, recebido: 72, unidade: 'pares' },
       ],
     },
   });
@@ -1508,6 +1812,20 @@ async function main() {
   }
 
   // ─── Assistência ─────────────────────────────────────────────────────
+  // Horários de atendimento ("Preciso de ajuda › Data").
+  const vagasRaw = [
+    ['2026-10-06T19:00', 5],
+    ['2026-10-08T19:00', 7],
+    ['2026-10-10T15:00', 2],
+    ['2026-10-13T19:00', 8],
+    ['2026-10-15T19:00', 8],
+    ['2026-10-17T15:00', 5],
+  ] as const;
+  const VG: Record<string, string> = {};
+  for (const [inicio, vagas] of vagasRaw) {
+    VG[inicio] = (await prisma.vagaAssistencia.create({ data: { inicio: d(inicio), vagas } })).id;
+  }
+
   const assist = [
     [
       'Carla N.',
@@ -1574,6 +1892,8 @@ async function main() {
         data: d(data),
         equipe,
         atendenteId: atendente ? pid(atendente) : undefined,
+        // Só as agendadas ocupam vaga no horário.
+        vagaId: status === StatusAssistencia.AGENDADA ? VG[data] : undefined,
         status,
         relato: { create: { texto: 'Relato fictício para desenvolvimento (dado sensível).' } },
       },
@@ -1773,6 +2093,121 @@ async function main() {
         ip: '200.150.0.7',
         criadoEm: d('2026-09-27T11:15'),
       },
+    ],
+  });
+
+  // ─── Biblioteca ──────────────────────────────────────────────────────
+  console.log('→ Biblioteca e transparência');
+  const biblioteca = [
+    [
+      'O Livro dos Espíritos',
+      'Allan Kardec',
+      'LIVRO',
+      'Obras básicas',
+      ['Reencarnação', 'Prece'],
+      'ESDE',
+    ],
+    [
+      'O Evangelho Segundo o Espiritismo',
+      'Allan Kardec',
+      'LIVRO',
+      'Obras básicas',
+      ['Prece', 'Família'],
+      'Evangelho',
+    ],
+    ['O Livro dos Médiuns', 'Allan Kardec', 'LIVRO', 'Mediunidade', ['Mediunidade'], 'Mediunidade'],
+    ['Apostila ESDE — Módulo 3', 'FEB / CEAK', 'PDF', 'ESDE', ['Reencarnação'], 'ESDE'],
+    ['Roteiro: Família e Espiritualidade', 'Marta Andrade', 'PDF', 'Família', ['Família'], null],
+    [
+      'O passe: fundamentos e prática',
+      'Diretoria doutrinária',
+      'ARTIGO',
+      'Passe',
+      ['Mediunidade'],
+      null,
+    ],
+    [
+      'Reencarnação e justiça divina',
+      'Helena Prado',
+      'ARTIGO',
+      'Reencarnação',
+      ['Reencarnação'],
+      'ESDE',
+    ],
+    [
+      'Introdução à mediunidade',
+      'Helena Prado',
+      'VIDEO',
+      'Mediunidade',
+      ['Mediunidade'],
+      'Mediunidade',
+    ],
+    ['Prece de Cáritas comentada', 'Lúcia Moraes', 'AUDIO', 'Prece', ['Prece'], 'Evangelho'],
+    ['Família e Espiritualidade', 'Marta Andrade', 'PALESTRA', 'Família', ['Família'], null],
+    ['A coragem da fé', 'Antônio Ferreira', 'PALESTRA', 'Fé', ['Prece'], null],
+    ['Nosso Lar', 'André Luiz / Chico Xavier', 'LIVRO', 'Vida espiritual', ['Reencarnação'], null],
+  ] as const;
+  for (const [titulo, autor, tipo, tema, assuntos, curso] of biblioteca) {
+    await prisma.itemBiblioteca.create({
+      data: {
+        titulo,
+        autor,
+        tipo,
+        tema,
+        assuntos: [...assuntos],
+        curso,
+        emprestimo: tipo === 'LIVRO',
+        url:
+          tipo === 'LIVRO'
+            ? null
+            : tipo === 'VIDEO' || tipo === 'PALESTRA'
+              ? 'https://www.youtube.com/@ceakpenapolis/videos'
+              : null,
+      },
+    });
+  }
+
+  // ─── Transparência ───────────────────────────────────────────────────
+  await prisma.prestacaoContas.create({
+    data: {
+      mes: d('2026-09-01'),
+      receitasCentavos: reais(18840),
+      despesasCentavos: reais(13290),
+      origens: [
+        { rotulo: 'Doações', centavos: reais(8420) },
+        { rotulo: 'Loja e bazar', centavos: reais(4820) },
+        { rotulo: 'Contribuições de associados', centavos: reais(3150) },
+        { rotulo: 'Eventos', centavos: reais(1680) },
+        { rotulo: 'Outras', centavos: reais(770) },
+      ],
+      aplicacoes: [
+        { rotulo: 'Assistência social', centavos: reais(4980) },
+        { rotulo: 'Energia e água', centavos: reais(2360) },
+        { rotulo: 'Manutenção da sede', centavos: reais(2140) },
+        { rotulo: 'Material de consumo', centavos: reais(1420) },
+        { rotulo: 'Tecnologia', centavos: reais(890) },
+        { rotulo: 'Outras', centavos: reais(1500) },
+      ],
+      impacto: [
+        {
+          valor: '126',
+          rotulo: 'famílias com cesta mensal',
+          rotuloResumo: 'famílias assistidas no trimestre',
+        },
+        { valor: '42', rotulo: 'atendimentos fraternos no mês' },
+        { valor: '147', rotulo: 'alunos em estudos' },
+        { valor: '68', rotulo: 'voluntários ativos' },
+      ],
+      publicada: true,
+      aprovadaEm: d('2026-10-01T18:00'),
+    },
+  });
+  await prisma.documentoTransparencia.createMany({
+    data: [
+      { titulo: 'Prestação de contas — setembro/2026', descricao: 'PDF · 1,2 MB', ordem: 1 },
+      { titulo: 'Prestação de contas — agosto/2026', descricao: 'PDF · 1,1 MB', ordem: 2 },
+      { titulo: 'Balanço anual 2025', descricao: 'PDF · 2,4 MB', ordem: 3 },
+      { titulo: 'Estatuto social', descricao: 'PDF · 380 KB', ordem: 4 },
     ],
   });
 

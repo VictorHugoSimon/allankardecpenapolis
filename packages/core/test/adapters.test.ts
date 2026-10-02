@@ -48,7 +48,7 @@ describe('PaymentProvider mock', () => {
       referencia: 'doacao-1',
     });
     expect(c.status).toBe('AGUARDANDO');
-    const { corpo, assinatura } = p.simularPagamento(c.id);
+    const { corpo, assinatura } = p.simularPagamento(c);
     const ev = await p.lerWebhook(corpo, assinatura);
     expect(ev).toMatchObject({
       cobrancaId: c.id,
@@ -62,7 +62,7 @@ describe('PaymentProvider mock', () => {
   it('rejeita webhook com assinatura inválida', async () => {
     const p = criarMockPaymentProvider(cfg);
     const c = await p.criarCobranca({ valorCentavos: 100, descricao: 'x', referencia: 'r' });
-    const { corpo } = p.simularPagamento(c.id);
+    const { corpo } = p.simularPagamento(c);
     await expect(p.lerWebhook(corpo, 'falsa')).rejects.toThrow(/inválida/);
     await expect(p.lerWebhook(corpo, null)).rejects.toThrow(/inválida/);
   });
