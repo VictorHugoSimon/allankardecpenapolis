@@ -1,0 +1,222 @@
+/*
+ * CEAK Digital — design tokens (Tailwind CSS v4).
+ * Fonte: docs/design/README.md ("Design tokens").
+ *
+ * Uso nos apps:
+ *   @import 'tailwindcss';
+ *   @import '@ceak/ui/theme.css';
+ *   @source '../../../../packages/ui/src';
+ *
+ * Ajustes de acessibilidade (WCAG 2.1 AA, contraste ≥ 4,5:1):
+ *   - muted-2 passou de #6B746C para #606861 (3,97:1 → 4,72:1 sobre beige).
+ *   - placeholder-ink passou de #7A7363 para #6B6557 (3,75:1 → 4,62:1 sobre as listras).
+ */
+
+@theme {
+  /* Superfícies */
+  --color-bg: #f7f4ee;
+  --color-surface: #ffffff;
+  --color-surface-2: #fcfbf8;
+  --color-beige: #efe8da;
+  --color-beige-2: #f2ece0;
+  --color-beige-3: #ece5d6;
+
+  /* Texto */
+  --color-ink: #1f2a24;
+  --color-ink-2: #3f4a42;
+  --color-muted: #5e675f;
+  --color-muted-2: #606861;
+
+  /* Bordas */
+  --color-line: #e6e0d3;
+  --color-line-soft: #efe8da;
+  --color-line-2: #d8d0bf;
+  --color-line-3: #cfc7b6;
+  --color-line-admin: #e1d9c8;
+
+  /* Marca */
+  --color-green: #2f5d46;
+  --color-green-dark: #1e3d2f;
+  --color-green-soft: #e4ede6;
+  --color-green-tint: #f4f7f2;
+  --color-green-on-dark: #c9d6cd;
+  --color-green-on-dark-2: #a9c2b1;
+  --color-green-chart: #9db8a6;
+  --color-ochre: #b5833a;
+  --color-danger: #a4473a;
+  --color-ok-strong: #2f7a52;
+
+  /* Pills de status (fundo / texto) */
+  --color-pill-ok-bg: #e4ede6;
+  --color-pill-ok-fg: #1e3d2f;
+  --color-pill-warn-bg: #f4ead5;
+  --color-pill-warn-fg: #7a5a1e;
+  --color-pill-warn-bd: #e3c98f;
+  --color-pill-err-bg: #f3ddd5;
+  --color-pill-err-fg: #8a3426;
+  --color-pill-neutral-bg: #eeeae1;
+  --color-pill-neutral-fg: #4f5a52;
+  --color-pill-info-bg: #e1e8ef;
+  --color-pill-info-fg: #2f4b63;
+
+  /* Placeholders de imagem */
+  --color-placeholder-ink: #6b6557;
+
+  /* Categorias de agenda e canais: oklch(0.48 0.08 H) */
+  --color-cat-palestras: oklch(0.48 0.08 155);
+  --color-cat-estudos: oklch(0.48 0.08 235);
+  --color-cat-cursos: oklch(0.48 0.08 295);
+  --color-cat-eventos: oklch(0.48 0.08 60);
+  --color-cat-assistencia: oklch(0.48 0.08 20);
+  --color-cat-campanhas: oklch(0.48 0.08 195);
+  --color-ch-blog: oklch(0.48 0.08 155);
+  --color-ch-facebook: oklch(0.48 0.08 250);
+  --color-ch-instagram: oklch(0.48 0.08 330);
+  --color-ch-google: oklch(0.48 0.08 60);
+
+  /* Tipografia (variáveis definidas por next/font em cada app) */
+  --font-serif: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  --font-sans: var(--font-instrument-sans), 'Instrument Sans', system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Raios */
+  --radius-pill: 999px;
+  --radius-input: 10px;
+  --radius-input-lg: 14px;
+  --radius-card-sm: 14px;
+  --radius-card: 16px;
+  --radius-card-lg: 20px;
+  --radius-hero: 24px;
+  --radius-frame: 52px;
+  --radius-frame-inner: 42px;
+
+  /* Sombras (quase inexistentes) */
+  --shadow-app: 0 30px 60px -30px rgba(31, 42, 36, 0.45);
+  --shadow-dropdown: 0 20px 40px -20px rgba(31, 42, 36, 0.3);
+  --shadow-drawer: 0 0 40px rgba(0, 0, 0, 0.2);
+
+  /* Larguras máximas */
+  --container-site: 1240px;
+  --container-admin: 1360px;
+  --container-text: 640px;
+  --container-text-wide: 1040px;
+
+  /* Animações */
+  --animate-ceak-pop: ceakPop 0.6s ease-out both;
+  --animate-ceak-ring: ceakRing 1.4s ease-out 0.3s both;
+  --animate-ceak-pulse: ceakPulse 1.6s ease-in-out infinite;
+  --animate-ceak-scan: ceakScan 2.4s ease-in-out infinite;
+  --animate-ceak-toast: ceakToast 0.2s ease-out both;
+
+  @keyframes ceakPop {
+    0% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    70% {
+      transform: scale(1.06);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes ceakRing {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+  @keyframes ceakPulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+  @keyframes ceakScan {
+    0%,
+    100% {
+      top: 12%;
+    }
+    50% {
+      top: 84%;
+    }
+  }
+  @keyframes ceakToast {
+    0% {
+      transform: translateY(8px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  a {
+    color: var(--color-green);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-green-dark);
+    text-decoration: underline;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-green);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility placeholder-stripes {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-beige-3) 0 10px,
+    var(--color-beige-2) 10px 20px
+  );
+}
+
+@utility label-caps {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
