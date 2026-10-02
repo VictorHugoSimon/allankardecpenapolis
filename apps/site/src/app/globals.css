@@ -1,3 +1,11 @@
 @import 'tailwindcss';
 @import '@ceak/ui/theme.css';
 @source '../../../../packages/ui/src';
+
+/* Links dentro de texto corrido: sublinhados (WCAG 1.4.1, não depender só da cor). */
+@layer base {
+  :where(p, span, label, dd) > a:not([class*='rounded-pill']) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
