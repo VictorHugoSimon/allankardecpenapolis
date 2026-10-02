@@ -1,0 +1,1166 @@
+// CEAK Digital — modelo de dados.
+// Convenções: valores monetários em centavos (Int); datas em UTC (timestamptz),
+// exibidas no fuso America/Sao_Paulo; nomes de tabela em snake_case.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────
+
+enum Perfil {
+  ADMINISTRADOR
+  DIRETORIA
+  TESOURARIA
+  SECRETARIA
+  COORDENADOR
+  INSTRUTOR
+  VOLUNTARIO
+  MEMBRO
+  VISITANTE
+}
+
+enum StatusPessoa {
+  ATIVO
+  NOVO
+  AUSENTE
+  INATIVO
+}
+
+enum TipoEvento {
+  PALESTRA
+  ESTUDO
+  CURSO
+  EVENTO
+  ASSISTENCIA
+  CAMPANHA
+}
+
+enum StatusEvento {
+  RASCUNHO
+  AGUARDANDO_APROVACAO
+  CONFIRMADO
+  EM_ANDAMENTO
+  ENCERRADO
+  CANCELADO
+}
+
+/// Etapas do fluxo da palestra (Automation Engine).
+enum EtapaFluxoPalestra {
+  CRIADA
+  DESCRICAO_IA
+  CONTEUDO_SOCIAL
+  APROVACAO_DIVULGACAO
+  POSTS_AGENDADOS
+  PUSH_ENVIADO
+  CHECKIN_ABERTO
+  REALIZADA
+  GRAVACAO_DISPONIVEL
+  NPS_ENVIADO
+  RESUMO_IA
+  ARTIGO_E_POST
+  APROVACAO_PUBLICACAO
+  PUBLICADA
+}
+
+enum OrigemCheckin {
+  QR
+  MANUAL
+  RECEPCAO
+}
+
+enum StatusTurma {
+  ATIVA
+  EM_RISCO
+  ENCERRADA
+}
+
+enum StatusMatricula {
+  ATIVA
+  EM_RISCO
+  CONCLUIDA
+  TRANCADA
+}
+
+enum TipoMaterial {
+  PDF
+  VIDEO
+  AUDIO
+  LINK
+  APOSTILA
+}
+
+/// Fluxo obrigatório: CAPTURADO → PROCESSANDO → RASCUNHO_IA → REVISAO → APROVADO → AGENDADO → PUBLICADO | ERRO.
+/// REJEITADO devolve ao autor (editor de conteúdo).
+enum StatusConteudo {
+  CAPTURADO
+  PROCESSANDO
+  RASCUNHO_IA
+  REVISAO
+  APROVADO
+  AGENDADO
+  PUBLICADO
+  ERRO
+  REJEITADO
+}
+
+enum Canal {
+  BLOG
+  FACEBOOK
+  INSTAGRAM
+  GOOGLE_BUSINESS
+  YOUTUBE
+  PUSH
+  EMAIL
+  WHATSAPP
+}
+
+enum TipoAprovacao {
+  CONTEUDO
+  FINANCEIRO
+  CAMPANHA
+  COMUNICACAO
+  PRODUTO
+  IA
+  EVENTO
+}
+
+enum DecisaoAprovacao {
+  PENDENTE
+  APROVADO
+  REJEITADO
+}
+
+enum StatusComunicacao {
+  RASCUNHO
+  AGUARDANDO_APROVACAO
+  AGENDADO
+  ENVIADO
+  ERRO
+  CANCELADO
+}
+
+enum FormaDoacao {
+  PIX
+  PIX_RECORRENTE
+  ENTREGA
+  DINHEIRO
+  TRANSFERENCIA
+}
+
+enum StatusPagamento {
+  AGUARDANDO
+  PAGO
+  EXPIRADO
+  CANCELADO
+  ESTORNADO
+}
+
+enum StatusCampanha {
+  RASCUNHO
+  ATIVA
+  ENCERRADA
+  AGENDADA
+}
+
+enum UnidadeMedida {
+  UN
+  KG
+  PECA
+  CESTA
+  REAIS
+}
+
+/// "Produto doado", "Feito por voluntárias", "Livraria CEAK".
+enum OrigemProduto {
+  DOADO
+  FEITO_POR_VOLUNTARIAS
+  LIVRARIA
+}
+
+/// "Novo", "Seminovo", "Usado, ótimo estado", "Usado, bom estado".
+enum EstadoProduto {
+  NOVO
+  SEMINOVO
+  USADO_OTIMO
+  USADO_BOM
+}
+
+enum StatusProduto {
+  RASCUNHO
+  AGUARDANDO_APROVACAO
+  ATIVO
+  ESGOTADO
+  INATIVO
+}
+
+enum StatusPedido {
+  AGUARDANDO_PIX
+  PAGO
+  AGUARDANDO_RETIRADA
+  RETIRADO
+  CANCELADO
+}
+
+enum CategoriaEstoque {
+  ALIMENTOS
+  LOJA
+  LIMPEZA
+  DOACOES
+}
+
+enum TipoMovimentacao {
+  ENTRADA
+  SAIDA
+  AJUSTE
+}
+
+enum TipoLancamento {
+  PAGAR
+  RECEBER
+}
+
+/// Status de contas: pendente | aprovado | pago | vencido | cancelado.
+enum StatusLancamento {
+  PENDENTE
+  APROVADO
+  PAGO
+  VENCIDO
+  CANCELADO
+}
+
+enum StatusConciliacao {
+  PENDENTE
+  SUGERIDO
+  CONCILIADO
+  DIVERGENTE
+}
+
+enum TipoAssistencia {
+  ATENDIMENTO_FRATERNO
+  PASSE
+  TRATAMENTO_ESPIRITUAL
+  PRECE
+  ORIENTACAO
+  EVANGELHO_NO_LAR
+}
+
+enum StatusAssistencia {
+  PENDENTE
+  AGENDADA
+  CONCLUIDA
+  CANCELADA
+}
+
+enum StatusExecucao {
+  EM_EXECUCAO
+  SUCESSO
+  FALHA
+}
+
+enum NivelLog {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+}
+
+enum CategoriaLog {
+  APLICACAO
+  SEGURANCA
+  AUDITORIA
+  FINANCEIRO
+  IA
+  AUTOMACAO
+  INTEGRACOES
+  NOTIFICACOES
+}
+
+enum StatusIntegracao {
+  CONECTADO
+  ATENCAO
+  ERRO
+  DESCONECTADO
+}
+
+enum CanalCodigo {
+  EMAIL
+  WHATSAPP
+}
+
+// ─────────────────────────────────────────────────────────────
+// Pessoas e acesso
+// ─────────────────────────────────────────────────────────────
+
+/// Pessoa atendida ou participante. Titular dos dados (LGPD).
+model Pessoa {
+  id                   String       @id @default(uuid()) @db.Uuid
+  nome                 String
+  email                String?      @unique
+  whatsapp             String?
+  nascimento           DateTime?    @db.Date
+  cidade               String?
+  perfil               Perfil       @default(VISITANTE)
+  status               StatusPessoa @default(NOVO)
+  primeiraVisitaEm     DateTime?    @map("primeira_visita_em")
+  membroDesde          DateTime?    @map("membro_desde")
+  /// Consentimento LGPD no cadastro.
+  consentimentoEm      DateTime?    @map("consentimento_em")
+  consentimentoVersao  String?      @map("consentimento_versao")
+  /// Pedido de exclusão (LGPD). Dados pessoais são anonimizados após o prazo.
+  exclusaoSolicitadaEm DateTime?    @map("exclusao_solicitada_em")
+  anonimizadaEm        DateTime?    @map("anonimizada_em")
+  criadoEm             DateTime     @default(now()) @map("criado_em")
+  atualizadoEm         DateTime     @updatedAt @map("atualizado_em")
+
+  usuario       Usuario?
+  inscricoes    Inscricao[]
+  checkins      Checkin[]
+  avaliacoes    Avaliacao[]
+  matriculas    Matricula[]
+  presencas     Presenca[]
+  doacoes       Doacao[]
+  pedidos       Pedido[]
+  voluntario    Voluntario?
+  solicitacoes  SolicitacaoAssistencia[] @relation("Solicitante")
+  atendimentos  SolicitacaoAssistencia[] @relation("Atendente")
+  notificacoes  Notificacao[]
+  conquistas    ConquistaPessoa[]
+  turmasMinistradas Turma[]
+  eventosPalestrante Evento[] @relation("Palestrante")
+
+  @@index([perfil])
+  @@map("pessoa")
+}
+
+/// Conta de acesso (App e/ou Gestão).
+model Usuario {
+  id                 String    @id @default(uuid()) @db.Uuid
+  pessoaId           String    @unique @map("pessoa_id") @db.Uuid
+  email              String    @unique
+  perfil             Perfil
+  /// Coordenação de assistência: única função que vê relatos sensíveis.
+  coordAssistencia   Boolean   @default(false) @map("coord_assistencia")
+  /// `auth.users.id` do Supabase.
+  authId             String?   @unique @map("auth_id") @db.Uuid
+  ativo              Boolean   @default(true)
+  doisFatores        Boolean   @default(false) @map("dois_fatores")
+  ultimoAcessoEm     DateTime? @map("ultimo_acesso_em")
+  tentativasFalhas   Int       @default(0) @map("tentativas_falhas")
+  bloqueadoAte       DateTime? @map("bloqueado_ate")
+  criadoEm           DateTime  @default(now()) @map("criado_em")
+  atualizadoEm       DateTime  @updatedAt @map("atualizado_em")
+
+  pessoa      Pessoa      @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+  credencial  Credencial?
+  auditorias  Auditoria[]
+  aprovacoes  Aprovacao[] @relation("Responsavel")
+  solicitadas Aprovacao[] @relation("Solicitante")
+  conteudos   Conteudo[]
+  logs        Log[]
+
+  @@map("usuario")
+}
+
+/// Senha do provedor local (hash scrypt). Tabela separada: o papel da aplicação
+/// (ceak_app) não tem nenhum acesso a ela.
+model Credencial {
+  usuarioId    String   @id @map("usuario_id") @db.Uuid
+  senhaHash    String   @map("senha_hash")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("credencial")
+}
+
+/// Código de acesso por WhatsApp ou e-mail (provedor local). Guardado como hash.
+model CodigoAcesso {
+  id         String      @id @default(uuid()) @db.Uuid
+  destino    String
+  canal      CanalCodigo
+  codigoHash String      @map("codigo_hash")
+  expiraEm   DateTime    @map("expira_em")
+  usadoEm    DateTime?   @map("usado_em")
+  tentativas Int         @default(0)
+  criadoEm   DateTime    @default(now()) @map("criado_em")
+
+  @@index([destino, canal])
+  @@map("codigo_acesso")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Agenda, eventos e presença
+// ─────────────────────────────────────────────────────────────
+
+model Evento {
+  id              String              @id @default(uuid()) @db.Uuid
+  slug            String              @unique
+  titulo          String
+  tipo            TipoEvento
+  status          StatusEvento        @default(RASCUNHO)
+  etapaFluxo      EtapaFluxoPalestra? @map("etapa_fluxo")
+  descricao       String?
+  resumo          String?
+  inicio          DateTime
+  fim             DateTime?
+  local           String?
+  palestranteId   String?             @map("palestrante_id") @db.Uuid
+  /// Responsável quando não há palestrante (ex.: "Equipe A", "Diretoria").
+  responsavel     String?
+  transmissaoUrl  String?             @map("transmissao_url")
+  gravacaoUrl     String?             @map("gravacao_url")
+  materialUrl     String?             @map("material_url")
+  inscricaoAberta Boolean             @default(true) @map("inscricao_aberta")
+  vagas           Int?
+  publico         Boolean             @default(true)
+  criadoEm        DateTime            @default(now()) @map("criado_em")
+  atualizadoEm    DateTime            @updatedAt @map("atualizado_em")
+
+  palestrante Pessoa?     @relation("Palestrante", fields: [palestranteId], references: [id])
+  inscricoes  Inscricao[]
+  checkins    Checkin[]
+  avaliacoes  Avaliacao[]
+  conteudos   Conteudo[]
+  aulas       Aula[]
+
+  @@index([inicio])
+  @@index([tipo, inicio])
+  @@map("evento")
+}
+
+model Inscricao {
+  id          String   @id @default(uuid()) @db.Uuid
+  eventoId    String   @map("evento_id") @db.Uuid
+  pessoaId    String   @map("pessoa_id") @db.Uuid
+  primeiraVez Boolean  @default(false) @map("primeira_vez")
+  criadoEm    DateTime @default(now()) @map("criado_em")
+
+  evento Evento @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+
+  @@unique([eventoId, pessoaId])
+  @@map("inscricao")
+}
+
+model Checkin {
+  id       String        @id @default(uuid()) @db.Uuid
+  pessoaId String        @map("pessoa_id") @db.Uuid
+  eventoId String?       @map("evento_id") @db.Uuid
+  origem   OrigemCheckin
+  criadoEm DateTime      @default(now()) @map("criado_em")
+
+  pessoa Pessoa  @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+  evento Evento? @relation(fields: [eventoId], references: [id])
+
+  @@unique([pessoaId, eventoId])
+  @@index([criadoEm])
+  @@map("checkin")
+}
+
+/// Avaliação NPS de palestra/evento.
+model Avaliacao {
+  id             String   @id @default(uuid()) @db.Uuid
+  eventoId       String   @map("evento_id") @db.Uuid
+  pessoaId       String?  @map("pessoa_id") @db.Uuid
+  nps            Int
+  conteudo       Int?
+  clareza        Int?
+  aplicabilidade Int?
+  comentario     String?
+  sugestao       String?
+  criadoEm       DateTime @default(now()) @map("criado_em")
+
+  evento Evento  @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  pessoa Pessoa? @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
+
+  @@unique([eventoId, pessoaId])
+  @@map("avaliacao")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Estudos
+// ─────────────────────────────────────────────────────────────
+
+model Curso {
+  id        String   @id @default(uuid()) @db.Uuid
+  slug      String   @unique
+  nome      String
+  sigla     String?
+  descricao String?
+  publico   String?
+  duracao   String?
+  ordem     Int      @default(0)
+  ativo     Boolean  @default(true)
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  turmas     Turma[]
+  materiais  Material[]
+  @@map("curso")
+}
+
+model Turma {
+  id           String      @id @default(uuid()) @db.Uuid
+  cursoId      String      @map("curso_id") @db.Uuid
+  nome         String
+  instrutorId  String?     @map("instrutor_id") @db.Uuid
+  encontros    String
+  progresso    String?
+  status       StatusTurma @default(ATIVA)
+  inicio       DateTime?   @db.Date
+  fim          DateTime?   @db.Date
+  criadoEm     DateTime    @default(now()) @map("criado_em")
+
+  curso      Curso       @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  instrutor  Pessoa?     @relation(fields: [instrutorId], references: [id])
+  aulas      Aula[]
+  matriculas Matricula[]
+
+  @@map("turma")
+}
+
+model Aula {
+  id        String    @id @default(uuid()) @db.Uuid
+  turmaId   String    @map("turma_id") @db.Uuid
+  eventoId  String?   @map("evento_id") @db.Uuid
+  numero    Int
+  titulo    String
+  data      DateTime
+  modulo    String?
+
+  turma     Turma      @relation(fields: [turmaId], references: [id], onDelete: Cascade)
+  evento    Evento?    @relation(fields: [eventoId], references: [id])
+  presencas Presenca[]
+  materiais Material[]
+
+  @@unique([turmaId, numero])
+  @@map("aula")
+}
+
+model Material {
+  id       String       @id @default(uuid()) @db.Uuid
+  cursoId  String?      @map("curso_id") @db.Uuid
+  aulaId   String?      @map("aula_id") @db.Uuid
+  titulo   String
+  tipo     TipoMaterial
+  url      String
+  criadoEm DateTime     @default(now()) @map("criado_em")
+
+  curso Curso? @relation(fields: [cursoId], references: [id], onDelete: Cascade)
+  aula  Aula?  @relation(fields: [aulaId], references: [id], onDelete: Cascade)
+
+  @@map("material")
+}
+
+model Matricula {
+  id        String          @id @default(uuid()) @db.Uuid
+  turmaId   String          @map("turma_id") @db.Uuid
+  pessoaId  String          @map("pessoa_id") @db.Uuid
+  status    StatusMatricula @default(ATIVA)
+  progresso Int             @default(0)
+  criadoEm  DateTime        @default(now()) @map("criado_em")
+
+  turma  Turma  @relation(fields: [turmaId], references: [id], onDelete: Cascade)
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+
+  @@unique([turmaId, pessoaId])
+  @@map("matricula")
+}
+
+model Presenca {
+  id       String   @id @default(uuid()) @db.Uuid
+  aulaId   String   @map("aula_id") @db.Uuid
+  pessoaId String   @map("pessoa_id") @db.Uuid
+  presente Boolean
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  aula   Aula   @relation(fields: [aulaId], references: [id], onDelete: Cascade)
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+
+  @@unique([aulaId, pessoaId])
+  @@map("presenca")
+}
+
+/// Conquistas da "Minha jornada" (pessoal, sem ranking).
+model Conquista {
+  id        String            @id @default(uuid()) @db.Uuid
+  chave     String            @unique
+  titulo    String
+  descricao String
+  ordem     Int               @default(0)
+
+  pessoas ConquistaPessoa[]
+  @@map("conquista")
+}
+
+model ConquistaPessoa {
+  pessoaId    String   @map("pessoa_id") @db.Uuid
+  conquistaId String   @map("conquista_id") @db.Uuid
+  obtidaEm    DateTime @default(now()) @map("obtida_em")
+
+  pessoa    Pessoa    @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+  conquista Conquista @relation(fields: [conquistaId], references: [id], onDelete: Cascade)
+
+  @@id([pessoaId, conquistaId])
+  @@map("conquista_pessoa")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Conteúdo, aprovação e comunicação
+// ─────────────────────────────────────────────────────────────
+
+model Conteudo {
+  id            String         @id @default(uuid()) @db.Uuid
+  titulo        String
+  /// Origem: "Gravação YouTube", "Agenda", "Campanhas"...
+  fonte         String
+  /// Texto original (ex.: transcrição da palestra).
+  textoOriginal String?        @map("texto_original")
+  resumo        String?
+  seoTitulo     String?        @map("seo_titulo")
+  seoDescricao  String?        @map("seo_descricao")
+  tags          String[]
+  imagemUrl     String?        @map("imagem_url")
+  fontes        String[]
+  status        StatusConteudo @default(CAPTURADO)
+  geradoPorIa   Boolean        @default(false) @map("gerado_por_ia")
+  agendadoPara  DateTime?      @map("agendado_para")
+  publicadoEm   DateTime?      @map("publicado_em")
+  erro          String?
+  eventoId      String?        @map("evento_id") @db.Uuid
+  responsavelId String?        @map("responsavel_id") @db.Uuid
+  criadoEm      DateTime       @default(now()) @map("criado_em")
+  atualizadoEm  DateTime       @updatedAt @map("atualizado_em")
+
+  evento      Evento?          @relation(fields: [eventoId], references: [id])
+  responsavel Usuario?         @relation(fields: [responsavelId], references: [id])
+  versoes     ConteudoVersao[]
+  aprovacoes  Aprovacao[]
+
+  @@index([status])
+  @@map("conteudo")
+}
+
+/// Versão do conteúdo por canal (Blog, Facebook, Instagram, Google Business).
+model ConteudoVersao {
+  id           String    @id @default(uuid()) @db.Uuid
+  conteudoId   String    @map("conteudo_id") @db.Uuid
+  canal        Canal
+  texto        String
+  publicadoEm  DateTime? @map("publicado_em")
+  idExterno    String?   @map("id_externo")
+  urlExterna   String?   @map("url_externa")
+  erro         String?
+  atualizadoEm DateTime  @updatedAt @map("atualizado_em")
+
+  conteudo Conteudo @relation(fields: [conteudoId], references: [id], onDelete: Cascade)
+
+  @@unique([conteudoId, canal])
+  @@map("conteudo_versao")
+}
+
+/// Central de aprovações. Toda decisão gera Auditoria.
+model Aprovacao {
+  id            String           @id @default(uuid()) @db.Uuid
+  tipo          TipoAprovacao
+  titulo        String
+  detalhe       String?
+  /// Entidade alvo (ex.: "Conteudo", "Lancamento") e seu ID.
+  entidade      String
+  entidadeId    String           @map("entidade_id")
+  decisao       DecisaoAprovacao @default(PENDENTE)
+  comentario    String?
+  solicitanteId String?          @map("solicitante_id") @db.Uuid
+  responsavelId String?          @map("responsavel_id") @db.Uuid
+  conteudoId    String?          @map("conteudo_id") @db.Uuid
+  decididoEm    DateTime?        @map("decidido_em")
+  criadoEm      DateTime         @default(now()) @map("criado_em")
+
+  solicitante Usuario?  @relation("Solicitante", fields: [solicitanteId], references: [id])
+  responsavel Usuario?  @relation("Responsavel", fields: [responsavelId], references: [id])
+  conteudo    Conteudo? @relation(fields: [conteudoId], references: [id], onDelete: Cascade)
+
+  @@index([decisao, tipo])
+  @@map("aprovacao")
+}
+
+model Comunicacao {
+  id           String            @id @default(uuid()) @db.Uuid
+  canal        Canal
+  titulo       String
+  mensagem     String
+  /// Descrição do público (ex.: "Membros (382)") e filtro aplicado.
+  publico      String
+  filtro       Json?
+  status       StatusComunicacao @default(RASCUNHO)
+  agendadoPara DateTime?         @map("agendado_para")
+  enviadoEm    DateTime?         @map("enviado_em")
+  enviados     Int               @default(0)
+  aberturas    Int               @default(0)
+  geradoPorIa  Boolean           @default(false) @map("gerado_por_ia")
+  criadoEm     DateTime          @default(now()) @map("criado_em")
+
+  @@map("comunicacao")
+}
+
+model Notificacao {
+  id       String    @id @default(uuid()) @db.Uuid
+  pessoaId String    @map("pessoa_id") @db.Uuid
+  titulo   String
+  corpo    String
+  url      String?
+  lidaEm   DateTime? @map("lida_em")
+  criadoEm DateTime  @default(now()) @map("criado_em")
+
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+
+  @@index([pessoaId, lidaEm])
+  @@map("notificacao")
+}
+
+/// Inscrição Web Push (VAPID) de um dispositivo.
+model DispositivoPush {
+  id        String   @id @default(uuid()) @db.Uuid
+  pessoaId  String?  @map("pessoa_id") @db.Uuid
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  @@map("dispositivo_push")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Solidário: campanhas e doações
+// ─────────────────────────────────────────────────────────────
+
+model Campanha {
+  id          String         @id @default(uuid()) @db.Uuid
+  slug        String         @unique
+  titulo      String
+  descricao   String?
+  status      StatusCampanha @default(ATIVA)
+  unidade     UnidadeMedida
+  meta        Int
+  arrecadado  Int            @default(0)
+  inicio      DateTime?      @db.Date
+  fim         DateTime?      @db.Date
+  pontosColeta String[]      @map("pontos_coleta")
+  criadoEm    DateTime       @default(now()) @map("criado_em")
+
+  itens   ItemCampanha[]
+  doacoes Doacao[]
+  @@map("campanha")
+}
+
+model ItemCampanha {
+  id         String @id @default(uuid()) @db.Uuid
+  campanhaId String @map("campanha_id") @db.Uuid
+  nome       String
+  meta       Int
+  recebido   Int    @default(0)
+  unidade    String
+
+  campanha Campanha @relation(fields: [campanhaId], references: [id], onDelete: Cascade)
+  @@map("item_campanha")
+}
+
+model Doacao {
+  id             String          @id @default(uuid()) @db.Uuid
+  pessoaId       String?         @map("pessoa_id") @db.Uuid
+  /// Nome exibido quando não há cadastro (ex.: "Anônimo", "Mercado Bom Preço").
+  doadorNome     String?         @map("doador_nome")
+  valorCentavos  Int?            @map("valor_centavos")
+  /// Doação em itens (ex.: "40 kg de arroz").
+  itemDescricao  String?         @map("item_descricao")
+  forma          FormaDoacao
+  destino        String
+  campanhaId     String?         @map("campanha_id") @db.Uuid
+  recorrente     Boolean         @default(false)
+  statusPagamento StatusPagamento @default(AGUARDANDO) @map("status_pagamento")
+  cobrancaId     String?         @unique @map("cobranca_id")
+  brCode         String?         @map("br_code")
+  reciboEmitidoEm DateTime?      @map("recibo_emitido_em")
+  pagoEm         DateTime?       @map("pago_em")
+  criadoEm       DateTime        @default(now()) @map("criado_em")
+
+  pessoa   Pessoa?   @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
+  campanha Campanha? @relation(fields: [campanhaId], references: [id])
+
+  @@index([criadoEm])
+  @@map("doacao")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Loja e estoque
+// ─────────────────────────────────────────────────────────────
+
+model Produto {
+  id            String        @id @default(uuid()) @db.Uuid
+  slug          String        @unique
+  nome          String
+  categoria     String
+  descricao     String?
+  precoCentavos Int           @map("preco_centavos")
+  origem        OrigemProduto
+  estado        EstadoProduto
+  status        StatusProduto @default(ATIVO)
+  imagens       String[]
+  itemEstoqueId String?       @unique @map("item_estoque_id") @db.Uuid
+  criadoEm      DateTime      @default(now()) @map("criado_em")
+
+  itemEstoque ItemEstoque? @relation(fields: [itemEstoqueId], references: [id])
+  itens       ItemPedido[]
+  @@map("produto")
+}
+
+model Pedido {
+  id              String          @id @default(uuid()) @db.Uuid
+  numero          Int             @unique @default(autoincrement())
+  pessoaId        String?         @map("pessoa_id") @db.Uuid
+  clienteNome     String          @map("cliente_nome")
+  clienteWhatsapp String?         @map("cliente_whatsapp")
+  totalCentavos   Int             @map("total_centavos")
+  status          StatusPedido    @default(AGUARDANDO_PIX)
+  statusPagamento StatusPagamento @default(AGUARDANDO) @map("status_pagamento")
+  cobrancaId      String?         @unique @map("cobranca_id")
+  brCode          String?         @map("br_code")
+  pagoEm          DateTime?       @map("pago_em")
+  retiradoEm      DateTime?       @map("retirado_em")
+  criadoEm        DateTime        @default(now()) @map("criado_em")
+
+  pessoa Pessoa?      @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
+  itens  ItemPedido[]
+  @@map("pedido")
+}
+
+model ItemPedido {
+  id                String @id @default(uuid()) @db.Uuid
+  pedidoId          String @map("pedido_id") @db.Uuid
+  produtoId         String @map("produto_id") @db.Uuid
+  quantidade        Int
+  precoUnitCentavos Int    @map("preco_unit_centavos")
+
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto Produto @relation(fields: [produtoId], references: [id])
+  @@map("item_pedido")
+}
+
+/// Saldo de estoque. Pedido pago baixa automaticamente; abaixo do mínimo gera alerta.
+model ItemEstoque {
+  id        String           @id @default(uuid()) @db.Uuid
+  sku       String           @unique
+  nome      String
+  categoria CategoriaEstoque
+  unidade   UnidadeMedida
+  saldo     Decimal          @db.Decimal(12, 3)
+  minimo    Decimal?         @db.Decimal(12, 3)
+  criadoEm  DateTime         @default(now()) @map("criado_em")
+  atualizadoEm DateTime      @updatedAt @map("atualizado_em")
+
+  produto       Produto?
+  movimentacoes Movimentacao[]
+  @@map("item_estoque")
+}
+
+model Movimentacao {
+  id            String           @id @default(uuid()) @db.Uuid
+  itemEstoqueId String           @map("item_estoque_id") @db.Uuid
+  tipo          TipoMovimentacao
+  motivo        String
+  quantidade    Decimal          @db.Decimal(12, 3)
+  /// Origem ou destino (ex.: "Pedido #1042", "Família Rocha").
+  referencia    String?
+  por           String
+  criadoEm      DateTime         @default(now()) @map("criado_em")
+
+  itemEstoque ItemEstoque @relation(fields: [itemEstoqueId], references: [id], onDelete: Cascade)
+  @@index([criadoEm])
+  @@map("movimentacao")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Financeiro
+// ─────────────────────────────────────────────────────────────
+
+model CategoriaFinanceira {
+  id               String         @id @default(uuid()) @db.Uuid
+  nome             String
+  tipo             TipoLancamento
+  orcadoMesCentavos Int?          @map("orcado_mes_centavos")
+
+  lancamentos Lancamento[]
+  @@unique([nome, tipo])
+  @@map("categoria_financeira")
+}
+
+model CentroCusto {
+  id                String  @id @default(uuid()) @db.Uuid
+  nome              String  @unique
+  descricao         String?
+  orcadoMesCentavos Int?    @map("orcado_mes_centavos")
+
+  lancamentos Lancamento[]
+  @@map("centro_custo")
+}
+
+/// Conta a pagar ou a receber. Toda alteração é auditada.
+model Lancamento {
+  id            String           @id @default(uuid()) @db.Uuid
+  tipo          TipoLancamento
+  /// Fornecedor (pagar) ou origem (receber).
+  contraparte   String
+  descricao     String
+  categoriaId   String           @map("categoria_id") @db.Uuid
+  centroCustoId String?          @map("centro_custo_id") @db.Uuid
+  valorCentavos Int              @map("valor_centavos")
+  vencimento    DateTime         @db.Date
+  status        StatusLancamento @default(PENDENTE)
+  pagoEm        DateTime?        @map("pago_em")
+  responsavel   String?
+  criadoEm      DateTime         @default(now()) @map("criado_em")
+  atualizadoEm  DateTime         @updatedAt @map("atualizado_em")
+
+  categoria   CategoriaFinanceira @relation(fields: [categoriaId], references: [id])
+  centroCusto CentroCusto?        @relation(fields: [centroCustoId], references: [id])
+  extratos    ExtratoLinha[]
+
+  @@index([tipo, status, vencimento])
+  @@map("lancamento")
+}
+
+/// Linha do extrato bancário para conciliação.
+model ExtratoLinha {
+  id            String            @id @default(uuid()) @db.Uuid
+  data          DateTime          @db.Date
+  descricao     String
+  /// Positivo = crédito; negativo = débito.
+  valorCentavos Int               @map("valor_centavos")
+  lancamentoId  String?           @map("lancamento_id") @db.Uuid
+  /// Descrição do lançamento sugerido/vinculado (ex.: "Doação #8812").
+  referencia    String?
+  status        StatusConciliacao @default(PENDENTE)
+  conciliadoEm  DateTime?         @map("conciliado_em")
+
+  lancamento Lancamento? @relation(fields: [lancamentoId], references: [id])
+  @@map("extrato_linha")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Voluntariado e assistência
+// ─────────────────────────────────────────────────────────────
+
+model Area {
+  id        String  @id @default(uuid()) @db.Uuid
+  nome      String  @unique
+  descricao String?
+  /// Vagas desejadas na escala.
+  necessidade Int   @default(0)
+
+  voluntarios VoluntarioArea[]
+  escalas     Escala[]
+  @@map("area")
+}
+
+model Habilidade {
+  id   String @id @default(uuid()) @db.Uuid
+  nome String @unique
+
+  voluntarios VoluntarioHabilidade[]
+  @@map("habilidade")
+}
+
+model Voluntario {
+  id       String   @id @default(uuid()) @db.Uuid
+  pessoaId String   @unique @map("pessoa_id") @db.Uuid
+  ativo    Boolean  @default(true)
+  desde    DateTime @default(now())
+
+  pessoa      Pessoa                 @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+  areas       VoluntarioArea[]
+  habilidades VoluntarioHabilidade[]
+  escalas     Escala[]
+  @@map("voluntario")
+}
+
+model VoluntarioArea {
+  voluntarioId String @map("voluntario_id") @db.Uuid
+  areaId       String @map("area_id") @db.Uuid
+
+  voluntario Voluntario @relation(fields: [voluntarioId], references: [id], onDelete: Cascade)
+  area       Area       @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  @@id([voluntarioId, areaId])
+  @@map("voluntario_area")
+}
+
+model VoluntarioHabilidade {
+  voluntarioId String @map("voluntario_id") @db.Uuid
+  habilidadeId String @map("habilidade_id") @db.Uuid
+
+  voluntario Voluntario @relation(fields: [voluntarioId], references: [id], onDelete: Cascade)
+  habilidade Habilidade @relation(fields: [habilidadeId], references: [id], onDelete: Cascade)
+  @@id([voluntarioId, habilidadeId])
+  @@map("voluntario_habilidade")
+}
+
+model Escala {
+  id           String   @id @default(uuid()) @db.Uuid
+  areaId       String   @map("area_id") @db.Uuid
+  voluntarioId String   @map("voluntario_id") @db.Uuid
+  inicio       DateTime
+  fim          DateTime
+  funcao       String?
+
+  area       Area       @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  voluntario Voluntario @relation(fields: [voluntarioId], references: [id], onDelete: Cascade)
+  @@index([inicio])
+  @@map("escala")
+}
+
+/// Solicitação de assistência espiritual. O relato fica em RelatoAssistencia (restrito por RLS).
+model SolicitacaoAssistencia {
+  id            String            @id @default(uuid()) @db.Uuid
+  tipo          TipoAssistencia
+  pessoaId      String?           @map("pessoa_id") @db.Uuid
+  /// Nome exibido (ex.: "Carla N.", "Anônimo").
+  nomeExibicao  String            @map("nome_exibicao")
+  contato       String?
+  data          DateTime?
+  atendenteId   String?           @map("atendente_id") @db.Uuid
+  equipe        String?
+  status        StatusAssistencia @default(PENDENTE)
+  anonimo       Boolean           @default(false)
+  criadoEm      DateTime          @default(now()) @map("criado_em")
+  atualizadoEm  DateTime          @updatedAt @map("atualizado_em")
+
+  pessoa    Pessoa? @relation("Solicitante", fields: [pessoaId], references: [id], onDelete: SetNull)
+  atendente Pessoa? @relation("Atendente", fields: [atendenteId], references: [id], onDelete: SetNull)
+  relato    RelatoAssistencia?
+  @@index([status, data])
+  @@map("solicitacao_assistencia")
+}
+
+/// Relato da solicitação (dado sensível). Tabela separada para o RLS restringir
+/// a leitura à coordenação de assistência; todo acesso é auditado.
+model RelatoAssistencia {
+  solicitacaoId String   @id @map("solicitacao_id") @db.Uuid
+  texto         String
+  criadoEm      DateTime @default(now()) @map("criado_em")
+
+  solicitacao SolicitacaoAssistencia @relation(fields: [solicitacaoId], references: [id], onDelete: Cascade)
+  @@map("relato_assistencia")
+}
+
+// ─────────────────────────────────────────────────────────────
+// Automação, observabilidade e integrações
+// ─────────────────────────────────────────────────────────────
+
+model Automacao {
+  id       String   @id @default(uuid()) @db.Uuid
+  chave    String   @unique
+  nome     String
+  gatilho  String
+  acao     String
+  ativa    Boolean  @default(true)
+  /// Exige decisão humana antes de publicar/enviar.
+  exigeAprovacao Boolean @default(false) @map("exige_aprovacao")
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  execucoes Execucao[]
+  @@map("automacao")
+}
+
+model Execucao {
+  id          String         @id @default(uuid()) @db.Uuid
+  automacaoId String         @map("automacao_id") @db.Uuid
+  status      StatusExecucao
+  entrada     Json?
+  saida       Json?
+  erro        String?
+  duracaoMs   Int?           @map("duracao_ms")
+  iniciadaEm  DateTime       @default(now()) @map("iniciada_em")
+  finalizadaEm DateTime?     @map("finalizada_em")
+
+  automacao Automacao @relation(fields: [automacaoId], references: [id], onDelete: Cascade)
+  @@index([iniciadaEm])
+  @@map("execucao")
+}
+
+/// Log estruturado (Logs Center). Retenção configurável (padrão 24 meses).
+model Log {
+  id         String       @id @default(uuid()) @db.Uuid
+  categoria  CategoriaLog
+  nivel      NivelLog
+  mensagem   String
+  rota       String?
+  usuarioId  String?      @map("usuario_id") @db.Uuid
+  /// Ator quando não há usuário (ex.: "engine", "pix-webhook", "anônimo").
+  ator       String?
+  status     Int?
+  latenciaMs Int?         @map("latencia_ms")
+  contexto   Json?
+  criadoEm   DateTime     @default(now()) @map("criado_em")
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  @@index([categoria, criadoEm])
+  @@index([criadoEm])
+  @@map("log")
+}
+
+/// Trilha de auditoria (antes/depois). Somente inserção.
+model Auditoria {
+  id         String   @id @default(uuid()) @db.Uuid
+  usuarioId  String?  @map("usuario_id") @db.Uuid
+  acao       String
+  entidade   String
+  entidadeId String   @map("entidade_id")
+  antes      Json?
+  depois     Json?
+  ip         String?
+  criadoEm   DateTime @default(now()) @map("criado_em")
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: SetNull)
+  @@index([entidade, entidadeId])
+  @@index([criadoEm])
+  @@map("auditoria")
+}
+
+model Integracao {
+  id        String           @id @default(uuid()) @db.Uuid
+  chave     String           @unique
+  nome      String
+  descricao String
+  status    StatusIntegracao @default(DESCONECTADO)
+  expiraEm  DateTime?        @map("expira_em")
+  ultimoErro String?         @map("ultimo_erro")
+  atualizadoEm DateTime      @updatedAt @map("atualizado_em")
+
+  segredo IntegracaoSegredo?
+  @@map("integracao")
+}
+
+/// Token/credencial da integração, cifrado. Sem acesso pelo papel da aplicação.
+model IntegracaoSegredo {
+  integracaoId String   @id @map("integracao_id") @db.Uuid
+  tokenCifrado String   @map("token_cifrado")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  integracao Integracao @relation(fields: [integracaoId], references: [id], onDelete: Cascade)
+  @@map("integracao_segredo")
+}
+
+/// Configurações gerais (chave/valor), ex.: retenção de logs.
+model Configuracao {
+  chave        String   @id
+  valor        Json
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@map("configuracao")
+}
