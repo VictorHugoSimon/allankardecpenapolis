@@ -44,3 +44,33 @@ describe('auditoria', () => {
     expect(mascararIp(null)).toBe('—');
   });
 });
+
+describe('datas do site', async () => {
+  const f = await import('../src/format');
+  const sexta20h = new Date('2026-10-02T23:00:00Z'); // 20h em Penápolis
+
+  it('partes da data', () => {
+    expect(f.partesData(sexta20h)).toMatchObject({
+      dia: 2,
+      diaSemana: 'Sexta-feira',
+      diaSemanaCurto: 'Sex',
+      mesCurto: 'OUT',
+      chaveDia: '2026-10-02',
+    });
+  });
+
+  it('horários', () => {
+    expect(f.formatarHorario(sexta20h)).toBe('20h00');
+    expect(
+      f.formatarHorario(new Date('2026-10-17T11:00:00Z'), new Date('2026-10-17T15:00:00Z')),
+    ).toBe('8h às 12h');
+    expect(f.formatarHoraCurta(new Date('2026-10-03T22:30:00Z'))).toBe('19h30');
+  });
+
+  it('datas curtas', () => {
+    expect(f.formatarDataCurta(new Date('2026-09-29T13:00:00Z'))).toBe('29 set 2026');
+    expect(f.formatarDiaSemanaData(new Date('2026-10-05T23:00:00Z'))).toBe('Seg, 05/10');
+    expect(f.formatarMesAno(new Date('2026-09-01T15:00:00Z'))).toBe('Setembro de 2026');
+    expect(f.inicioDoDia(sexta20h).toISOString()).toBe('2026-10-02T03:00:00.000Z');
+  });
+});

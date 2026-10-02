@@ -32,7 +32,7 @@ function lerReferencia(ref: string): Referencia | null {
 
 /** Cria a doação (aguardando) e a cobrança PIX. */
 export async function iniciarDoacao(
-  dados: DoacaoInput,
+  dados: Omit<DoacaoInput, 'nome' | 'email' | 'site'> & { nome?: string; email?: string },
   deps: Pick<DepsPagamento, 'pagamento' | 'log'>,
 ) {
   const doacao = await prisma.doacao.create({

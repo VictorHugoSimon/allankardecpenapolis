@@ -24,6 +24,7 @@
   /* Texto */
   --color-ink: #1f2a24;
   --color-ink-2: #3f4a42;
+  --color-ink-3: #4f5a52;
   --color-muted: #5e675f;
   --color-muted-2: #606861;
 
@@ -33,17 +34,22 @@
   --color-line-2: #d8d0bf;
   --color-line-3: #cfc7b6;
   --color-line-admin: #e1d9c8;
+  --color-line-warm: #eae3d5;
 
   /* Marca */
   --color-green: #2f5d46;
   --color-green-dark: #1e3d2f;
   --color-green-soft: #e4ede6;
+  --color-green-soft-line: #d3e0d6;
+  --color-green-mid: #335a47;
+  --color-green-line: #5f8a72;
   --color-green-tint: #f4f7f2;
   --color-green-on-dark: #c9d6cd;
   --color-green-on-dark-2: #a9c2b1;
   --color-green-chart: #9db8a6;
   --color-ochre: #b5833a;
   --color-danger: #a4473a;
+  --color-live: #e07a5f;
   --color-ok-strong: #2f7a52;
 
   /* Pills de status (fundo / texto) */
@@ -171,7 +177,8 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 15px;
-    line-height: 1.5;
+    /* Entrelinha padrão do navegador, como nos protótipos; textos longos definem a sua. */
+    line-height: normal;
     -webkit-font-smoothing: antialiased;
   }
   a {
