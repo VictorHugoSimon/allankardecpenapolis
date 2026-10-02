@@ -1,0 +1,61 @@
+/** Canais de saída: push (Web Push/VAPID), e-mail (Resend) e WhatsApp. */
+export interface MensagemEnviada {
+  canal: 'push' | 'email' | 'whatsapp';
+  destino: string;
+  assunto?: string;
+  corpo: string;
+  enviadaEm: Date;
+}
+
+export interface PushProvider {
+  readonly nome: string;
+  enviar(inscricao: string, titulo: string, corpo: string, url?: string): Promise<void>;
+}
+
+export interface EmailProvider {
+  readonly nome: string;
+  enviar(para: string, assunto: string, html: string): Promise<void>;
+}
+
+export interface WhatsAppProvider {
+  readonly nome: string;
+  enviar(telefone: string, texto: string): Promise<void>;
+}
+
+/** Caixa de saída em memória, compartilhada pelos mocks (útil em testes e no dev). */
+export class CaixaDeSaida {
+  readonly mensagens: MensagemEnviada[] = [];
+  registrar(m: Omit<MensagemEnviada, 'enviadaEm'>) {
+    this.mensagens.push({ ...m, enviadaEm: new Date() });
+    if (process.env.NODE_ENV !== 'test') {
+      process.stdout.write(
+        `[mock:${m.canal}] → ${m.destino}: ${m.assunto ? `${m.assunto} · ` : ''}${m.corpo}\n`,
+      );
+    }
+  }
+  ultima(canal?: MensagemEnviada['canal']) {
+    return [...this.mensagens].reverse().find((m) => !canal || m.canal === canal);
+  }
+}
+
+export function criarMocksMensageria(caixa = new CaixaDeSaida()) {
+  const push: PushProvider = {
+    nome: 'mock',
+    async enviar(inscricao, titulo, corpo) {
+      caixa.registrar({ canal: 'push', destino: inscricao, assunto: titulo, corpo });
+    },
+  };
+  const email: EmailProvider = {
+    nome: 'mock',
+    async enviar(para, assunto, html) {
+      caixa.registrar({ canal: 'email', destino: para, assunto, corpo: html });
+    },
+  };
+  const whatsapp: WhatsAppProvider = {
+    nome: 'mock',
+    async enviar(telefone, texto) {
+      caixa.registrar({ canal: 'whatsapp', destino: telefone, corpo: texto });
+    },
+  };
+  return { caixa, push, email, whatsapp };
+}
