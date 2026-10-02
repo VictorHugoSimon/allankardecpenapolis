@@ -1,0 +1,32 @@
+{
+  "name": "ceak-digital",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @ceak/db db:generate",
+    "db:migrate": "pnpm --filter @ceak/db db:migrate",
+    "db:deploy": "pnpm --filter @ceak/db db:deploy",
+    "db:reset": "pnpm --filter @ceak/db db:reset",
+    "db:seed": "pnpm --filter @ceak/db db:seed"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "1.56.1",
+    "dotenv": "^17.4.2",
+    "prettier": "^3.9.9",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "turbo": "^2.11.7",
+    "typescript": "~5.9.3"
+  }
+}

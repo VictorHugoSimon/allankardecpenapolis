@@ -1,0 +1,27 @@
+# Supabase local (`supabase start`). Banco em 54322, API/Auth em 54321, Studio em 54323.
+# O schema é aplicado pelo Prisma (`pnpm db:deploy`), não por migrações do Supabase.
+project_id = "ceak-digital"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+
+[db]
+port = 54322
+major_version = 17
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3001"
+additional_redirect_urls = ["http://localhost:3000", "http://localhost:3002"]
+jwt_expiry = 1800
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
