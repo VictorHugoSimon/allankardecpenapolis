@@ -6,7 +6,7 @@ import {
   MODULOS,
   modulosDoPerfil,
   type Perfil,
-} from '../packages/core/src/rbac';
+} from '../../packages/core/src/rbac';
 import { entrar, USUARIOS } from './helpers';
 
 /**
