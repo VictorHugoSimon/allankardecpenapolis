@@ -2,7 +2,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { assinarSessao, lerSessao, precisaRenovar } from '@ceak/core/auth/sessao';
 import { APP_SESSAO_S, COOKIE_APP } from './lib/sessao-config';
 
-const PUBLICAS = ['/entrar', '/entrar/codigo', '/cadastro', '/offline'];
+/** Telas de acesso: quem já tem sessão vai para o início. */
+const PUBLICAS = ['/entrar', '/entrar/codigo', '/cadastro'];
+/** Livres para todos (página offline do service worker e health check). */
+const LIVRES = ['/offline', '/api/health'];
 
 function secret(): string {
   const s = process.env.AUTH_SECRET;
@@ -17,12 +20,14 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get(COOKIE_APP)?.value;
   const sessao = await lerSessao(token, secret());
 
+  if (LIVRES.includes(pathname)) return NextResponse.next();
   if (PUBLICAS.includes(pathname)) {
-    if (sessao && pathname !== '/offline') return NextResponse.redirect(new URL('/', req.url));
+    if (sessao) return NextResponse.redirect(new URL('/', req.url));
     return NextResponse.next();
   }
   if (!sessao) {
-    if (pathname.startsWith('/api/')) return NextResponse.json({ erro: 'Sessão expirada.' }, { status: 401 });
+    if (pathname.startsWith('/api/'))
+      return NextResponse.json({ erro: 'Sessão expirada.' }, { status: 401 });
     const url = new URL('/entrar', req.url);
     if (pathname !== '/') url.searchParams.set('next', pathname + search);
     const res = NextResponse.redirect(url);
@@ -44,5 +49,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   runtime: 'nodejs',
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg|icons/|manifest.webmanifest|sw.js|swe-worker|robots.txt).*)'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|icon.svg|icons/|manifest.webmanifest|sw.js|swe-worker|robots.txt).*)',
+  ],
 };

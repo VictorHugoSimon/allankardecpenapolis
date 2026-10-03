@@ -2,7 +2,13 @@ import 'server-only';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { criarAdapters, type Adapters } from '@ceak/core/adapters';
-import { assinarSessao, criarSupabaseAuthProvider, lerSessao, type AuthProvider, type Sessao } from '@ceak/core/auth';
+import {
+  assinarSessao,
+  criarSupabaseAuthProvider,
+  lerSessao,
+  type AuthProvider,
+  type Sessao,
+} from '@ceak/core/auth';
 import { criarLogger } from '@ceak/core/logger';
 import { criarLocalAuthProvider, logSinkBanco } from '@ceak/db';
 import { authSecret } from './env';
@@ -35,7 +41,10 @@ export function authProvider(): AuthProvider {
   } else {
     const a = adapters();
     g.__ceakAppAuth = criarLocalAuthProvider({
-      enviar: (destino, canal, msg) => (canal === 'email' ? a.email.enviar(destino, 'Seu acesso ao CEAK', msg) : a.whatsapp.enviar(destino, msg)),
+      enviar: (destino, canal, msg) =>
+        canal === 'email'
+          ? a.email.enviar(destino, 'Seu acesso ao CEAK', msg)
+          : a.whatsapp.enviar(destino, msg),
     });
   }
   return g.__ceakAppAuth;
@@ -73,7 +82,11 @@ export async function ipDaRequisicao(): Promise<string | null> {
 const janelas = new Map<string, { inicio: number; n: number }>();
 
 /** Limite de envios por IP e ação (em memória; com várias instâncias, trocar por Redis). */
-export async function dentroDoLimite(acao: string, max = 8, janelaMs = 10 * 60_000): Promise<boolean> {
+export async function dentroDoLimite(
+  acao: string,
+  max = 8,
+  janelaMs = 10 * 60_000,
+): Promise<boolean> {
   const chave = `${acao}:${(await ipDaRequisicao()) ?? '?'}`;
   const agora = Date.now();
   const j = janelas.get(chave);
