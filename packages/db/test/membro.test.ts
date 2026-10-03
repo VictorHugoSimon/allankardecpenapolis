@@ -1,7 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { criarMocksMensageria } from '@ceak/core/adapters';
 import { criarLogger } from '@ceak/core/logger';
+import { servicoPorSlug } from '@ceak/core/regras';
 import {
   atividadeParaCheckin,
+  atualizarDadosPessoais,
   cadastrarParticipante,
   detalheTurma,
   documentosParaIA,
@@ -12,6 +15,7 @@ import {
   meusEstudos,
   prisma,
   registrarAvaliacao,
+  solicitarAtendimento,
   solicitarExclusaoDados,
 } from '../src';
 
@@ -147,6 +151,47 @@ describe.skipIf(!temBanco)('serviços do CEAK App', () => {
     expect(t!.proxima?.titulo).toBe('A justiça da reencarnação');
     expect(t!.materiais).toHaveLength(5);
     expect(await detalheTurma(ids.pessoa, e[0]!.turmaId)).toBeNull(); // quem não é aluno não vê
+  });
+
+  it('correção dos próprios dados grava auditoria só quando algo muda', async () => {
+    const dados = { nome: 'Membro Teste Silva', whatsapp: '+5518900000098' };
+    await atualizarDadosPessoais(ids.pessoa, dados, ids.usuario, '127.0.0.1');
+    await atualizarDadosPessoais(ids.pessoa, dados, ids.usuario, '127.0.0.1');
+    expect(await prisma.pessoa.findUniqueOrThrow({ where: { id: ids.pessoa } })).toMatchObject(
+      dados,
+    );
+    const aud = await prisma.auditoria.findMany({
+      where: { entidade: 'Pessoa', entidadeId: ids.pessoa },
+    });
+    expect(aud).toHaveLength(1);
+    expect(aud[0]!.antes).toMatchObject({ nome: 'Membro Teste', whatsapp: '+5518900000099' });
+  });
+
+  it('assistência pedida pelo App fica ligada à pessoa da sessão', async () => {
+    const vaga = await prisma.vagaAssistencia.create({
+      data: { inicio: new Date(Date.now() + 3 * 86_400_000), vagas: 2 },
+    });
+    const r = await solicitarAtendimento(
+      servicoPorSlug('atendimento-fraterno')!,
+      {
+        nome: 'Membro Teste Silva',
+        whatsapp: '+5518911112222',
+        relato: undefined,
+        vagaId: vaga.id,
+        consentimento: true,
+      },
+      { whatsapp: criarMocksMensageria().whatsapp, log, ip: null },
+      { pessoaId: ids.pessoa },
+    );
+    const sol = await prisma.solicitacaoAssistencia.findUniqueOrThrow({ where: { id: r.id } });
+    expect(sol.pessoaId).toBe(ids.pessoa);
+    // O WhatsApp da conta não é trocado pelo informado no pedido.
+    expect((await prisma.pessoa.findUniqueOrThrow({ where: { id: ids.pessoa } })).whatsapp).toBe(
+      '+5518900000098',
+    );
+    await prisma.auditoria.deleteMany({ where: { entidadeId: r.id } });
+    await prisma.solicitacaoAssistencia.delete({ where: { id: r.id } });
+    await prisma.vagaAssistencia.delete({ where: { id: vaga.id } });
   });
 
   it('LGPD: exporta os dados do titular e registra pedido de exclusão com auditoria', async () => {

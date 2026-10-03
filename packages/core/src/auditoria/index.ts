@@ -8,6 +8,7 @@ export const ENTIDADES_AUDITADAS = [
   'ExtratoLinha',
   'Doacao',
   'Usuario',
+  'Pessoa',
   'Aprovacao',
   'Conteudo',
   'Campanha',

@@ -33,14 +33,23 @@ export async function entrar(_prev: EstadoLogin, form: FormData): Promise<Estado
   const r = await autenticarComSenha(authProvider(), email, senha);
 
   if (!r.ok) {
-    log.warn('SEGURANCA', r.motivo === 'bloqueado' ? `login bloqueado · ${email}` : `tentativa de login falha · ${email}`, {
-      rota: '/login',
-      status: r.motivo === 'bloqueado' ? 429 : 401,
-      usuario: ip ?? undefined,
-      latenciaMs: Date.now() - t0,
-    });
+    log.warn(
+      'SEGURANCA',
+      r.motivo === 'bloqueado'
+        ? `login bloqueado · ${email}`
+        : `tentativa de login falha · ${email}`,
+      {
+        rota: '/login',
+        status: r.motivo === 'bloqueado' ? 429 : 401,
+        usuario: ip ?? undefined,
+        latenciaMs: Date.now() - t0,
+      },
+    );
     return {
-      erro: r.motivo === 'bloqueado' ? 'Muitas tentativas. Tente novamente em 15 minutos.' : 'E-mail ou senha incorretos.',
+      erro:
+        r.motivo === 'bloqueado'
+          ? 'Muitas tentativas. Tente novamente em 15 minutos.'
+          : 'E-mail ou senha incorretos.',
       campos: { email },
     };
   }

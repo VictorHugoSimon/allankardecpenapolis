@@ -43,6 +43,8 @@ export async function solicitarAtendimento(
   servico: ServicoAjuda,
   dados: SolicitacaoAjudaInput,
   deps: { whatsapp: WhatsAppProvider; log: Logger; ip: string | null },
+  /** Pedido feito pelo App: vincula à pessoa da sessão (e guarda o WhatsApp, se faltava). */
+  opcoes: { pessoaId?: string } = {},
 ) {
   const resultado = await prisma.$transaction(async (tx) => {
     const [vaga] = await tx.$queryRaw<
@@ -64,7 +66,15 @@ export async function solicitarAtendimento(
         'vaga_esgotada',
       );
     }
-    const pessoa = await encontrarOuCriarPessoa(tx, { nome: dados.nome, whatsapp: dados.whatsapp });
+    const pessoa = opcoes.pessoaId
+      ? { id: opcoes.pessoaId }
+      : await encontrarOuCriarPessoa(tx, { nome: dados.nome, whatsapp: dados.whatsapp });
+    if (opcoes.pessoaId) {
+      await tx.pessoa.updateMany({
+        where: { id: opcoes.pessoaId, whatsapp: null },
+        data: { whatsapp: dados.whatsapp },
+      });
+    }
     const sol = await tx.solicitacaoAssistencia.create({
       data: {
         tipo: servico.tipo,

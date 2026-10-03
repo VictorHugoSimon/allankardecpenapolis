@@ -430,7 +430,14 @@ export async function detalheTurma(pessoaId: string, turmaId: string, agora = ne
           curso: { select: { id: true, nome: true, sigla: true } },
           aulas: {
             orderBy: { numero: 'asc' },
-            select: { id: true, numero: true, titulo: true, data: true, modulo: true },
+            select: {
+              id: true,
+              numero: true,
+              titulo: true,
+              data: true,
+              modulo: true,
+              evento: { select: { local: true } },
+            },
           },
         },
       },
@@ -601,6 +608,32 @@ export async function perfilMembro(pessoaId: string) {
         select: { ativo: true, areas: { select: { area: { select: { nome: true } } } } },
       },
     },
+  });
+}
+
+/** Correção dos próprios dados (LGPD, art. 18, III), com auditoria. */
+export async function atualizarDadosPessoais(
+  pessoaId: string,
+  dados: { nome: string; whatsapp: string | null },
+  usuarioId: string | null,
+  ip: string | null,
+) {
+  await prisma.$transaction(async (tx) => {
+    const antes = await tx.pessoa.findUniqueOrThrow({
+      where: { id: pessoaId },
+      select: { nome: true, whatsapp: true },
+    });
+    if (antes.nome === dados.nome && antes.whatsapp === dados.whatsapp) return;
+    await tx.pessoa.update({ where: { id: pessoaId }, data: dados });
+    await registrarAuditoria(tx, {
+      usuarioId,
+      acao: 'atualizou os próprios dados',
+      entidade: 'Pessoa',
+      entidadeId: pessoaId,
+      antes,
+      depois: dados,
+      ip,
+    });
   });
 }
 
