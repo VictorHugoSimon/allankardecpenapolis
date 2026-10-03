@@ -61,7 +61,7 @@ export default async function AprovacoesPage({
                 {a.editar ? (
                   <Link
                     href={a.editar}
-                    aria-label={`Editar: ${a.titulo}`}
+                    aria-label={`${a.tipo === 'CONTEUDO' ? 'Revisar' : 'Editar'}: ${a.titulo}`}
                     className={buttonClasses({
                       variant: 'secondary',
                       shape: 'rounded',

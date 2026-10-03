@@ -37,7 +37,10 @@ describe('senha', () => {
 describe('sessão', () => {
   it('assina e lê o cookie', async () => {
     const t = await assinarSessao(sessao, SECRET);
-    expect(await lerSessao(t, SECRET)).toEqual(sessao);
+    // Sem funções extras, o seletor de perfil recebe só o perfil ativo.
+    expect(await lerSessao(t, SECRET)).toEqual({ ...sessao, perfis: [sessao.perfil] });
+    const multi = await assinarSessao({ ...sessao, perfis: ['SECRETARIA', 'INSTRUTOR'] }, SECRET);
+    expect((await lerSessao(multi, SECRET))?.perfis).toEqual(['SECRETARIA', 'INSTRUTOR']);
   });
 
   it('rejeita assinatura de outro segredo, token adulterado e vazio', async () => {

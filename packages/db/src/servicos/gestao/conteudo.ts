@@ -434,7 +434,10 @@ export async function publicarConteudo(
       slug: true,
       resumo: true,
       categoria: true,
-      versoes: { select: { canal: true, texto: true, publicadoEm: true } },
+      versoes: {
+        orderBy: { canal: 'asc' },
+        select: { canal: true, texto: true, publicadoEm: true },
+      },
     },
   });
   if (!c) throw new ErroNegocio('Conteúdo não encontrado.', 'nao_encontrado');

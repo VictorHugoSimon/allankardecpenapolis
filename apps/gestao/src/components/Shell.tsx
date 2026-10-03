@@ -203,7 +203,9 @@ export function Shell({
                       {m.badge ? (
                         <span className="rounded-pill text-pill-warn-fg bg-white px-[7px] py-px text-[11px]">
                           {m.badge}
-                          <span className="sr-only"> pendentes</span>
+                          <span className="sr-only">
+                            {m.badge === 1 ? ' pendente' : ' pendentes'}
+                          </span>
                         </span>
                       ) : null}
                     </Link>

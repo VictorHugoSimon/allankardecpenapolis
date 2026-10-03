@@ -76,6 +76,7 @@ export default defineConfig({
             url: `${GESTAO}/api/health`,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
+            env: { MOCK_CAIXA_ARQUIVO: process.env.MOCK_CAIXA_ARQUIVO },
           },
         ]),
     ...(process.env.PLAYWRIGHT_SITE_URL

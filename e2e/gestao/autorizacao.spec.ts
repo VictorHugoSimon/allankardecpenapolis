@@ -56,9 +56,12 @@ for (const perfil of PERFIS_GESTAO) {
 
     // Menu: exatamente os módulos permitidos, na ordem da sidebar.
     const esperado = MENU.flatMap((g) =>
-      g.itens.filter((i) => permitidos.includes(i.id)).map((i) => i.label),
+      g.itens.filter((i) => permitidos.includes(i.id)).map((i) => new RegExp(`^${i.label}`)),
     );
-    await expect(page.getByRole('navigation').getByRole('link')).toHaveText(esperado);
+    // (Aprovações traz o contador de pendências junto do nome.)
+    await expect(
+      page.getByRole('complementary', { name: 'Menu principal' }).getByRole('link'),
+    ).toHaveText(esperado);
 
     // Rotas: as proibidas respondem 403 com a página de acesso negado.
     for (const m of MODULOS) {

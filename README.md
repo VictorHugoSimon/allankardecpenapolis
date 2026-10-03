@@ -119,6 +119,20 @@ Rotas: `/entrar` (e-mail e senha), `/entrar/codigo` (código pelo WhatsApp), `/c
 - **Loja.** O App mostra a vitrine; o carrinho e o pagamento acontecem no site.
 - **Testes.** `e2e/app` cobre a jornada 2 (Login → Home → Check-in → Estudo → Palestra → Avaliação), check-in por QR, login por código, cadastro, PWA (manifest, service worker e offline), acessibilidade (axe em todas as telas) e a moldura no desktop. Lighthouse (perfil móvel): 96–99 em Performance e 100 em Acessibilidade e Boas práticas.
 
+## CEAK Gestão — núcleo (Fase 3)
+
+Rotas: `/` (Command Center), `/pessoas` e `/pessoas/[id]` (Perfil 360°), `/agenda` e `/agenda/nova`, `/eventos` (com `/eventos/[id]/qrcode` para imprimir), `/estudos`, `/aprovacoes`, `/conteudo`, `/conteudo/novo` e `/conteudo/[id]` (editor), `/financeiro` (Dashboard), `/financeiro/pagar`, `/financeiro/receber` e `/financeiro/novo`, `/config` (Instituição, Perfis de acesso, Usuários e Segurança e LGPD), `/busca` e `/redefinir-senha`. Os módulos das fases 4 e 5 aparecem no menu com a tela de espera do protótipo.
+
+- **Seletor de perfil.** O usuário pode ter funções extras (`perfisExtras`). O seletor “Perfil de acesso” aparece só para quem tem duas ou mais e lista apenas essas funções; a troca é conferida no banco, regrava a sessão e fica na auditoria. No seed: Paulo Mendes (Secretaria + Instrutor), Renata Campos e Sueli Andrade (Coordenador + Instrutor).
+- **Instrutor.** Em Pessoas e Estudos vê só as próprias turmas e alunos (RLS no banco para pessoas; filtro no serviço para turmas).
+- **Aprovação humana.** Conteúdo só é publicado depois de Aprovado por quem tem os módulos Conteúdo e Aprovações (Administrador, Diretoria, Secretaria). Editar um conteúdo aprovado ou agendado o devolve para Revisão. Cada decisão grava auditoria; rejeitar avisa o autor por notificação.
+- **Publicação.** O Blog vai direto para o site (`/blog/[slug]`); Facebook, Instagram e Google passam pelos adapters sociais. Canal com integração em atenção (ex.: Instagram com token expirado) fica na fila, registrado no conteúdo, sem bloquear os outros. O agendamento grava a data; o disparo na hora marcada entra com o Automation Engine (Fase 5).
+- **Financeiro.** Dashboard com o último mês fechado e os seis meses anteriores (o seed traz o realizado de abril a setembro, fechando setembro em R$ 18.840 de receitas e R$ 13.290 de despesas). Contas seguem `pendente → aprovado → pago` (ou `cancelado`); pendente ou aprovado com vencimento passado aparece como Vencido. Conta nova nasce pendente e entra na Central de aprovações. Tudo sob RLS (Administrador, Diretoria e Tesouraria) e com auditoria.
+- **Check-in.** Eventos tem o cartaz com o QR Code assinado para a entrada do salão (o mesmo token que o App valida).
+- **Usuários.** Convite por e-mail com link de uso único (48 h) para definir a senha. “Recuperar senha” no login agora envia um link real (30 min). Não é possível desativar o próprio acesso nem ficar sem Administrador ativo.
+- **Configurações.** Instituição mostra os dados de `packages/core/config/instituicao.ts` (fonte única, ainda com os valores fictícios). A matriz de perfis é a do código (`packages/core/src/rbac`). Em Segurança e LGPD, a retenção de logs é editável (com auditoria).
+- **Testes.** `e2e/gestao` cobre a jornada 6 (Login → Command Center → Conteúdo pendente → Revisar → Aprovar → Publicação, conferindo a auditoria no banco e o post no site), rejeição, seletor de perfil, Instrutor só com os seus alunos, financeiro com auditoria, agenda por perfil, QR do check-in, convite com definição de senha, busca e acessibilidade (axe) em todas as telas novas.
+
 ## Dados institucionais pendentes
 
 Endereço, CNPJ, telefones, chave PIX, diretoria, histórico/linha do tempo, programação semanal, logo e fotos estão centralizados em **[`packages/core/config/instituicao.ts`](packages/core/config/instituicao.ts)**, com os valores fictícios dos protótipos marcados como `PENDENTE`.
@@ -128,6 +142,6 @@ Endereço, CNPJ, telefones, chave PIX, diretoria, histórico/linha do tempo, pro
 - O texto de `/privacidade` é uma base escrita a partir das regras do sistema e precisa de revisão jurídica da diretoria.
 - Fotos reais (fachada, produtos, diretoria, blog) e o logo oficial: hoje são placeholders com a legenda do que deve entrar.
 
-## Decisões pendentes de implementação
+## Decisões pendentes
 
-- **Seletor de perfil (Fase 3):** aparece só para quem tem duas ou mais funções e lista apenas os perfis que a pessoa realmente tem. Quem tem uma função só não vê o seletor.
+- **Autenticação em dois fatores** (Administrador, Diretoria e Tesouraria): falta definir o método (código por e-mail/WhatsApp ou aplicativo autenticador). Hoje a configuração aparece em Segurança e LGPD, mas ainda não é exigida no login.
