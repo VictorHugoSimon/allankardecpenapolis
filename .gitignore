@@ -13,3 +13,5 @@ test-results
 packages/db/src/generated
 supabase/.temp
 .DS_Store
+apps/app/public/sw.js*
+apps/app/public/swe-worker*

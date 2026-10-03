@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { temAcessoGestao } from '@ceak/core/rbac';
 import { loginSchema, recuperarSenhaSchema } from '@ceak/core/validacao';
-import { prisma, sessaoParaIdentidade } from '@ceak/db';
+import { autenticarComSenha } from '@ceak/db';
 import { authProvider, gravarCookieSessao, ipDaRequisicao } from '@/lib/auth';
 import { log } from '@/lib/log';
 
@@ -12,9 +12,6 @@ export interface EstadoLogin {
   campos?: { email?: string };
   recuperacaoEnviada?: boolean;
 }
-
-const MAX_TENTATIVAS = 5;
-const BLOQUEIO_MS = 15 * 60_000;
 
 /** Só aceita caminhos internos (evita open redirect). */
 function destinoSeguro(next: FormDataEntryValue | null): string {
@@ -33,48 +30,29 @@ export async function entrar(_prev: EstadoLogin, form: FormData): Promise<Estado
   }
   const { email, senha } = parsed.data;
   const ip = await ipDaRequisicao();
-  const usuario = await prisma.usuario.findUnique({ where: { email } });
+  const r = await autenticarComSenha(authProvider(), email, senha);
 
-  if (usuario?.bloqueadoAte && usuario.bloqueadoAte > new Date()) {
-    log.warn('SEGURANCA', `login bloqueado · ${email}`, {
+  if (!r.ok) {
+    log.warn('SEGURANCA', r.motivo === 'bloqueado' ? `login bloqueado · ${email}` : `tentativa de login falha · ${email}`, {
       rota: '/login',
-      status: 429,
-      usuario: ip ?? undefined,
-    });
-    return { erro: 'Muitas tentativas. Tente novamente em 15 minutos.', campos: { email } };
-  }
-
-  const identidade = await authProvider().entrarComSenha(email, senha);
-  const sessao = identidade ? await sessaoParaIdentidade(identidade) : null;
-
-  if (!sessao) {
-    if (usuario) {
-      const tentativas = usuario.tentativasFalhas + 1;
-      await prisma.usuario.update({
-        where: { id: usuario.id },
-        data: {
-          tentativasFalhas: tentativas,
-          bloqueadoAte: tentativas >= MAX_TENTATIVAS ? new Date(Date.now() + BLOQUEIO_MS) : null,
-        },
-      });
-    }
-    log.warn('SEGURANCA', `tentativa de login falha · ${email}`, {
-      rota: '/login',
-      status: 401,
+      status: r.motivo === 'bloqueado' ? 429 : 401,
       usuario: ip ?? undefined,
       latenciaMs: Date.now() - t0,
     });
-    return { erro: 'E-mail ou senha incorretos.', campos: { email } };
+    return {
+      erro: r.motivo === 'bloqueado' ? 'Muitas tentativas. Tente novamente em 15 minutos.' : 'E-mail ou senha incorretos.',
+      campos: { email },
+    };
   }
 
-  await gravarCookieSessao(sessao);
-  log.info('SEGURANCA', `login · ${sessao.email} (${sessao.perfil})`, {
+  await gravarCookieSessao(r.sessao);
+  log.info('SEGURANCA', `login · ${r.sessao.email} (${r.sessao.perfil})`, {
     rota: '/login',
     status: 200,
-    usuario: sessao.nome,
+    usuario: r.sessao.nome,
     latenciaMs: Date.now() - t0,
   });
-  redirect(temAcessoGestao(sessao.perfil) ? destinoSeguro(form.get('next')) : '/sem-acesso');
+  redirect(temAcessoGestao(r.sessao.perfil) ? destinoSeguro(form.get('next')) : '/sem-acesso');
 }
 
 export async function recuperarSenha(_prev: EstadoLogin, form: FormData): Promise<EstadoLogin> {
