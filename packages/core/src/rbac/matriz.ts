@@ -77,7 +77,7 @@ export function temAcessoGestao(perfil: Perfil): boolean {
 }
 
 /** Rotas do Gestão abertas a qualquer perfil com acesso ao Gestão. */
-export const ROTAS_GESTAO_LIVRES = ['/ui', '/sem-acesso', '/conta'] as const;
+export const ROTAS_GESTAO_LIVRES = ['/ui', '/sem-acesso', '/conta', '/busca'] as const;
 
 /**
  * Descobre o módulo de uma rota do Gestão (ex.: `/pessoas/123` → `pessoas`).
@@ -101,4 +101,14 @@ export function podeAcessarRota(perfil: Perfil, pathname: string): boolean {
   if (mod === null) return true;
   if (mod === undefined) return perfil === 'ADMINISTRADOR';
   return podeAcessar(perfil, mod);
+}
+
+/** Quem cria e edita atividades na agenda (Instrutor e Voluntário só consultam). */
+export function podeEditarAgenda(perfil: Perfil): boolean {
+  return ['ADMINISTRADOR', 'DIRETORIA', 'SECRETARIA', 'COORDENADOR'].includes(perfil);
+}
+
+/** Quem aprova conteúdo: precisa do módulo Conteúdo e da Central de aprovações. */
+export function podeAprovarConteudo(perfil: Perfil): boolean {
+  return podeAcessar(perfil, 'conteudo') && podeAcessar(perfil, 'aprovacoes');
 }

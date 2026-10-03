@@ -29,5 +29,6 @@ export async function sessaoParaIdentidade(id: IdentidadeConfirmada): Promise<Se
     email: usuario.email,
     perfil: usuario.perfil,
     coordAssistencia: usuario.coordAssistencia,
+    perfis: [usuario.perfil, ...usuario.perfisExtras.filter((p) => p !== usuario.perfil)],
   };
 }

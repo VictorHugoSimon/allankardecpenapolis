@@ -9,6 +9,8 @@ export const ENTIDADES_AUDITADAS = [
   'Doacao',
   'Usuario',
   'Pessoa',
+  'Evento',
+  'Configuracao',
   'Aprovacao',
   'Conteudo',
   'Campanha',

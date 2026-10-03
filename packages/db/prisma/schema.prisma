@@ -346,6 +346,9 @@ model Usuario {
   pessoaId         String    @unique @map("pessoa_id") @db.Uuid
   email            String    @unique
   perfil           Perfil
+  /// Outras funções na casa (ex.: Secretaria que também é Instrutor). O Gestão mostra
+  /// o seletor de perfil só para quem tem duas ou mais funções.
+  perfisExtras     Perfil[]  @default([]) @map("perfis_extras")
   /// Coordenação de assistência: única função que vê relatos sensíveis.
   coordAssistencia Boolean   @default(false) @map("coord_assistencia")
   /// `auth.users.id` do Supabase.

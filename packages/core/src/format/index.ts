@@ -163,3 +163,14 @@ export function mesmoDia(a: Date, b: Date): boolean {
 export function inicioDoDia(d: Date): Date {
   return new Date(`${partesData(d).chaveDia}T00:00:00-03:00`);
 }
+
+/** "Família e Espiritualidade" → "familia-e-espiritualidade" */
+export function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 80);
+}

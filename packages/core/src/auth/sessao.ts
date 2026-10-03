@@ -10,6 +10,8 @@ export interface Sessao {
   perfil: Perfil;
   /** Membro da coordenação de assistência (acesso a dados sensíveis). */
   coordAssistencia: boolean;
+  /** Funções disponíveis para o seletor de perfil (inclui o perfil ativo). */
+  perfis?: Perfil[];
 }
 
 export const COOKIE_SESSAO = 'ceak_sessao';
@@ -64,6 +66,7 @@ export async function lerSessao(token: string | undefined, secret: string): Prom
       email: p.email,
       perfil: p.perfil,
       coordAssistencia: p.coordAssistencia === true,
+      perfis: Array.isArray(p.perfis) ? p.perfis.filter(isPerfil) : [p.perfil],
     };
   } catch {
     return null;

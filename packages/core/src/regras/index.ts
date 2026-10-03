@@ -204,3 +204,4 @@ export const DESTINOS_DOACAO = [
 ] as const;
 
 export const VALORES_DOACAO = [20, 50, 100, 200] as const;
+export * from './gestao';

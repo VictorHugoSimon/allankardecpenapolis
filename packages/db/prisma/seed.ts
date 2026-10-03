@@ -82,7 +82,12 @@ async function main() {
     perfil: (typeof Perfil)[keyof typeof Perfil];
     status?: (typeof StatusPessoa)[keyof typeof StatusPessoa];
     whatsapp?: string;
-    usuario?: { coord?: boolean; ativo?: boolean; ultimo?: Date };
+    usuario?: {
+      coord?: boolean;
+      ativo?: boolean;
+      ultimo?: Date;
+      extras?: (typeof Perfil)[keyof typeof Perfil][];
+    };
   }[] = [
     {
       nome: 'Antônio Ferreira',
@@ -110,21 +115,21 @@ async function main() {
       email: 'paulo.mendes@allankardecpenapolis.com.br',
       perfil: Perfil.SECRETARIA,
       status: StatusPessoa.ATIVO,
-      usuario: { ultimo: d('2026-10-02T09:40') },
+      usuario: { ultimo: d('2026-10-02T09:40'), extras: [Perfil.INSTRUTOR] },
     },
     {
       nome: 'Renata Campos',
       email: 'renata.campos@allankardecpenapolis.com.br',
       perfil: Perfil.COORDENADOR,
       status: StatusPessoa.ATIVO,
-      usuario: { ultimo: d('2026-09-28T20:00') },
+      usuario: { ultimo: d('2026-09-28T20:00'), extras: [Perfil.INSTRUTOR] },
     },
     {
       nome: 'Sueli Andrade',
       email: 'sueli.andrade@allankardecpenapolis.com.br',
       perfil: Perfil.COORDENADOR,
       status: StatusPessoa.ATIVO,
-      usuario: { coord: true, ultimo: d('2026-09-28T19:00') },
+      usuario: { coord: true, ultimo: d('2026-09-28T19:00'), extras: [Perfil.INSTRUTOR] },
     },
     {
       nome: 'Helena Prado',
@@ -234,6 +239,7 @@ async function main() {
           email: p.email,
           perfil: p.perfil,
           coordAssistencia: p.usuario.coord ?? false,
+          perfisExtras: p.usuario.extras ?? [],
           ativo: p.usuario.ativo ?? true,
           doisFatores: (
             [Perfil.ADMINISTRADOR, Perfil.DIRETORIA, Perfil.TESOURARIA] as string[]
@@ -1587,6 +1593,7 @@ async function main() {
     ['Eventos', TipoLancamento.RECEBER, null],
     ['Convênios', TipoLancamento.RECEBER, null],
     ['Doações', TipoLancamento.RECEBER, null],
+    ['Outras', TipoLancamento.RECEBER, null],
   ] as const;
   const CAT: Record<string, string> = {};
   for (const [nome, tipo, orcado] of cats) {
@@ -1760,6 +1767,91 @@ async function main() {
       },
     });
   }
+  // Reembolso pendente (item da Central de aprovações).
+  LANC['reembolso-limpeza'] = (
+    await prisma.lancamento.create({
+      data: {
+        tipo: TipoLancamento.PAGAR,
+        contraparte: 'Lúcia Moraes',
+        descricao: 'Reembolso de material de limpeza',
+        categoriaId: CAT['PAGAR:Material']!,
+        centroCustoId: CC.Sede,
+        vencimento: d('2026-10-09'),
+        valorCentavos: reais(214.3),
+        status: StatusLancamento.PENDENTE,
+        responsavel: 'Lúcia Moraes',
+      },
+    })
+  ).id;
+  await prisma.aprovacao.updateMany({
+    where: { entidade: 'Lancamento', entidadeId: 'cpfl' },
+    data: { entidadeId: LANC['CPFL Paulista']! },
+  });
+  await prisma.aprovacao.updateMany({
+    where: { entidade: 'Lancamento', entidadeId: 'reembolso-limpeza' },
+    data: { entidadeId: LANC['reembolso-limpeza'] },
+  });
+
+  // Realizado de abril a setembro (Dashboard financeiro). Setembro fecha em
+  // R$ 18.840 de receitas e R$ 13.290 de despesas, como no protótipo.
+  const MESES_HIST = [
+    ['04', 'abr', 15200, 12800],
+    ['05', 'mai', 16100, 13400],
+    ['06', 'jun', 15800, 14100],
+    ['07', 'jul', 16920, 12410],
+    ['08', 'ago', 17380, 15970],
+  ] as const;
+  const RECEITA_SET = { Doações: 8420, Loja: 4820, Mensalidades: 3150, Eventos: 1680, Outras: 770 };
+  const DESPESA_SET = {
+    'Assistência social': 4980,
+    Utilidades: 2360,
+    Manutenção: 2140,
+    Material: 1420,
+    Tecnologia: 890,
+    Loja: 960.2,
+    Outras: 539.8,
+  };
+  const distribuir = (total: number, base: Record<string, number>) => {
+    const soma = Object.values(base).reduce((a, b) => a + b, 0);
+    const linhas = Object.entries(base).map(
+      ([k, v]) => [k, Math.round((total * v) / soma)] as const,
+    );
+    const dif = total - linhas.reduce((a, [, v]) => a + v, 0);
+    return linhas.map(([k, v], i) => [k, i === 0 ? v + dif : v] as const);
+  };
+  const realizado = async (
+    tipo: (typeof TipoLancamento)[keyof typeof TipoLancamento],
+    cat: string,
+    valor: number,
+    dia: string,
+    rotulo: string,
+  ) =>
+    prisma.lancamento.create({
+      data: {
+        tipo,
+        contraparte:
+          tipo === TipoLancamento.RECEBER ? 'Receitas consolidadas' : 'Fornecedores diversos',
+        descricao: `${cat} — ${rotulo}`,
+        categoriaId: CAT[`${tipo}:${cat}`]!,
+        vencimento: d(dia),
+        valorCentavos: reais(valor),
+        status: StatusLancamento.PAGO,
+        pagoEm: d(dia),
+        responsavel: 'Maria Silva',
+      },
+    });
+  for (const [mm, rotulo, rec, desp] of MESES_HIST) {
+    for (const [cat, v] of distribuir(rec, RECEITA_SET))
+      await realizado(TipoLancamento.RECEBER, cat, v, `2026-${mm}-25`, `${rotulo}/26`);
+    for (const [cat, v] of distribuir(desp, DESPESA_SET))
+      await realizado(TipoLancamento.PAGAR, cat, v, `2026-${mm}-20`, `${rotulo}/26`);
+  }
+  // Setembro: a venda da loja (R$ 4.820) e os livros da FEB (R$ 960,20) já estão lançados acima.
+  for (const [cat, v] of Object.entries(RECEITA_SET).filter(([c]) => c !== 'Loja'))
+    await realizado(TipoLancamento.RECEBER, cat, v, '2026-09-25', 'set/26');
+  for (const [cat, v] of Object.entries(DESPESA_SET).filter(([c]) => c !== 'Loja'))
+    await realizado(TipoLancamento.PAGAR, cat, v, '2026-09-18', 'set/26');
+
   await prisma.extratoLinha.createMany({
     data: [
       {
@@ -2443,6 +2535,11 @@ async function main() {
       { chave: 'membros.loginGoogle', valor: false },
     ],
   });
+
+  // Cadastros antigos: data de criação coerente com a jornada (painel "+N no mês").
+  await prisma.$executeRaw`UPDATE pessoa SET criado_em = coalesce(membro_desde, primeira_visita_em, '2026-09-15T12:00:00-03:00')
+    WHERE criado_em > '2026-09-30'`;
+  await prisma.$executeRaw`UPDATE pessoa SET criado_em = '2026-09-30T19:30:00-03:00' WHERE nome IN ('Carla Nogueira')`;
 
   const total = await prisma.pessoa.count();
   console.log(
