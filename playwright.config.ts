@@ -1,10 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 import { config as dotenv } from 'dotenv';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 dotenv({ quiet: true });
+// Faz o modo offline e as rotas do Playwright valerem também para o service worker do App.
+process.env.PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS = '1';
 
 const GESTAO = process.env.PLAYWRIGHT_GESTAO_URL ?? 'http://localhost:3002';
 const SITE = process.env.PLAYWRIGHT_SITE_URL ?? 'http://localhost:3000';
+const APP = process.env.PLAYWRIGHT_APP_URL ?? 'http://localhost:3001';
+/** O App grava as mensagens dos mocks aqui (os testes leem o código de acesso do WhatsApp). */
+process.env.MOCK_CAIXA_ARQUIVO ??= join(tmpdir(), 'ceak-caixa-e2e.jsonl');
 
 /**
  * Jornadas E2E. Pré-requisitos: banco migrado e semeado (`pnpm db:deploy && pnpm db:seed`)
@@ -47,6 +54,18 @@ export default defineConfig({
       testMatch: /responsivo\.spec\.ts/,
       use: { ...devices['Pixel 7'], baseURL: SITE },
     },
+    {
+      name: 'app',
+      testDir: './e2e/app',
+      testIgnore: /moldura/,
+      use: { ...devices['Pixel 7'], baseURL: APP },
+    },
+    {
+      name: 'app-desktop',
+      testDir: './e2e/app',
+      testMatch: /moldura\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: APP },
+    },
   ],
   webServer: [
     ...(process.env.PLAYWRIGHT_GESTAO_URL
@@ -67,6 +86,17 @@ export default defineConfig({
             url: SITE,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
+          },
+        ]),
+    ...(process.env.PLAYWRIGHT_APP_URL
+      ? []
+      : [
+          {
+            command: 'pnpm --filter @ceak/app start',
+            url: `${APP}/api/health`,
+            reuseExistingServer: !process.env.CI,
+            timeout: 120_000,
+            env: { MOCK_CAIXA_ARQUIVO: process.env.MOCK_CAIXA_ARQUIVO },
           },
         ]),
   ],

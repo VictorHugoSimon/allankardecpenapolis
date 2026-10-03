@@ -38,7 +38,7 @@ pnpm db:seed                  # dados fictícios dos protótipos
 pnpm dev                      # sobe site, app e gestão
 ```
 
-Entre no Gestão em http://localhost:3002 com qualquer usuário abaixo (senha `ceak-dev-2026`, ou o valor de `SEED_SENHA`):
+Entre no Gestão em http://localhost:3002 ou no App em http://localhost:3001 com qualquer usuário abaixo (senha `ceak-dev-2026`, ou o valor de `SEED_SENHA`):
 
 | Perfil                                   | E-mail                                       |
 | ---------------------------------------- | -------------------------------------------- |
@@ -98,6 +98,26 @@ Rotas: `/`, `/o-ceak`, `/agenda` (filtro e mês por query string, `.ics` em `/ag
 - **Assistência.** A vaga é reservada com bloqueio de linha (não há duas reservas para a última vaga). O relato fica na tabela restrita e a auditoria registra a solicitação sem o conteúdo do relato.
 - **Doação mensal.** O controle "Tornar mensal" aparece desativado com o aviso "em breve" até o PIX Automático ser integrado.
 - **SEO.** Metadata por página, `sitemap.xml`, `robots.txt`, imagem Open Graph e JSON-LD (`Organization`, `Event`, `BlogPosting`, `Product`). Lighthouse (perfil móvel) em produção: 93–99 em Performance e 100 em Acessibilidade, Boas práticas e SEO nas páginas principais.
+
+## CEAK App (Fase 2)
+
+PWA instalável em http://localhost:3001 (no desktop aparece na moldura de celular com o painel de atalhos; abaixo de 600px ocupa a tela inteira). Para ver a jornada completa do protótipo, entre como **Victor Alves** (`victor.alves@email.com`).
+
+Rotas: `/entrar` (e-mail e senha), `/entrar/codigo` (código pelo WhatsApp), `/cadastro`, `/` (início), `/checkin`, `/jornada`, `/estudos`, `/estudos/[turma]` (abas Aulas, Materiais, Presença e Calendário), `/estudos/inscrever`, `/agenda` e `/agenda/[slug]` (tela "Palestra"), `/avaliacao/[slug]` (NPS), `/ia`, `/biblioteca`, `/notificacoes`, `/perfil`, `/perfil/dados`, `/perfil/contribuicoes`, `/lives`, `/quero-ajudar`, `/doar` e `/doar/[id]`, `/preciso-de-ajuda` e `/preciso-de-ajuda/[servico]`, `/loja` e `/offline`.
+
+- **Sessão.** Cookie próprio (`ceak_app_sessao`), separado do Gestão, válido por 30 dias com renovação deslizante (`APP_SESSAO_DIAS`). O login tem o mesmo bloqueio do Gestão (5 tentativas → 15 min).
+- **Código pelo WhatsApp.** Só é enviado se o número pertence a uma conta ativa, e a resposta é a mesma nos dois casos (não revela quem tem conta). Com os mocks, o código aparece no terminal do App.
+- **Criar conta.** A conta nova entra como **Visitante**; a secretaria promove a Membro no Gestão. O cadastro reaproveita a pessoa que já se inscreveu ou pediu atendimento pelo site.
+- **Check-in.** Pela câmera do App (BarcodeDetector nativo, com jsQR como alternativa no iPhone) ou pela câmera do celular, que abre `/checkin?evento=…&t=…`. O token é um HMAC do evento (`CHECKIN_SECRET`), então não dá para marcar presença em outro evento pela URL. "Confirmar presença" vale só para a atividade aberta de hoje (de 2 horas antes do início até o fim). A presença não duplica. Os QR Codes impressos serão gerados no Gestão (Fase 3).
+- **Jornada.** Pessoal e sem ranking. As conquistas são concedidas automaticamente no check-in (Primeira visita, 5 encontros, Primeiro estudo, Primeiro voluntariado, Campanha solidária).
+- **Avaliação (NPS).** Uma por pessoa e palestra (reenviar atualiza). A Home mostra a palestra com check-in dos últimos 14 dias ainda sem avaliação.
+- **CEAK IA.** Responde só com base nos documentos oficiais (agenda, estudos, campanhas, orientações) e sempre mostra a "Fonte consultada". Perguntas pessoais são encaminhadas ao atendimento fraterno. A conversa não é gravada; o log registra só o evento, sem o texto.
+- **Doação e assistência.** Mesmos fluxos do site, ligados à pessoa da sessão: a doação aparece em Minha jornada e em Minhas contribuições. No pedido de atendimento, o relato é opcional e, quando preenchido, exige um consentimento específico (fica na tabela restrita, legível pela coordenação da assistência e pela diretoria).
+- **LGPD.** Em Perfil › Dados pessoais: corrigir nome e WhatsApp (com auditoria), baixar os próprios dados em JSON (`/api/meus-dados`, com auditoria) e pedir a exclusão (a secretaria conclui a anonimização no Gestão).
+- **PWA.** Manifest com ícones 192/512/maskable (gerados do monograma "AK" até chegar o logo oficial), service worker (Serwist) e página `/offline`. O service worker guarda **só arquivos estáticos e a página offline**: telas da área do membro nunca ficam no cache do aparelho.
+- **Push.** Web Push com VAPID. Com `VAPID_PUBLIC_KEY` e `VAPID_PRIVATE_KEY` definidos, o membro liga as notificações em Perfil e o envio usa o `web-push`. Sem as chaves, o controle aparece como "em breve" e os envios caem no mock.
+- **Loja.** O App mostra a vitrine; o carrinho e o pagamento acontecem no site.
+- **Testes.** `e2e/app` cobre a jornada 2 (Login → Home → Check-in → Estudo → Palestra → Avaliação), check-in por QR, login por código, cadastro, PWA (manifest, service worker e offline), acessibilidade (axe em todas as telas) e a moldura no desktop. Lighthouse (perfil móvel): 96–99 em Performance e 100 em Acessibilidade e Boas práticas.
 
 ## Dados institucionais pendentes
 
