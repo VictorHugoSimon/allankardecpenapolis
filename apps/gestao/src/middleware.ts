@@ -8,7 +8,7 @@ import {
 } from '@ceak/core/auth/sessao';
 import { podeAcessarRota, temAcessoGestao } from '@ceak/core/rbac';
 
-const PUBLICAS = ['/login'];
+const PUBLICAS = ['/login', '/redefinir-senha'];
 
 function secret(): string {
   const s = process.env.AUTH_SECRET;

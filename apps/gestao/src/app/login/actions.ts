@@ -3,9 +3,10 @@
 import { redirect } from 'next/navigation';
 import { temAcessoGestao } from '@ceak/core/rbac';
 import { loginSchema, recuperarSenhaSchema } from '@ceak/core/validacao';
-import { autenticarComSenha } from '@ceak/db';
+import { autenticarComSenha, solicitarRedefinicaoSenha } from '@ceak/db';
 import { authProvider, gravarCookieSessao, ipDaRequisicao } from '@/lib/auth';
 import { log } from '@/lib/log';
+import { enviarEmail, GESTAO_URL } from '@/lib/servidor';
 
 export interface EstadoLogin {
   erro?: string;
@@ -68,10 +69,17 @@ export async function recuperarSenha(_prev: EstadoLogin, form: FormData): Promis
   const parsed = recuperarSenhaSchema.safeParse({ email: form.get('email') });
   if (parsed.success) {
     // Mesmo retorno exista ou não a conta (não revela e-mails cadastrados).
-    await authProvider()
-      .enviarRecuperacaoSenha(parsed.data.email)
-      .catch(() => undefined);
-    log.info('SEGURANCA', 'recuperação de senha solicitada', { rota: '/login' });
+    const enviar =
+      process.env.AUTH_PROVIDER === 'supabase'
+        ? authProvider().enviarRecuperacaoSenha(parsed.data.email)
+        : solicitarRedefinicaoSenha(parsed.data.email, { enviarEmail, urlBase: GESTAO_URL, log });
+    await enviar.catch((e) =>
+      log.error('SEGURANCA', 'recuperação de senha falhou', {
+        rota: '/login',
+        status: 500,
+        contexto: { erro: String(e) },
+      }),
+    );
   }
   return { recuperacaoEnviada: true };
 }
