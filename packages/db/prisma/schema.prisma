@@ -572,6 +572,8 @@ model Material {
   titulo   String
   tipo     TipoMaterial
   url      String
+  /// Ex.: "48 páginas · 2,1 MB", "58 min", "Leitura recomendada".
+  detalhe  String?
   criadoEm DateTime     @default(now()) @map("criado_em")
 
   curso Curso? @relation(fields: [cursoId], references: [id], onDelete: Cascade)
@@ -741,13 +743,15 @@ model Comunicacao {
 }
 
 model Notificacao {
-  id       String    @id @default(uuid()) @db.Uuid
-  pessoaId String    @map("pessoa_id") @db.Uuid
-  titulo   String
-  corpo    String
-  url      String?
-  lidaEm   DateTime? @map("lida_em")
-  criadoEm DateTime  @default(now()) @map("criado_em")
+  id        String    @id @default(uuid()) @db.Uuid
+  pessoaId  String    @map("pessoa_id") @db.Uuid
+  /// Rótulo exibido no app (ex.: "Lembrete", "Estudos", "Campanha", "Voluntariado").
+  categoria String    @default("Aviso")
+  titulo    String
+  corpo     String
+  url       String?
+  lidaEm    DateTime? @map("lida_em")
+  criadoEm  DateTime  @default(now()) @map("criado_em")
 
   pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
 

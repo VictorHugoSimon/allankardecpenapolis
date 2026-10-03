@@ -648,6 +648,14 @@ async function main() {
     T[nome] = t.id;
   }
   // Turma ESDE 2026 — seg: 16 aulas e frequência dos alunos do protótipo.
+  const TITULOS_ESDE: Record<number, string> = {
+    15: 'A pluralidade das existências',
+    16: 'Esquecimento do passado',
+    17: 'A justiça da reencarnação',
+    18: 'Infância e família',
+    19: 'Laços de família',
+    20: 'Revisão do módulo',
+  };
   const turmaEsde = T['Turma 2026 — seg']!;
   const aulas: string[] = [];
   for (let n = 1; n <= 16; n++) {
@@ -655,7 +663,7 @@ async function main() {
       data: {
         turmaId: turmaEsde,
         numero: n,
-        titulo: `Aula ${n}`,
+        titulo: TITULOS_ESDE[n] ?? `Aula ${n}`,
         modulo: n <= 6 ? 'Módulo 1' : n <= 11 ? 'Módulo 2' : 'Módulo 3',
         data: new Date(d('2026-06-15T20:00').getTime() + (n - 1) * 7 * 86_400_000),
       },
@@ -667,12 +675,24 @@ async function main() {
     data: {
       turmaId: turmaEsde,
       numero: 17,
-      titulo: 'Aula 17',
+      titulo: TITULOS_ESDE[17]!,
       modulo: 'Módulo 3',
       data: d('2026-10-05T20:00'),
       eventoId: esdeAula.id,
     },
   });
+  // Restante do módulo 3 e início do módulo 4 (calendário e grade de presença do app).
+  for (let n = 18; n <= 24; n++) {
+    await prisma.aula.create({
+      data: {
+        turmaId: turmaEsde,
+        numero: n,
+        titulo: TITULOS_ESDE[n] ?? `Módulo 4 · Aula ${n - 20}`,
+        modulo: n <= 20 ? 'Módulo 3' : 'Módulo 4',
+        data: new Date(d('2026-10-05T20:00').getTime() + (n - 17) * 7 * 86_400_000),
+      },
+    });
+  }
   await prisma.aula.create({
     data: {
       turmaId: T['Sábado aberto']!,
@@ -689,13 +709,44 @@ async function main() {
       data: d('2026-10-04T09:30'),
     },
   });
-  await prisma.material.create({
-    data: {
-      cursoId: C.ESDE,
-      titulo: 'Apostila ESDE — Módulo 3',
-      tipo: 'APOSTILA',
-      url: '/materiais/esde-modulo-3.pdf',
-    },
+  await prisma.material.createMany({
+    data: [
+      {
+        cursoId: C.ESDE!,
+        titulo: 'Apostila — Módulo 3',
+        tipo: 'APOSTILA',
+        url: '/materiais/esde-modulo-3.pdf',
+        detalhe: '48 páginas · 2,1 MB',
+      },
+      {
+        cursoId: C.ESDE!,
+        titulo: 'Aula 16 gravada',
+        tipo: 'VIDEO',
+        url: 'https://www.youtube.com/@ceakpenapolis/videos',
+        detalhe: '58 min',
+      },
+      {
+        cursoId: C.ESDE!,
+        titulo: 'Roteiro de reflexão — aula 17',
+        tipo: 'PDF',
+        url: '/materiais/esde-roteiro-aula-17.pdf',
+        detalhe: '3 páginas',
+      },
+      {
+        cursoId: C.ESDE!,
+        titulo: 'O Livro dos Espíritos, questões 166–222',
+        tipo: 'LINK',
+        url: 'https://www.febnet.org.br',
+        detalhe: 'Leitura recomendada',
+      },
+      {
+        cursoId: C.ESDE!,
+        titulo: 'Prece de abertura',
+        tipo: 'AUDIO',
+        url: '/materiais/prece-de-abertura.mp3',
+        detalhe: '4 min',
+      },
+    ],
   });
   const alunos = [
     ['Victor Alves', 14, 78, StatusMatricula.ATIVA],
@@ -711,7 +762,12 @@ async function main() {
     });
     for (const [i, aulaId] of aulas.entries()) {
       await prisma.presenca.create({
-        data: { aulaId, pessoaId: pid(nome), presente: i < presentes },
+        // Victor faltou às aulas 7 e 12 (grade de presença do protótipo).
+        data: {
+          aulaId,
+          pessoaId: pid(nome),
+          presente: nome === 'Victor Alves' ? i !== 6 && i !== 11 : i < presentes,
+        },
       });
     }
   }
@@ -820,9 +876,10 @@ async function main() {
   ] as const;
   for (const [i, [chave, titulo, descricao]] of conquistas.entries()) {
     const c = await prisma.conquista.create({ data: { chave, titulo, descricao, ordem: i } });
+    const obtidas = ['2024-03-08', '2024-04-19', '2024-05-06', '2024-08-14'];
     if (i < 4)
       await prisma.conquistaPessoa.create({
-        data: { pessoaId: pid('Victor Alves'), conquistaId: c.id },
+        data: { pessoaId: pid('Victor Alves'), conquistaId: c.id, obtidaEm: d(obtidas[i]!) },
       });
   }
 
@@ -1809,7 +1866,115 @@ async function main() {
         funcao: ars[0],
       },
     });
+    if (nome === 'Victor Alves') {
+      await prisma.escala.createMany({
+        data: [
+          {
+            areaId: AR.Recepção!,
+            voluntarioId: v.id,
+            inicio: d('2026-09-30T18:30'),
+            fim: d('2026-09-30T21:30'),
+            funcao: 'Recepção',
+          },
+          {
+            areaId: AR.Recepção!,
+            voluntarioId: v.id,
+            inicio: d('2026-09-16T19:00'),
+            fim: d('2026-09-16T21:00'),
+            funcao: 'Recepção',
+          },
+          {
+            areaId: AR.Recepção!,
+            voluntarioId: v.id,
+            inicio: d('2026-10-21T19:00'),
+            fim: d('2026-10-21T21:30'),
+            funcao: 'Recepção',
+          },
+        ],
+      });
+    }
   }
+
+  // ─── Membro: check-ins, avaliação, doação e notificações (CEAK App) ───
+  const evPorTitulo = async (titulo: string) =>
+    (await prisma.evento.findFirstOrThrow({ where: { titulo } })).id;
+  for (const titulo of [
+    'A coragem da fé',
+    'O bem que se faz em silêncio',
+    'Os obstáculos como lições',
+    'Paz interior em tempos difíceis',
+  ]) {
+    const eventoId = await evPorTitulo(titulo);
+    const ev = await prisma.evento.findUniqueOrThrow({ where: { id: eventoId } });
+    await prisma.checkin.create({
+      data: {
+        eventoId,
+        pessoaId: pid('Victor Alves'),
+        origem: 'QR',
+        criadoEm: new Date(ev.inicio.getTime() - 6 * 60_000),
+      },
+    });
+  }
+  await prisma.avaliacao.create({
+    data: {
+      eventoId: await evPorTitulo('A coragem da fé'),
+      pessoaId: pid('Victor Alves'),
+      nps: 10,
+      conteudo: 5,
+      clareza: 5,
+      aplicabilidade: 4,
+      criadoEm: d('2026-09-26T09:00'),
+    },
+  });
+  await prisma.doacao.create({
+    data: {
+      pessoaId: pid('Victor Alves'),
+      itemDescricao: '6 peças',
+      forma: FormaDoacao.ENTREGA,
+      destino: 'Campanha do Agasalho',
+      campanhaId: agasalho.id,
+      statusPagamento: StatusPagamento.PAGO,
+      reciboEmitidoEm: d('2026-09-29'),
+      criadoEm: d('2026-09-29T10:00'),
+    },
+  });
+  await prisma.notificacao.createMany({
+    data: [
+      {
+        pessoaId: pid('Victor Alves'),
+        categoria: 'Lembrete',
+        titulo: 'Palestra hoje às 20:00',
+        corpo: '“O perdão como libertação”, com Rogério Lima. Transmissão ao vivo disponível.',
+        url: '/palestra',
+        criadoEm: d('2026-10-02T18:00'),
+      },
+      {
+        pessoaId: pid('Victor Alves'),
+        categoria: 'Estudos',
+        titulo: 'Nova apostila disponível',
+        corpo: 'Roteiro de reflexão da aula 17 do ESDE.',
+        url: '/estudos',
+        criadoEm: d('2026-10-01T10:00'),
+      },
+      {
+        pessoaId: pid('Victor Alves'),
+        categoria: 'Campanha',
+        titulo: 'Campanha do Agasalho: 75% da meta',
+        corpo: 'Faltam 122 peças. Coleta drive-thru aos sábados.',
+        url: '/quero-ajudar',
+        criadoEm: d('2026-09-29T09:00'),
+        lidaEm: d('2026-09-29T12:00'),
+      },
+      {
+        pessoaId: pid('Victor Alves'),
+        categoria: 'Voluntariado',
+        titulo: 'Escala de outubro publicada',
+        corpo: 'Recepção: quartas 07/10 e 21/10, 19h00.',
+        criadoEm: d('2026-09-27T09:00'),
+        lidaEm: d('2026-09-27T20:00'),
+      },
+    ],
+  });
 
   // ─── Assistência ─────────────────────────────────────────────────────
   // Horários de atendimento ("Preciso de ajuda › Data").

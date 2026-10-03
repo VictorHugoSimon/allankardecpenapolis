@@ -9,12 +9,14 @@ import {
 } from './mensageria';
 import { criarMockPaymentProvider, type PaymentProvider } from './payment';
 import { criarMockSocialProvider, type SocialProvider } from './social';
+import { criarWebPushProvider } from './webpush';
 
 export * from './ai';
 export * from './mensageria';
 export * from './payment';
 export * from './pix-brcode';
 export * from './social';
+export * from './webpush';
 
 export interface Adapters {
   pagamento: PaymentProvider;
@@ -44,7 +46,6 @@ export function criarAdapters(env: Env = process.env): Adapters {
   for (const k of [
     'PAYMENT_PROVIDER',
     'AI_PROVIDER',
-    'PUSH_PROVIDER',
     'EMAIL_PROVIDER',
     'WHATSAPP_PROVIDER',
     'SOCIAL_PROVIDER',
@@ -52,6 +53,21 @@ export function criarAdapters(env: Env = process.env): Adapters {
     exigirMock(env, k);
   }
   const msg = criarMocksMensageria();
+  // Web Push real quando as chaves VAPID estão configuradas; senão, mock.
+  const vapid =
+    env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY
+      ? {
+          publicKey: env.VAPID_PUBLIC_KEY,
+          privateKey: env.VAPID_PRIVATE_KEY,
+          subject: env.VAPID_SUBJECT ?? `mailto:${instituicao.contato.email}`,
+        }
+      : null;
+  if (env.PUSH_PROVIDER && !['mock', 'webpush'].includes(env.PUSH_PROVIDER)) {
+    throw new Error(`PUSH_PROVIDER=${env.PUSH_PROVIDER} desconhecido. Use "mock" ou "webpush".`);
+  }
+  if (env.PUSH_PROVIDER === 'webpush' && !vapid) {
+    throw new Error('PUSH_PROVIDER=webpush exige VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY.');
+  }
   return {
     pagamento: criarMockPaymentProvider({
       chave: instituicao.pix.chave,
@@ -60,7 +76,7 @@ export function criarAdapters(env: Env = process.env): Adapters {
       webhookSecret: env.PIX_WEBHOOK_SECRET ?? 'dev-webhook-secret',
     }),
     ia: criarMockAIProvider(),
-    push: msg.push,
+    push: vapid && env.PUSH_PROVIDER !== 'mock' ? criarWebPushProvider(vapid) : msg.push,
     email: msg.email,
     whatsapp: msg.whatsapp,
     caixa: msg.caixa,

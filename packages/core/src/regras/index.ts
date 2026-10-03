@@ -1,3 +1,4 @@
+export * from './membro';
 /**
  * Regras de negócio puras (sem banco), compartilhadas por site, app e gestão.
  */

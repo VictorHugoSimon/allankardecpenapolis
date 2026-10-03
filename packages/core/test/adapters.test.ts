@@ -115,3 +115,16 @@ describe('criarAdapters', () => {
     );
   });
 });
+
+describe('push', () => {
+  it('usa Web Push com chaves VAPID e mock sem elas', async () => {
+    const webpush = (await import('web-push')).default;
+    const chaves = webpush.generateVAPIDKeys();
+    expect(criarAdapters({}).push.nome).toBe('mock');
+    expect(
+      criarAdapters({ VAPID_PUBLIC_KEY: chaves.publicKey, VAPID_PRIVATE_KEY: chaves.privateKey })
+        .push.nome,
+    ).toBe('webpush');
+    expect(() => criarAdapters({ PUSH_PROVIDER: 'webpush' })).toThrow(/VAPID/);
+  });
+});

@@ -152,3 +152,39 @@ export const intencaoAjudaSchema = z.object({
   site: isca,
 });
 export type IntencaoAjudaInput = z.infer<typeof intencaoAjudaSchema>;
+
+// ─── CEAK App ─────────────────────────────────────────────────────────
+
+const nota = z.coerce.number().int().min(1).max(5).optional();
+
+export const avaliacaoSchema = z.object({
+  nps: z.coerce
+    .number({ error: 'Escolha uma nota de 0 a 10.' })
+    .int()
+    .min(0, 'Escolha uma nota de 0 a 10.')
+    .max(10),
+  conteudo: nota,
+  clareza: nota,
+  aplicabilidade: nota,
+  comentario: z
+    .string()
+    .trim()
+    .max(1000)
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+  sugestao: z
+    .string()
+    .trim()
+    .max(1000)
+    .optional()
+    .transform((v) => (v ? v : undefined)),
+});
+export type AvaliacaoInput = z.infer<typeof avaliacaoSchema>;
+
+export const perguntaIaSchema = z.object({
+  pergunta: z
+    .string()
+    .trim()
+    .min(2, 'Escreva sua pergunta.')
+    .max(500, 'Use no máximo 500 caracteres.'),
+});

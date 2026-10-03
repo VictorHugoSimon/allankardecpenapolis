@@ -32,7 +32,13 @@ function lerReferencia(ref: string): Referencia | null {
 
 /** Cria a doação (aguardando) e a cobrança PIX. */
 export async function iniciarDoacao(
-  dados: Omit<DoacaoInput, 'nome' | 'email' | 'site'> & { nome?: string; email?: string },
+  dados: Omit<DoacaoInput, 'nome' | 'email' | 'site'> & {
+    nome?: string;
+    email?: string;
+    /** Doação feita pelo App: aparece na jornada da pessoa. */
+    pessoaId?: string;
+    campanhaId?: string;
+  },
   deps: Pick<DepsPagamento, 'pagamento' | 'log'>,
 ) {
   const doacao = await prisma.doacao.create({
@@ -40,6 +46,8 @@ export async function iniciarDoacao(
       valorCentavos: dados.valorCentavos,
       forma: 'PIX',
       destino: dados.destino,
+      pessoaId: dados.pessoaId,
+      campanhaId: dados.campanhaId,
       doadorNome: dados.nome ?? 'Anônimo',
       doadorEmail: dados.email,
       statusPagamento: 'AGUARDANDO',
