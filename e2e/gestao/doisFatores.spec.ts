@@ -59,7 +59,7 @@ test('administrador redefine o autenticador; a pessoa configura de novo e usa um
   await entrar(page, USUARIOS.ADMINISTRADOR);
   await page.goto(`/config/usuarios/${u!.id}`);
   await page.getByRole('button', { name: 'Redefinir autenticador' }).click();
-  await expect(page.getByRole('status')).toContainText('Autenticador redefinido');
+  await expect(page.getByText('Autenticador redefinido')).toBeVisible();
 
   // Próximo login: configurar o aplicativo.
   await senha(page, alvo);
