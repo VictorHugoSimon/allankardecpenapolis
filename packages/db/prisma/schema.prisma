@@ -375,9 +375,18 @@ model Usuario {
 /// Senha do provedor local (hash scrypt). Tabela separada: o papel da aplicação
 /// (ceak_app) não tem nenhum acesso a ela.
 model Credencial {
-  usuarioId    String   @id @map("usuario_id") @db.Uuid
-  senhaHash    String   @map("senha_hash")
-  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+  usuarioId          String    @id @map("usuario_id") @db.Uuid
+  senhaHash          String    @map("senha_hash")
+  /// Autenticador (TOTP): segredo cifrado (AES-256-GCM), nunca em texto puro.
+  totpSegredo        String?   @map("totp_segredo")
+  /// Segredo gerado na configuração, aguardando o primeiro código válido.
+  totpPendente       String?   @map("totp_pendente")
+  totpAtivadoEm      DateTime? @map("totp_ativado_em")
+  /// Último passo de 30 s aceito (impede reusar o mesmo código).
+  totpUltimoPasso    Int?      @map("totp_ultimo_passo")
+  /// Hashes dos códigos de recuperação ainda não usados.
+  codigosRecuperacao String[]  @default([]) @map("codigos_recuperacao")
+  atualizadoEm       DateTime  @updatedAt @map("atualizado_em")
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 

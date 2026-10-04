@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { listarUsuarios } from '@ceak/db';
+import { listarUsuarios, situacao2fa } from '@ceak/db';
 import { buttonClasses, Pill, Table } from '@ceak/ui';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 
@@ -15,6 +15,7 @@ export default async function UsuariosPage({
   const s = await exigirModulo('config');
   const { ok } = await searchParams;
   const us = await listarUsuarios(contextoRls(s));
+  const f2 = await situacao2fa(us.map((u) => u.id));
   return (
     <>
       {ok ? (
@@ -24,7 +25,9 @@ export default async function UsuariosPage({
         >
           {ok === 'convite'
             ? 'Convite enviado por e-mail · registrado na auditoria.'
-            : 'Usuário atualizado · registrado na auditoria.'}
+            : ok === '2fa'
+              ? 'Autenticador redefinido · a pessoa vai configurar de novo no próximo login.'
+              : 'Usuário atualizado · registrado na auditoria.'}
         </p>
       ) : null}
       <div className="flex justify-end">
@@ -65,6 +68,19 @@ export default async function UsuariosPage({
                 ) : null}
               </>
             ),
+          },
+          {
+            key: '2fa',
+            header: 'Autenticador',
+            cell: (u) => {
+              const x = f2[u.id];
+              if (x?.ativo) return <Pill tone="ok">Ativo</Pill>;
+              return x?.exige ? (
+                <Pill tone="warn">Pendente</Pill>
+              ) : (
+                <span className="text-muted-2">—</span>
+              );
+            },
           },
           { key: 'ultimo', header: 'Último acesso', cell: (u) => u.ultimoAcesso },
           {

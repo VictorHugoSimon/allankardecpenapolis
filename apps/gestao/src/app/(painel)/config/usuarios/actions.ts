@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { isPerfil, PERFIS } from '@ceak/core/rbac';
-import { atualizarUsuario, convidarUsuario, ErroNegocio } from '@ceak/db';
+import { atualizarUsuario, convidarUsuario, ErroNegocio, redefinir2fa } from '@ceak/db';
 import { exigirModulo } from '@/lib/auth';
 import { log } from '@/lib/log';
 import { contexto, enviarEmail, GESTAO_URL } from '@/lib/servidor';
@@ -79,4 +79,17 @@ export async function convidar(
     throw e;
   }
   redirect('/config/usuarios?ok=convite');
+}
+
+/** Celular perdido: o autenticador é apagado e a pessoa configura de novo no próximo login. */
+export async function redefinirAutenticador(id: string): Promise<void> {
+  const s = await exigirModulo('config');
+  const ctx = await contexto(s);
+  await redefinir2fa(s.usuarioId, id, ctx.ip);
+  log.info('SEGURANCA', 'autenticador (2FA) redefinido', {
+    rota: '/config/usuarios',
+    status: 200,
+    usuario: s.nome,
+  });
+  redirect('/config/usuarios?ok=2fa');
 }

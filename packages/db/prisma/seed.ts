@@ -5,7 +5,7 @@
  * ATENÇÃO: apaga e recria todos os dados. Bloqueado em produção.
  *   pnpm db:seed
  */
-import { hashSenha } from '@ceak/core/auth';
+import { cifrarSegredo, hashSenha } from '@ceak/core/auth';
 import { TERMO_LGPD_VERSAO } from '@ceak/core/validacao';
 import { config } from 'dotenv';
 import { resolve } from 'node:path';
@@ -13,6 +13,14 @@ import { resolve } from 'node:path';
 config({ path: resolve(import.meta.dirname, '../../../.env'), quiet: true });
 
 const { prisma } = await import('../src/client');
+
+/** Segredo do autenticador dos usuários do seed (apenas desenvolvimento e testes). */
+const SEED_TOTP_SEGREDO = process.env.SEED_TOTP_SEGREDO ?? 'JBSWY3DPEHPK3PXPCEAKDEVSEEDTOTPA';
+/** Mesma regra dos apps: AUTH_SECRET ou o padrão de desenvolvimento. */
+function segredoApp() {
+  const s = process.env.AUTH_SECRET;
+  return s && s.length >= 32 ? s : 'dev-only-secret-0123456789-abcdefghijklmnopqrstuvwxyz';
+}
 const {
   Perfil,
   TipoEvento,
@@ -251,6 +259,17 @@ async function main() {
       P[p.nome]!.usuarioId = u.id;
     }
   }
+  // Autenticador (2FA) dos perfis que exigem: segredo só de desenvolvimento.
+  // Código atual: `pnpm db:totp <e-mail>`.
+  await prisma.credencial.updateMany({
+    where: {
+      usuario: { perfil: { in: [Perfil.ADMINISTRADOR, Perfil.DIRETORIA, Perfil.TESOURARIA] } },
+    },
+    data: {
+      totpSegredo: cifrarSegredo(SEED_TOTP_SEGREDO, segredoApp()),
+      totpAtivadoEm: d('2026-01-10'),
+    },
+  });
   const pid = (nome: string) => P[nome]!.id;
   const uid = (nome: string) => P[nome]!.usuarioId!;
   await prisma.pessoa.update({

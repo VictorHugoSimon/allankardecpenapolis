@@ -18,7 +18,8 @@
     "db:migrate": "pnpm --filter @ceak/db db:migrate",
     "db:deploy": "pnpm --filter @ceak/db db:deploy",
     "db:reset": "pnpm --filter @ceak/db db:reset",
-    "db:seed": "pnpm --filter @ceak/db db:seed"
+    "db:seed": "pnpm --filter @ceak/db db:seed",
+    "db:totp": "pnpm --filter @ceak/db db:totp"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

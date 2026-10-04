@@ -14,9 +14,9 @@ export default async function SegurancaPage() {
   const itens: { titulo: string; detalhe: string; ativo: boolean; nota?: string }[] = [
     {
       titulo: 'Autenticação em dois fatores',
-      detalhe: 'Obrigatória para Administrador, Diretoria e Tesouraria',
+      detalhe:
+        'Aplicativo autenticador (Google Authenticator, Microsoft Authenticator, Authy…) · obrigatório para Administrador, Diretoria e Tesouraria',
       ativo: true,
-      nota: 'Definição pendente: código por e-mail/WhatsApp ou aplicativo autenticador.',
     },
     {
       titulo: 'Sessão expira por inatividade',

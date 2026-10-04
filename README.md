@@ -53,6 +53,8 @@ Entre no Gestão em http://localhost:3002 ou no App em http://localhost:3001 com
 | Membro                                   | joao.rocha@email.com                         |
 | Visitante                                | carla.nogueira@email.com                     |
 
+Administrador, Diretoria e Tesouraria também confirmam um código do **aplicativo autenticador** no Gestão. No seed, os três usam o mesmo segredo (`SEED_TOTP_SEGREDO`, padrão `JBSWY3DPEHPK3PXPCEAKDEVSEEDTOTPA`): adicione-o ao seu aplicativo ou veja o código atual com `pnpm db:totp <e-mail>`.
+
 A página **`/ui`** do Gestão mostra todos os componentes.
 
 ## Comandos
@@ -67,6 +69,7 @@ A página **`/ui`** do Gestão mostra todos os componentes.
 | `pnpm db:deploy`                               | Aplica as migrações                                                                       |
 | `pnpm db:migrate`                              | Cria uma nova migração a partir do `schema.prisma` (desenvolvimento)                      |
 | `pnpm db:seed`                                 | **Apaga** e recria os dados fictícios (bloqueado em produção)                             |
+| `pnpm db:totp <e-mail>`                        | Mostra o código atual do autenticador de um usuário do seed (só desenvolvimento)          |
 
 ## Decisões técnicas
 
@@ -130,8 +133,9 @@ Rotas: `/` (Command Center), `/pessoas` e `/pessoas/[id]` (Perfil 360°), `/agen
 - **Financeiro.** Dashboard com o último mês fechado e os seis meses anteriores (o seed traz o realizado de abril a setembro, fechando setembro em R$ 18.840 de receitas e R$ 13.290 de despesas). Contas seguem `pendente → aprovado → pago` (ou `cancelado`); pendente ou aprovado com vencimento passado aparece como Vencido. Conta nova nasce pendente e entra na Central de aprovações. Tudo sob RLS (Administrador, Diretoria e Tesouraria) e com auditoria.
 - **Check-in.** Eventos tem o cartaz com o QR Code assinado para a entrada do salão (o mesmo token que o App valida).
 - **Usuários.** Convite por e-mail com link de uso único (48 h) para definir a senha. “Recuperar senha” no login agora envia um link real (30 min). Não é possível desativar o próprio acesso nem ficar sem Administrador ativo.
+- **Autenticação em dois fatores.** Aplicativo autenticador (TOTP, RFC 6238: Google Authenticator, Microsoft Authenticator, Authy…), obrigatório no Gestão para os perfis de `seguranca.doisFatoresObrigatorio` (Administrador, Diretoria e Tesouraria). Depois da senha, quem já ativou digita o código (`/login/verificar`); quem ainda não ativou configura lendo o QR Code (`/login/configurar`) e recebe 8 códigos de recuperação de uso único. O segredo fica cifrado (AES-256-GCM, chave derivada do `AUTH_SECRET`), os códigos de recuperação só como hash, o mesmo código não vale duas vezes e 5 erros bloqueiam por 15 minutos. “Não pedir de novo neste navegador por 30 dias” é opcional e deixa de valer se o autenticador for redefinido. Em Configurações › Usuários aparece a situação de cada um e o Administrador pode **redefinir o autenticador** (celular perdido), com auditoria. O CEAK App (área do membro) não pede o segundo fator.
 - **Configurações.** Instituição mostra os dados de `packages/core/config/instituicao.ts` (fonte única, ainda com os valores fictícios). A matriz de perfis é a do código (`packages/core/src/rbac`). Em Segurança e LGPD, a retenção de logs é editável (com auditoria).
-- **Testes.** `e2e/gestao` cobre a jornada 6 (Login → Command Center → Conteúdo pendente → Revisar → Aprovar → Publicação, conferindo a auditoria no banco e o post no site), rejeição, seletor de perfil, Instrutor só com os seus alunos, financeiro com auditoria, agenda por perfil, QR do check-in, convite com definição de senha, busca e acessibilidade (axe) em todas as telas novas.
+- **Testes.** `e2e/gestao` cobre a jornada 6 (Login → Command Center → Conteúdo pendente → Revisar → Aprovar → Publicação, conferindo a auditoria no banco e o post no site), rejeição, seletor de perfil, Instrutor só com os seus alunos, financeiro com auditoria, agenda por perfil, QR do check-in, convite com definição de senha, busca, autenticador (código, código errado, redefinição, nova configuração e código de recuperação) e acessibilidade (axe) em todas as telas novas.
 
 ## Dados institucionais pendentes
 
@@ -144,4 +148,4 @@ Endereço, CNPJ, telefones, chave PIX, diretoria, histórico/linha do tempo, pro
 
 ## Decisões pendentes
 
-- **Autenticação em dois fatores** (Administrador, Diretoria e Tesouraria): falta definir o método (código por e-mail/WhatsApp ou aplicativo autenticador). Hoje a configuração aparece em Segurança e LGPD, mas ainda não é exigida no login.
+- Nenhuma no momento (o método do segundo fator foi definido: aplicativo autenticador).

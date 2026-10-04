@@ -3,7 +3,8 @@
 import { redirect } from 'next/navigation';
 import { temAcessoGestao } from '@ceak/core/rbac';
 import { loginSchema, recuperarSenhaSchema } from '@ceak/core/validacao';
-import { autenticarComSenha, solicitarRedefinicaoSenha } from '@ceak/db';
+import { autenticarComSenha, etapaDoisFatores, solicitarRedefinicaoSenha } from '@ceak/db';
+import { gravarPendente, navegadorConfiavel } from '@/lib/doisFatores';
 import { authProvider, gravarCookieSessao, ipDaRequisicao } from '@/lib/auth';
 import { log } from '@/lib/log';
 import { enviarEmail, GESTAO_URL } from '@/lib/servidor';
@@ -55,6 +56,24 @@ export async function entrar(_prev: EstadoLogin, form: FormData): Promise<Estado
     };
   }
 
+  // Segundo fator: autenticador obrigatório para Administrador, Diretoria e Tesouraria.
+  const destino = temAcessoGestao(r.sessao.perfil)
+    ? destinoSeguro(form.get('next'))
+    : '/sem-acesso';
+  const f = await etapaDoisFatores(r.sessao.usuarioId);
+  if (
+    f.etapa === 'configurar' ||
+    (f.etapa === 'verificar' && !(await navegadorConfiavel(r.sessao.usuarioId, f.ativadoEm)))
+  ) {
+    await gravarPendente({ sessao: r.sessao, etapa: f.etapa, next: destino });
+    log.info('SEGURANCA', `login · senha ok, aguardando autenticador · ${r.sessao.email}`, {
+      rota: '/login',
+      status: 202,
+      usuario: r.sessao.nome,
+    });
+    redirect(f.etapa === 'configurar' ? '/login/configurar' : '/login/verificar');
+  }
+
   await gravarCookieSessao(r.sessao);
   log.info('SEGURANCA', `login · ${r.sessao.email} (${r.sessao.perfil})`, {
     rota: '/login',
@@ -62,7 +81,7 @@ export async function entrar(_prev: EstadoLogin, form: FormData): Promise<Estado
     usuario: r.sessao.nome,
     latenciaMs: Date.now() - t0,
   });
-  redirect(temAcessoGestao(r.sessao.perfil) ? destinoSeguro(form.get('next')) : '/sem-acesso');
+  redirect(destino);
 }
 
 export async function recuperarSenha(_prev: EstadoLogin, form: FormData): Promise<EstadoLogin> {
