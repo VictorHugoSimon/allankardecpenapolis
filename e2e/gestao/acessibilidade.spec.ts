@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { entrar, USUARIOS } from './helpers';
+import { confiarNavegador, entrar, USUARIOS } from './helpers';
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
@@ -34,6 +34,7 @@ test('/ui e Visão Geral sem violações WCAG 2.1 AA', async ({ page }) => {
 });
 
 test('navegação por teclado no login', async ({ page }) => {
+  await confiarNavegador(page, USUARIOS.ADMINISTRADOR);
   await page.goto('/login');
   await page.keyboard.press('Tab');
   await expect(page.getByLabel('E-mail')).toBeFocused();
