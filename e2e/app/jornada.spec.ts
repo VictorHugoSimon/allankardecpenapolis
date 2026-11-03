@@ -138,7 +138,9 @@ test('a versão publicada não promete código pelo WhatsApp sem provedor real',
   await page.goto('/entrar');
   await expect(page.getByRole('link', { name: 'Entrar com código pelo WhatsApp' })).toHaveCount(0);
   await page.goto('/entrar/codigo');
-  await expect(page.getByText(/acesso por código do WhatsApp ainda não está disponível/i)).toBeVisible();
+  await expect(
+    page.getByText(/acesso por código do WhatsApp ainda não está disponível/i),
+  ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Voltar para entrar' })).toBeVisible();
 });
 
