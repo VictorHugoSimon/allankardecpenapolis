@@ -7,20 +7,20 @@ function runtimeDatabaseUrl(url?: string, schema?: string) {
   if (!url || !schema) return url;
 
   const parsed = new URL(url);
-  // O pooler transacional do Neon não aceita `options=search_path` no startup.
-  // Os novos previews CEAK v2 usam a conexão direta e mantêm o legado intacto.
+  // O CEAK v2 usa a conexão direta do Neon; os previews legados permanecem intactos.
   parsed.hostname = parsed.hostname.replace('-pooler.', '.');
-  parsed.searchParams.set('options', `-c search_path=${schema},public`);
   return parsed.toString();
 }
 
 function criarClient(): PrismaClient {
-  const scopedDatabaseUrl = runtimeDatabaseUrl(
-    process.env.DATABASE_URL,
-    process.env.CEAK_DB_SCHEMA?.trim(),
+  const databaseSchema = process.env.CEAK_DB_SCHEMA?.trim();
+  const scopedDatabaseUrl = runtimeDatabaseUrl(process.env.DATABASE_URL, databaseSchema);
+
+  const adapter = new PrismaPg(
+    { connectionString: scopedDatabaseUrl },
+    databaseSchema ? { schema: databaseSchema } : undefined,
   );
 
-  const adapter = new PrismaPg({ connectionString: scopedDatabaseUrl });
   return new PrismaClient({ adapter });
 }
 
