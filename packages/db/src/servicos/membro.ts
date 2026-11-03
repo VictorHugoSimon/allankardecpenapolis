@@ -34,39 +34,36 @@ export async function cadastrarParticipante(dados: CadastroInput) {
     );
   const senhaHash = await hashSenha(dados.senha);
   return prisma.$transaction(async (tx) => {
-    // Reaproveita o cadastro de quem já se inscreveu ou pediu atendimento pelo site.
-    const existente = await tx.pessoa.findFirst({
+    // Não associe automaticamente um cadastro pré-existente com base apenas
+    // em e-mail/WhatsApp informado. Esses dados não comprovam titularidade e
+    // o registro pode conter relatos privados, inscrições ou doações.
+    // A vinculação exige um fluxo separado de verificação de identidade.
+    const cadastroExistente = await tx.pessoa.findFirst({
       where: {
         anonimizadaEm: null,
-        usuario: null,
         OR: [{ email: dados.email }, ...(dados.whatsapp ? [{ whatsapp: dados.whatsapp }] : [])],
       },
       select: { id: true },
     });
+    if (cadastroExistente) {
+      throw new ErroNegocio(
+        'Já existe um cadastro com este contato. Procure a secretaria do CEAK para vincular sua conta com segurança.',
+        'vinculacao_exige_verificacao',
+      );
+    }
     const consentimento = { consentimentoEm: new Date(), consentimentoVersao: TERMO_LGPD_VERSAO };
-    const pessoa = existente
-      ? await tx.pessoa.update({
-          where: { id: existente.id },
-          data: {
-            nome: dados.nome,
-            email: dados.email,
-            whatsapp: dados.whatsapp ?? undefined,
-            ...consentimento,
-          },
-          select: { id: true },
-        })
-      : await tx.pessoa.create({
-          data: {
-            nome: dados.nome,
-            email: dados.email,
-            whatsapp: dados.whatsapp,
-            perfil: 'VISITANTE',
-            status: 'NOVO',
-            primeiraVisitaEm: dados.primeiraVez ? new Date() : undefined,
-            ...consentimento,
-          },
-          select: { id: true },
-        });
+    const pessoa = await tx.pessoa.create({
+      data: {
+        nome: dados.nome,
+        email: dados.email,
+        whatsapp: dados.whatsapp,
+        perfil: 'VISITANTE',
+        status: 'NOVO',
+        primeiraVisitaEm: dados.primeiraVez ? new Date() : undefined,
+        ...consentimento,
+      },
+      select: { id: true },
+    });
     const usuario = await tx.usuario.create({
       data: {
         pessoaId: pessoa.id,
