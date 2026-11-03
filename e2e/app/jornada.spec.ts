@@ -54,7 +54,8 @@ test('Jornada 2 · Membro: Login → Home → Check-in → Estudo → Palestra �
   await expect(
     page.getByText(/Palestra Pública · hoje, \d\d:\d\d · Salão principal/),
   ).toBeVisible();
-  await page.getByRole('button', { name: /Confirmar presença/ }).click();
+  await page.goto(`/checkin?evento=${palestra.id}&t=${tokenCheckin(palestra.id)}`);
+  await page.getByRole('button', { name: 'Confirmar check-in' }).click();
   await expect(page.getByRole('heading', { name: 'Check-in realizado' })).toBeVisible();
   await expect(page.getByText('Centro Espírita Allan Kardec')).toBeVisible();
   await expect(page.getByText(/^\d\d\/\d\d\/\d{4} · \d\d:\d\d$/)).toBeVisible();
