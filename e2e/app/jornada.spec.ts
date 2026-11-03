@@ -5,7 +5,6 @@ import {
   JOAO,
   removerEvento,
   tokenCheckin,
-  ultimoCodigo,
   VICTOR,
 } from './helpers';
 
@@ -48,7 +47,7 @@ test('Jornada 2 · Membro: Login → Home → Check-in → Estudo → Palestra �
   await expect(hoje.getByText('Hoje no CEAK')).toBeVisible();
   await expect(hoje).toContainText('Salão principal');
 
-  // Check-in (confirmação manual da atividade de hoje)
+  // Check-in com QR Code assinado (sem autoconfirmação manual)
   await hoje.getByRole('link', { name: 'Fazer check-in' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Check-in' })).toBeVisible();
   await expect(
@@ -135,32 +134,12 @@ test('check-in pelo QR Code (link aberto pela câmera do celular)', async ({ pag
   await expect(page.getByRole('heading', { name: 'Check-in já registrado' })).toBeVisible();
 });
 
-test('login com código pelo WhatsApp (sem revelar se o número existe)', async ({ page }) => {
+test('a versão publicada não promete código pelo WhatsApp sem provedor real', async ({ page }) => {
   await page.goto('/entrar');
-  await page.getByRole('link', { name: 'Entrar com código pelo WhatsApp' }).click();
-  await expect(page.getByRole('heading', { name: 'Entrar com código' })).toBeVisible();
-
-  // Número sem conta: mesma resposta, nenhum código enviado.
-  await page.getByLabel('WhatsApp com DDD').fill('(11) 90000-0000');
-  await page.getByRole('button', { name: 'Enviar código' }).click();
-  await expect(
-    page.getByText(/Se o número estiver cadastrado, você vai receber um código/),
-  ).toBeVisible();
-
+  await expect(page.getByRole('link', { name: 'Entrar com código pelo WhatsApp' })).toHaveCount(0);
   await page.goto('/entrar/codigo');
-  const t0 = Date.now();
-  await page.getByLabel('WhatsApp com DDD').fill('(18) 99654-1120');
-  await page.getByRole('button', { name: 'Enviar código' }).click();
-  await expect(
-    page.getByText(/Se o número estiver cadastrado, você vai receber um código/),
-  ).toBeVisible();
-  await page.getByLabel('Código de 6 dígitos').fill('000000');
-  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-  await expect(page.getByText(/Código inválido ou expirado/)).toBeVisible();
-  const codigo = await ultimoCodigo('+5518996541120', t0);
-  await page.getByLabel('Código de 6 dígitos').fill(codigo);
-  await page.getByRole('button', { name: 'Entrar', exact: true }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Olá, Victor' })).toBeVisible();
+  await expect(page.getByText(/acesso por código do WhatsApp ainda não está disponível/i)).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Voltar para entrar' })).toBeVisible();
 });
 
 test('criar conta pelo App entra como Visitante', async ({ page }) => {
