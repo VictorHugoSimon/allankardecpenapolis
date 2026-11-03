@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'claude/new-session-n6t9kx']
   pull_request:
 
 concurrency:
