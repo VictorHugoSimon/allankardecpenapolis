@@ -166,19 +166,10 @@ export function FluxoCheckin({
               O código está na entrada do salão
             </span>
           </button>
-          <button
-            type="button"
-            disabled={enviando || !atividade.aberto}
-            onClick={() => enviarCheckin({ evento: atividade.id, origem: 'MANUAL' })}
-            className="border-line text-ink rounded-[20px] border bg-white p-[22px] text-left disabled:opacity-60"
-          >
-            <span className="block text-[17px] font-semibold">
-              {enviando ? 'Registrando…' : 'Confirmar presença'}
-            </span>
-            <span className="text-muted mt-1 block text-[13px]">
-              Use se estiver no CEAK e não encontrar o código
-            </span>
-          </button>
+          <p className="border-line text-muted rounded-2xl border bg-white p-4 text-[13px] leading-relaxed">
+            Não encontrou o QR Code? Solicite apoio à recepção do CEAK.
+            A confirmação manual de presença é realizada pela equipe.
+          </p>
         </>
       )}
       <p className="text-muted-2 m-0 mt-2 text-[13px] leading-normal">
