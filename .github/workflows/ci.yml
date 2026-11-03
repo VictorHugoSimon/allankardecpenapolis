@@ -9,6 +9,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
   qualidade:
     name: Lint, testes e build
@@ -42,6 +45,19 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate
+      # Ajusta exclusivamente a formatação na branch de desenvolvimento.
+      # O commit via GITHUB_TOKEN não dispara uma nova execução em cascata.
+      - name: Aplicar Prettier e registrar ajustes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/claude/new-session-n6t9kx'
+        run: |
+          pnpm exec prettier --write .
+          if ! git diff --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add -u
+            git commit -m 'style: apply Prettier to CEAK development branch'
+            git push origin HEAD:claude/new-session-n6t9kx
+          fi
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
