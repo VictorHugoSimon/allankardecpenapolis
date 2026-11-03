@@ -57,6 +57,9 @@ export interface EstadoCodigo extends EstadoForm {
 
 /** Envia o código só para WhatsApp de uma conta ativa, sem revelar se o número existe. */
 export async function pedirCodigo(_: EstadoCodigo, form: FormData): Promise<EstadoCodigo> {
+  if (process.env.NODE_ENV === 'production' && (process.env.WHATSAPP_PROVIDER ?? 'mock') === 'mock') {
+    return { etapa: 'telefone', erro: 'O acesso por WhatsApp está indisponível neste ambiente. Entre com e-mail e senha.' };
+  }
   const valores = textos(form, ['whatsapp']);
   const tel = telefoneBR.safeParse(form.get('whatsapp') ?? '');
   if (!tel.success)
@@ -77,6 +80,9 @@ export async function pedirCodigo(_: EstadoCodigo, form: FormData): Promise<Esta
 }
 
 export async function confirmarCodigo(_: EstadoCodigo, form: FormData): Promise<EstadoCodigo> {
+  if (process.env.NODE_ENV === 'production' && (process.env.WHATSAPP_PROVIDER ?? 'mock') === 'mock') {
+    return { etapa: 'telefone', erro: 'O acesso por WhatsApp está indisponível neste ambiente. Entre com e-mail e senha.' };
+  }
   const telefone = String(form.get('telefone') ?? '');
   const codigo = String(form.get('codigo') ?? '').replace(/\D/g, '');
   const tel = telefoneBR.safeParse(telefone);
