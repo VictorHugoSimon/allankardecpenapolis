@@ -6,6 +6,12 @@ import { defineConfig, env } from 'prisma/config';
 config({ path: resolve(import.meta.dirname, '../../.env'), quiet: true });
 config({ quiet: true });
 
+const databaseUrl = env('DATABASE_URL');
+const databaseSchema = process.env.CEAK_DB_SCHEMA?.trim();
+const scopedDatabaseUrl = databaseSchema
+  ? `${databaseUrl}${databaseUrl.includes('?') ? '&' : '?'}options=${encodeURIComponent(`-c search_path=${databaseSchema},public`)}`
+  : databaseUrl;
+
 export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: {
@@ -13,6 +19,6 @@ export default defineConfig({
     seed: 'tsx prisma/seed.ts',
   },
   datasource: {
-    url: env('DATABASE_URL'),
+    url: scopedDatabaseUrl,
   },
 });
