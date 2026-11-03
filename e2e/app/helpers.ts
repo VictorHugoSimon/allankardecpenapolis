@@ -20,7 +20,10 @@ export async function entrarApp(page: Page, email = VICTOR, senha = SENHA) {
 }
 
 function banco() {
-  return new pg.Client({ connectionString: process.env.DATABASE_URL });
+  return new pg.Client({
+    connectionString: process.env.DATABASE_URL,
+    ...(process.env.CEAK_DB_SCHEMA ? { options: `-c search_path=${process.env.CEAK_DB_SCHEMA}` } : {}),
+  });
 }
 
 /** Mesmo segredo do App: CHECKIN_SECRET ou, sem ele, AUTH_SECRET. */
