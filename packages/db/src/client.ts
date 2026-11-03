@@ -1,4 +1,5 @@
 import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import { PrismaClient } from './generated/prisma/client';
 
 const globalForPrisma = globalThis as unknown as { __ceakPrisma?: PrismaClient };
@@ -16,10 +17,17 @@ function criarClient(): PrismaClient {
   const databaseSchema = process.env.CEAK_DB_SCHEMA?.trim();
   const scopedDatabaseUrl = runtimeDatabaseUrl(process.env.DATABASE_URL, databaseSchema);
 
-  const adapter = new PrismaPg(
-    { connectionString: scopedDatabaseUrl },
-    databaseSchema ? { schema: databaseSchema } : undefined,
-  );
+  // Prisma 7: o parâmetro schema do adapter nem sempre ajusta o search_path
+  // das consultas raw. Configure ambos para manter o schema isolado em todas
+  // as conexões, sem cair silenciosamente no schema public.
+  if (databaseSchema && !/^[a-z][a-z0-9_]{0,62}$/.test(databaseSchema)) {
+    throw new Error('CEAK_DB_SCHEMA inválido.');
+  }
+  const pool = new Pool({
+    connectionString: scopedDatabaseUrl,
+    ...(databaseSchema ? { options: `-c search_path=${databaseSchema}` } : {}),
+  });
+  const adapter = new PrismaPg(pool, databaseSchema ? { schema: databaseSchema } : undefined);
 
   return new PrismaClient({ adapter });
 }
