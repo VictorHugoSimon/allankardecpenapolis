@@ -5,7 +5,7 @@ import { useActionState } from 'react';
 import { botaoPrimario, botaoSecundario, campo, textoErro } from '@/lib/estilos';
 import { entrar } from '../actions';
 
-export function FormEntrar({ next }: { next?: string }) {
+export function FormEntrar({ next, codigoDisponivel }: { next?: string; codigoDisponivel?: boolean }) {
   const [estado, enviar, enviando] = useActionState(entrar, {});
   return (
     <>
@@ -64,9 +64,11 @@ export function FormEntrar({ next }: { next?: string }) {
           {enviando ? 'Entrando…' : 'Entrar'}
         </button>
       </form>
-      <Link href="/entrar/codigo" className={botaoSecundario}>
-        Entrar com código pelo WhatsApp
-      </Link>
+      {codigoDisponivel ? (
+        <Link href="/entrar/codigo" className={botaoSecundario}>
+          Entrar com código pelo WhatsApp
+        </Link>
+      ) : null}
       <p className="text-muted m-0 text-center text-sm">
         Primeiro acesso?{' '}
         <Link href="/cadastro" className="text-green font-semibold">
