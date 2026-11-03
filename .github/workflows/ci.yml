@@ -76,6 +76,10 @@ jobs:
             await db.connect();
             try {
               await db.query('GRANT USAGE ON SCHEMA ceak_v2 TO ceak_app');
+              await db.query('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ceak_v2 TO ceak_app');
+              await db.query('GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ceak_v2 TO ceak_app');
+              // Manter as mesmas exclusões de segredos do RLS original.
+              await db.query('REVOKE ALL ON ceak_v2.credencial, ceak_v2.codigo_acesso, ceak_v2.integracao_segredo FROM ceak_app');
             } finally {
               await db.end();
             }
