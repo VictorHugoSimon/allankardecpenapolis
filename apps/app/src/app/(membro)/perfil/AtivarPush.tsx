@@ -35,7 +35,17 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
       }
       const reg = await navigator.serviceWorker.getRegistration();
       const sub = await reg?.pushManager.getSubscription();
-      setEstado(sub ? 'ativo' : 'inativo');
+      if (!sub) {
+        setEstado('inativo');
+        return;
+      }
+      const r = await fetch(`/api/push?endpoint=${encodeURIComponent(sub.endpoint)}`, { cache: 'no-store' });
+      if (!r.ok) throw new Error(String(r.status));
+      const status = (await r.json()) as { vinculado: boolean; pertenceOutraConta: boolean };
+      setEstado(status.vinculado ? 'ativo' : 'inativo');
+      if (status.pertenceOutraConta) {
+        setAviso('Este aparelho ainda tem notificações de outra conta. Ao ativar, será criada uma inscrição exclusiva para sua conta.');
+      }
     })().catch(() => setEstado('indisponivel'));
   }, [chavePublica]);
 
@@ -48,6 +58,21 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
         if ((await Notification.requestPermission()) !== 'granted') {
           setEstado('bloqueado');
           return;
+        }
+        // Um navegador pode manter a inscrição anterior após a troca de conta.
+        // Nesse caso, revogue-a no próprio dispositivo e gere novo endpoint.
+        const anterior = await reg.pushManager.getSubscription();
+        if (anterior) {
+          const consulta = await fetch(
+            `/api/push?endpoint=${encodeURIComponent(anterior.endpoint)}`,
+            { cache: 'no-store' },
+          );
+          if (!consulta.ok) throw new Error(String(consulta.status));
+          const vinculo = (await consulta.json()) as { vinculado: boolean };
+          if (!vinculo.vinculado) {
+            const removido = await anterior.unsubscribe();
+            if (!removido) throw new Error('falha_ao_remover_inscricao_antiga');
+          }
         }
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
