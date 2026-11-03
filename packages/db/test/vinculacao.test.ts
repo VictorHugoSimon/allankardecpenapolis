@@ -11,7 +11,6 @@ const BASE = 'https://ceak-app.exemplo.invalid';
 
 describe.skipIf(!temBanco)('vinculação supervisionada de cadastros', () => {
   const pessoas: string[] = [];
-  const emails: string[] = [];
   let administrador = '';
   const flagAnterior = process.env.CEAK_ENABLE_ACCOUNT_LINKING;
 
@@ -21,7 +20,6 @@ describe.skipIf(!temBanco)('vinculação supervisionada de cadastros', () => {
       data: { nome: 'Participante de teste', email, perfil: 'VISITANTE', status: 'NOVO' },
     });
     pessoas.push(pessoa.id);
-    emails.push(email);
     return pessoa;
   }
 
