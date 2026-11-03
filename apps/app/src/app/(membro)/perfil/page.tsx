@@ -5,7 +5,7 @@ import { PERFIL_LABEL } from '@ceak/core/rbac';
 import { perfilMembro } from '@ceak/db';
 import { Tela } from '@/components/Tela';
 import { exigirSessao } from '@/lib/servidor';
-import { sair } from './actions';
+import { BotaoSairSeguro } from './BotaoSairSeguro';
 import { AtivarPush } from './AtivarPush';
 
 export const metadata: Metadata = { title: 'Perfil' };
@@ -70,14 +70,7 @@ export default async function PerfilPage() {
         <div className="border-line rounded-[18px] border bg-white px-4 py-2">
           <AtivarPush chavePublica={process.env.VAPID_PUBLIC_KEY ?? null} />
         </div>
-        <form action={sair}>
-          <button
-            type="submit"
-            className="rounded-pill border-line-2 text-danger hover:border-danger min-h-12 w-full border bg-transparent p-3.5 text-[15px]"
-          >
-            Sair
-          </button>
-        </form>
+        <BotaoSairSeguro />
       </div>
     </Tela>
   );
