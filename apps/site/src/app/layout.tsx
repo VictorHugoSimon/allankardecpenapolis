@@ -9,11 +9,13 @@ import { APP_URL, GESTAO_URL, SITE_URL } from '@/lib/urls';
 import './globals.css';
 
 const titulo = `${instituicao.nome} — ${instituicao.cidade}`;
+const homologacao = process.env.VERCEL_PROJECT_PRODUCTION_URL?.includes('git-preview') === true;
 const descricao =
   'Estudo, acolhimento, fraternidade e caridade em Penápolis – SP. Palestras públicas, estudos, atendimento fraterno, loja solidária e formas de ajudar.';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  ...(homologacao ? { robots: { index: false, follow: false } } : {}),
   title: { default: titulo, template: `%s · CEAK Penápolis` },
   description: descricao,
   applicationName: 'CEAK',
@@ -44,6 +46,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <CarrinhoProvider>
           <div className="flex min-h-screen flex-col">
+            {homologacao && (
+              <div role="status" className="bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-950">
+                AMBIENTE DE HOMOLOGAÇÃO — Dados de demonstração. Programação, contatos, diretoria e informações de PIX ainda não foram validados. Não realize pagamentos.
+              </div>
+            )}
             <Cabecalho appUrl={APP_URL} />
             <main id="conteudo" className="flex-1">
               {children}
