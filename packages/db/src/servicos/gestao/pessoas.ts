@@ -277,6 +277,13 @@ export async function perfil360(
     return {
       id: p.id,
       nome: p.nome,
+      // Apenas para o fluxo interno da secretaria: a identidade de uma conta
+      // não deve ser inferida por coincidência de telefone ou e-mail.
+      acessoApp: {
+        possuiConta: !!p.usuario,
+        contaAtiva: p.usuario?.ativo ?? false,
+        ultimoAcessoEm: p.usuario?.ultimoAcessoEm ?? null,
+      },
       resumo: [
         desde ? `Membro desde ${dd(desde.mes + 1)}/${desde.ano}` : null,
         ...[...new Set(papeis)].filter((x) => x !== 'Voluntário'),
