@@ -36,7 +36,10 @@ export async function autenticarComSenha(
     return { ok: true, sessao };
   }
   if (usuario) {
-    const tentativas = usuario.tentativasFalhas + 1;
+    // Encerrado o bloqueio de 15 minutos, inicie uma nova janela de tentativas.
+    // Sem isso, a primeira senha incorreta após a liberação bloqueia novamente.
+    const bloqueioExpirou = usuario.bloqueadoAte !== null && usuario.bloqueadoAte <= new Date();
+    const tentativas = (bloqueioExpirou ? 0 : usuario.tentativasFalhas) + 1;
     await prisma.usuario.update({
       where: { id: usuario.id },
       data: {
