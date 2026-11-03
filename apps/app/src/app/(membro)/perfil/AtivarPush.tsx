@@ -64,11 +64,14 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
       } else {
         const sub = await reg.pushManager.getSubscription();
         if (sub) {
-          await fetch('/api/push', {
+          // Mantenha a inscrição local se a remoção no servidor falhar.
+          // Isso evita informar "desativado" quando o destino ainda consta no banco.
+          const resposta = await fetch('/api/push', {
             method: 'DELETE',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ endpoint: sub.endpoint }),
           });
+          if (!resposta.ok) throw new Error(String(resposta.status));
           await sub.unsubscribe();
         }
         setEstado('inativo');
