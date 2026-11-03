@@ -27,12 +27,17 @@ function emModoAplicativo() {
 export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
   const [plataforma, setPlataforma] = useState<Plataforma>('desktop');
   const [samsungInternet, setSamsungInternet] = useState(false);
+  const [linkChrome, setLinkChrome] = useState('');
+  const [linkApp, setLinkApp] = useState('');
   const [estado, setEstado] = useState<Estado>('verificando');
   const [convite, setConvite] = useState<EventoInstalacao | null>(null);
   const [tentouInstalar, setTentouInstalar] = useState(false);
 
   useEffect(() => {
     const ua = navigator.userAgent;
+    const url = new URL(window.location.href);
+    setLinkApp(url.href);
+    setLinkChrome(`intent://${url.host}${url.pathname}${url.search}#Intent;scheme=${url.protocol.slice(0, -1)};package=com.android.chrome;end`);
     const ios = /iPad|iPhone|iPod/i.test(ua) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const android = /Android/i.test(ua);
@@ -105,9 +110,9 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
           <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
             <p className="mb-3 font-semibold">Abra o CEAK no Google Chrome para instalar com segurança.</p>
             <p className="mb-4">O Samsung Internet pode gerar uma instalação incompatível com as proteções mais recentes do Android. Não desative o Play Protect.</p>
-            <a href="intent://ceak-app-git-preview.vercel.app/#Intent;scheme=https;package=com.android.chrome;end" className="block w-full rounded-xl bg-[#2F5D46] px-5 py-4 text-center font-semibold text-white">Abrir no Google Chrome</a>
+            <a href={linkChrome || '#'} className="block w-full rounded-xl bg-[#2F5D46] px-5 py-4 text-center font-semibold text-white">Abrir no Google Chrome</a>
             <p className="mt-4">Se o Chrome não abrir, copie este link, abra o Chrome manualmente e cole na barra de endereços:</p>
-            <p className="mt-2 break-all font-semibold">https://ceak-app-git-preview.vercel.app</p>
+            <p className="mt-2 break-all font-semibold">{linkApp}</p>
             <p className="mt-3">No Chrome, toque em <strong>Instalar aplicativo</strong> ou use o menu ⋮.</p>
           </div>
         ) : tentouInstalar || estado === 'aguardando' ? (
