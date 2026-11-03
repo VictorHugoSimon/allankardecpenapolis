@@ -5,6 +5,7 @@ import { perfil360 } from '@ceak/db';
 import { Pill } from '@ceak/ui';
 import { Trilha } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
+import { ConviteVinculacao } from './ConviteVinculacao';
 
 export const metadata: Metadata = { title: 'Perfil 360°' };
 export const dynamic = 'force-dynamic';
@@ -54,9 +55,15 @@ export default async function Perfil360Page({ params }: { params: Promise<{ id: 
                 <li>Encaminhe a vinculação a um administrador autorizado após a implementação do fluxo com auditoria e verificação do contato.</li>
               </ol>
               <p className="mt-3 mb-0 font-semibold">
-                A vinculação automática está bloqueada por segurança. Nenhuma conta será criada por esta tela.
+                A vinculação automática está bloqueada por segurança. A ativação exige convite de uso único.
               </p>
             </div>
+          )}
+          {!p.acessoApp.possuiConta && s.perfil === 'ADMINISTRADOR' && (
+            <ConviteVinculacao
+              pessoaId={p.id}
+              habilitado={process.env.CEAK_ENABLE_ACCOUNT_LINKING === 'sim'}
+            />
           )}
         </section>
       )}
