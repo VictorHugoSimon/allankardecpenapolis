@@ -49,7 +49,23 @@ export function BotaoSairSeguro() {
       >
         {ocupado ? 'Saindo…' : 'Sair'}
       </button>
-      {erro ? <p role="alert" className="mt-3 text-sm text-red-700">{erro}</p> : null}
+      {erro ? (
+        <div role="alert" className="mt-3 space-y-2">
+          <p className="text-sm text-red-700">{erro}</p>
+          <button
+            type="button"
+            disabled={ocupado}
+            onClick={() => iniciar(() => { void sair(); })}
+            className="text-sm font-semibold underline"
+          >
+            Sair mesmo assim
+          </button>
+          <p className="text-xs text-red-700">
+            Se continuar, as notificações podem permanecer neste aparelho.
+            Desative-as também nas configurações do navegador.
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }
