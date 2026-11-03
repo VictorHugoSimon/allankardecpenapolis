@@ -32,6 +32,34 @@ export default async function Perfil360Page({ params }: { params: Promise<{ id: 
         </div>
         <Pill tone={p.status.tom}>{p.status.rotulo}</Pill>
       </section>
+      {['ADMINISTRADOR', 'SECRETARIA'].includes(s.perfil) && (
+        <section aria-labelledby="conta-app" className="border-line rounded-card border bg-white p-[22px]">
+          <h2 id="conta-app" className="m-0 mb-2 font-serif text-xl font-normal">
+            Vinculação segura com o CEAK App
+          </h2>
+          <p className="text-muted m-0 text-sm">
+            {p.acessoApp.possuiConta
+              ? p.acessoApp.contaAtiva
+                ? 'Este cadastro já possui uma conta ativa vinculada ao aplicativo.'
+                : 'Existe uma conta vinculada, porém ela está inativa. Não crie outra conta para substituir.'
+              : 'Este cadastro ainda não possui uma conta vinculada ao aplicativo.'}
+          </p>
+          {!p.acessoApp.possuiConta && (
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+              <p className="m-0 mb-2 font-semibold">Procedimento de conferência presencial</p>
+              <ol className="m-0 list-decimal space-y-2 pl-5">
+                <li>Solicite a identificação da pessoa e confira sua titularidade sem copiar documentos desnecessários.</li>
+                <li>Confirme os contatos diretamente com o titular, e não apenas pelos campos do cadastro.</li>
+                <li>Trate relatos de assistência e dados sensíveis como restritos; não os utilize para provar identidade.</li>
+                <li>Encaminhe a vinculação a um administrador autorizado após a implementação do fluxo com auditoria e verificação do contato.</li>
+              </ol>
+              <p className="mt-3 mb-0 font-semibold">
+                A vinculação automática está bloqueada por segurança. Nenhuma conta será criada por esta tela.
+              </p>
+            </div>
+          )}
+        </section>
+      )}
       <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
         {p.blocos.map((b) => (
           <section
