@@ -22,6 +22,12 @@ export async function emitirConviteVinculacao(
   if (process.env.CEAK_ENABLE_ACCOUNT_LINKING !== 'sim') {
     throw new ErroNegocio('Vinculação ainda não habilitada.', 'vinculacao_desativada');
   }
+  if (process.env.AUTH_PROVIDER === 'supabase') {
+    throw new ErroNegocio(
+      'A ativação de convites exige provedor de autenticação local.',
+      'provedor_incompativel',
+    );
+  }
   const admin = await prisma.usuario.findUnique({
     where: { id: administradorId },
     select: { ativo: true, perfil: true },
@@ -84,6 +90,12 @@ export async function ativarContaVinculada(
 ) {
   if (process.env.CEAK_ENABLE_ACCOUNT_LINKING !== 'sim') {
     throw new ErroNegocio('Vinculação ainda não habilitada.', 'vinculacao_desativada');
+  }
+  if (process.env.AUTH_PROVIDER === 'supabase') {
+    throw new ErroNegocio(
+      'A ativação de convites exige provedor de autenticação local.',
+      'provedor_incompativel',
+    );
   }
   if (!senhaForte.safeParse(senha).success) {
     throw new ErroNegocio('Escolha uma senha com pelo menos 10 caracteres, letras e números.', 'senha_invalida');
