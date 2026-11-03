@@ -1,0 +1,138 @@
+'use client';
+
+import { useEffect, useState, type ReactNode } from 'react';
+
+interface EventoInstalacao extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
+type Plataforma = 'ios' | 'android' | 'desktop';
+type Estado = 'verificando' | 'instalado' | 'instalar' | 'aguardando';
+
+function emModoAplicativo() {
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
+  );
+}
+
+/**
+ * Portal de instalação para dispositivos móveis.
+ * O navegador exige um gesto explícito do usuário para abrir o prompt nativo.
+ * Não é possível instalar um PWA silenciosamente nem abrir automaticamente
+ * uma instalação existente em todas as plataformas.
+ */
+export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
+  const [plataforma, setPlataforma] = useState<Plataforma>('desktop');
+  const [estado, setEstado] = useState<Estado>('verificando');
+  const [convite, setConvite] = useState<EventoInstalacao | null>(null);
+  const [tentouInstalar, setTentouInstalar] = useState(false);
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    const ios = /iPad|iPhone|iPod/i.test(ua) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const android = /Android/i.test(ua);
+    const dispositivo = ios ? 'ios' : android ? 'android' : 'desktop';
+    setPlataforma(dispositivo);
+
+    const atualizar = () => {
+      setEstado(emModoAplicativo() || dispositivo === 'desktop' ? 'instalado' : 'instalar');
+    };
+    const antesDeInstalar = (e: Event) => {
+      e.preventDefault();
+      setConvite(e as EventoInstalacao);
+      atualizar();
+    };
+    const instalado = () => {
+      setConvite(null);
+      setTentouInstalar(true);
+      setEstado(emModoAplicativo() ? 'instalado' : 'aguardando');
+    };
+    const media = window.matchMedia('(display-mode: standalone)');
+    window.addEventListener('beforeinstallprompt', antesDeInstalar);
+    window.addEventListener('appinstalled', instalado);
+    window.addEventListener('pageshow', atualizar);
+    media.addEventListener?.('change', atualizar);
+    atualizar();
+    return () => {
+      window.removeEventListener('beforeinstallprompt', antesDeInstalar);
+      window.removeEventListener('appinstalled', instalado);
+      window.removeEventListener('pageshow', atualizar);
+      media.removeEventListener?.('change', atualizar);
+    };
+  }, []);
+
+  async function instalar() {
+    if (!convite) return;
+    const evento = convite;
+    setConvite(null);
+    await evento.prompt();
+    const escolha = await evento.userChoice;
+    if (escolha.outcome === 'accepted') {
+      setTentouInstalar(true);
+      setEstado('aguardando');
+    }
+  }
+
+  if (estado === 'verificando') {
+    return (
+      <main className="flex min-h-dvh items-center justify-center bg-[#F7F4EE] p-6 text-[#1F2A24]">
+        <p role="status">Preparando o CEAK App…</p>
+      </main>
+    );
+  }
+  if (estado === 'instalado') return <>{children}</>;
+
+  return (
+    <main className="flex min-h-dvh items-center justify-center bg-[#F7F4EE] px-5 py-10 text-[#1F2A24]">
+      <section className="w-full max-w-[440px] rounded-3xl border border-[#dce5dd] bg-white p-7 shadow-lg" aria-labelledby="instalar-titulo">
+        <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-[22px] bg-[#2F5D46] font-serif text-3xl font-bold text-white" aria-hidden="true">AK</div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#2F5D46]">Centro Espírita Allan Kardec</p>
+        <h1 id="instalar-titulo" className="mb-3 font-serif text-3xl font-semibold">Instale o CEAK App para continuar</h1>
+        <p className="mb-6 leading-relaxed text-[#4A5B51]">
+          O acesso à área do membro pelo celular é feito pelo aplicativo instalado, com ícone na tela inicial, agenda, estudos e notificações.
+        </p>
+
+        {tentouInstalar || estado === 'aguardando' ? (
+          <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
+            Instalação solicitada. Agora abra o ícone <strong>CEAK</strong> na tela inicial ou na lista de aplicativos do seu celular.
+          </div>
+        ) : convite ? (
+          <button
+            type="button"
+            onClick={instalar}
+            className="w-full rounded-xl bg-[#2F5D46] px-5 py-4 font-semibold text-white"
+          >
+            Instalar aplicativo CEAK
+          </button>
+        ) : plataforma === 'ios' ? (
+          <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
+            <p className="mb-3 font-semibold">No iPhone ou iPad:</p>
+            <ol className="list-decimal space-y-2 pl-5">
+              <li>Abra este link no <strong>Safari</strong>, caso esteja em outro aplicativo.</li>
+              <li>Toque em <strong>Compartilhar</strong> (ícone de quadrado com seta).</li>
+              <li>Selecione <strong>Adicionar à Tela de Início</strong> e confirme.</li>
+              <li>Abra o ícone <strong>CEAK</strong> na tela inicial.</li>
+            </ol>
+          </div>
+        ) : (
+          <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
+            <p className="mb-3 font-semibold">No Android:</p>
+            <ol className="list-decimal space-y-2 pl-5">
+              <li>Abra este link no <strong>Google Chrome</strong>.</li>
+              <li>Toque no menu <strong>⋮</strong> do navegador.</li>
+              <li>Selecione <strong>Instalar aplicativo</strong> ou <strong>Adicionar à tela inicial</strong>.</li>
+              <li>Abra o ícone <strong>CEAK</strong> instalado.</li>
+            </ol>
+          </div>
+        )}
+        <p className="mt-5 text-xs leading-relaxed text-[#64776A]">
+          Por segurança, nenhum site pode instalar um aplicativo automaticamente sem sua confirmação. Ao abrir pelo ícone instalado, esta tela desaparece.
+        </p>
+      </section>
+    </main>
+  );
+}
