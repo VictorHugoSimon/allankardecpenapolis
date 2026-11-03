@@ -22,7 +22,9 @@ export async function entrarApp(page: Page, email = VICTOR, senha = SENHA) {
 function banco() {
   return new pg.Client({
     connectionString: process.env.DATABASE_URL,
-    ...(process.env.CEAK_DB_SCHEMA ? { options: `-c search_path=${process.env.CEAK_DB_SCHEMA}` } : {}),
+    ...(process.env.CEAK_DB_SCHEMA
+      ? { options: `-c search_path=${process.env.CEAK_DB_SCHEMA}` }
+      : {}),
   });
 }
 
