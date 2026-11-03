@@ -57,8 +57,14 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
       // em 20 min e não sobrevive ao redirecionamento de instalação.
       // Após ativar a conta, o acesso à área do membro volta a exigir o PWA.
       const ativacao = window.location.pathname === '/ativar-conta';
+      // O teste automatizado roda em localhost e precisa percorrer fluxos
+      // internos sem instalar um WebAPK. Não funciona em domínios publicados.
+      const testeLocal =
+        process.env.NEXT_PUBLIC_CEAK_E2E === 'sim' && window.location.hostname === 'localhost';
       setEstado(
-        emModoAplicativo() || dispositivo === 'desktop' || ativacao ? 'instalado' : 'instalar',
+        emModoAplicativo() || dispositivo === 'desktop' || ativacao || testeLocal
+          ? 'instalado'
+          : 'instalar',
       );
     };
     const antesDeInstalar = (e: Event) => {
