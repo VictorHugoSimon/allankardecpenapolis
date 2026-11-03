@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:wght@400;500;600&display=swap');
 @import 'tailwindcss';
 @import '@ceak/ui/theme.css';
 @source '../../../../packages/ui/src';
@@ -9,4 +10,11 @@
     text-decoration: underline;
     text-underline-offset: 2px;
   }
+}
+
+/* Famílias CSS: fallback local imediato, Google Fonts somente no navegador. */
+.ceak-fonts {
+  --font-newsreader: 'Newsreader';
+  --font-instrument-sans: 'Instrument Sans';
+  --font-jetbrains-mono: 'JetBrains Mono';
 }
