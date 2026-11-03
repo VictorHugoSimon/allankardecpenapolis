@@ -48,10 +48,12 @@ export async function solicitarAtendimento(
 ) {
   const resultado = await prisma.$transaction(async (tx) => {
     const [vaga] = await tx.$queryRaw<
-      { id: string; inicio: Date; vagas: number; ativa: boolean }[]
+      { id: string; inicio: Date; vagas: number; ativa: boolean; tipo: string | null }[]
     >`
-      SELECT id, inicio, vagas, ativa FROM vaga_assistencia WHERE id = ${dados.vagaId}::uuid FOR UPDATE`;
-    if (!vaga || !vaga.ativa || vaga.inicio <= new Date()) {
+      SELECT id, inicio, vagas, ativa, tipo::text FROM vaga_assistencia WHERE id = ${dados.vagaId}::uuid FOR UPDATE`;
+    // A vaga deve ser genérica ou pertencer exatamente ao serviço solicitado.
+    // A validação na interface não substitui a conferência no servidor.
+    if (!vaga || !vaga.ativa || vaga.inicio <= new Date() || (vaga.tipo !== null && vaga.tipo !== servico.tipo)) {
       throw new ErroNegocio(
         'Este horário não está mais disponível. Escolha outra data.',
         'vaga_indisponivel',
