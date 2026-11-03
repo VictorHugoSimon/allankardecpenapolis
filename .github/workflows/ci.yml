@@ -29,6 +29,7 @@ jobs:
           --health-cmd "pg_isready -U ceak" --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       DATABASE_URL: postgresql://ceak:ceak@localhost:5432/ceak
+      CEAK_DB_SCHEMA: ceak_v2
       AUTH_SECRET: ci-only-secret-0123456789-abcdefghijklmnopqrstuvwxyz
       AUTH_PROVIDER: local
       SEED_SENHA: ceak-dev-2026
