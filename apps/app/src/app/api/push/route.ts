@@ -8,6 +8,23 @@ const inscricao = z.object({
   keys: z.object({ p256dh: z.string().min(10).max(200), auth: z.string().min(8).max(100) }),
 });
 
+/** Verifica se a inscrição local realmente pertence à pessoa autenticada. */
+export async function GET(req: Request) {
+  const s = await getSessao();
+  if (!s) return NextResponse.json({ erro: 'Sessão expirada.' }, { status: 401 });
+  const endpoint = new URL(req.url).searchParams.get('endpoint');
+  const parsed = z.string().url().startsWith('https://').max(1000).safeParse(endpoint);
+  if (!parsed.success) return NextResponse.json({ erro: 'Inscrição inválida.' }, { status: 400 });
+  const registro = await prisma.dispositivoPush.findUnique({
+    where: { endpoint: parsed.data },
+    select: { pessoaId: true },
+  });
+  return NextResponse.json(
+    { vinculado: registro?.pessoaId === s.pessoaId, pertenceOutraConta: !!registro && registro.pessoaId !== s.pessoaId },
+    { headers: { 'Cache-Control': 'no-store' } },
+  );
+}
+
 /** Registra o aparelho para receber Web Push. */
 export async function POST(req: Request) {
   const s = await getSessao();
