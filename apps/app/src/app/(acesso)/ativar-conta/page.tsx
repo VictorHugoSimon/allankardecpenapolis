@@ -5,7 +5,6 @@ import { FormAtivacao } from './FormAtivacao';
 export const metadata: Metadata = {
   title: 'Ativar cadastro existente',
   robots: { index: false, follow: false },
-  referrer: 'no-referrer',
 };
 export const dynamic = 'force-dynamic';
 
