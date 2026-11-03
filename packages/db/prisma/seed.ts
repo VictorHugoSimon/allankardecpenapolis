@@ -1536,7 +1536,7 @@ async function main() {
     PR[nome] = { id: p.id, preco: reais(preco) };
   }
   // Pedidos #1037–#1042 (numeração do protótipo).
-  await prisma.$executeRawUnsafe(`ALTER SEQUENCE "pedido_numero_seq" RESTART WITH 1037`);
+  await prisma.$executeRawUnsafe(`ALTER SEQUENCE "ceak_v2"."pedido_numero_seq" RESTART WITH 1037`);
   const pedidos = [
     [
       'Fernanda Lima',
