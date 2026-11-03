@@ -69,9 +69,19 @@ const slug = (s: string) =>
     .replace(/(^-|-$)/g, '');
 
 async function limpar() {
+  // O seed é destrutivo: somente o schema isolado de homologação pode ser limpo.
+  // Nunca permita que CEAK_DB_SCHEMA ou DATABASE_URL apontem para o legado.
+  const schema = process.env.CEAK_DB_SCHEMA;
+  if (schema !== 'ceak_v2') {
+    throw new Error('Seed bloqueado: defina CEAK_DB_SCHEMA=ceak_v2. O schema public nunca pode ser limpo.');
+  }
+  const urlSchema = new URL(process.env.DATABASE_URL ?? '').searchParams.get('schema');
+  if (urlSchema && urlSchema !== schema) {
+    throw new Error('Seed bloqueado: schema da DATABASE_URL difere de ceak_v2.');
+  }
   const tabelas = await prisma.$queryRaw<{ tablename: string }[]>`
-    SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> '_prisma_migrations'`;
-  const lista = tabelas.map((t) => `"public"."${t.tablename}"`).join(', ');
+    SELECT tablename FROM pg_tables WHERE schemaname = 'ceak_v2' AND tablename <> '_prisma_migrations'`;
+  const lista = tabelas.map((t) => `"ceak_v2"."${t.tablename.replaceAll('"', '""')}"`).join(', ');
   if (lista) await prisma.$executeRawUnsafe(`TRUNCATE ${lista} RESTART IDENTITY CASCADE`);
 }
 
