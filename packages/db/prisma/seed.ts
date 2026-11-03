@@ -2568,7 +2568,7 @@ async function main() {
   });
 
   // Cadastros antigos: data de criação coerente com a jornada (painel "+N no mês").
-  await prisma.$executeRaw`UPDATE pessoa SET criado_em = coalesce(membro_desde, primeira_visita_em, '2026-09-15T12:00:00-03:00')
+  await prisma.$executeRaw`UPDATE "ceak_v2"."pessoa" SET criado_em = coalesce(membro_desde, primeira_visita_em, '2026-09-15T12:00:00-03:00')
     WHERE criado_em > '2026-09-30'`;
   await prisma.$executeRaw`UPDATE pessoa SET criado_em = '2026-09-30T19:30:00-03:00' WHERE nome IN ('Carla Nogueira')`;
 
