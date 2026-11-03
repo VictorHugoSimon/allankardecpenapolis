@@ -24,8 +24,13 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export async function registrarCheckin(_: EstadoCheckin, form: FormData): Promise<EstadoCheckin> {
   const s = await exigirSessao();
   const eventoId = String(form.get('evento') ?? '');
-  const origem = form.get('origem') === 'QR' ? 'QR' : 'MANUAL';
+  // O membro só pode registrar sua própria presença mediante QR assinado.
+  // Check-in manual é atribuição da equipe de recepção na Gestão.
+  const origem = form.get('origem');
   const token = String(form.get('t') ?? '');
+  if (origem !== 'QR' || !token) {
+    return { erro: 'Para registrar sua presença pelo aplicativo, escaneie o QR Code da recepção.' };
+  }
   if (!UUID.test(eventoId)) {
     return {
       erro: 'Este QR Code não é do check-in do CEAK. Use o código afixado na entrada do salão.',
@@ -37,7 +42,7 @@ export async function registrarCheckin(_: EstadoCheckin, form: FormData): Promis
       {
         eventoId,
         origem,
-        tokenValido: origem === 'QR' && tokenCheckinValido(eventoId, token, checkinSecret()),
+        tokenValido: tokenCheckinValido(eventoId, token, checkinSecret()),
       },
       { log },
     );
