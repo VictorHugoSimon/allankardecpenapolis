@@ -3,7 +3,7 @@ import { assinarSessao, lerSessao, precisaRenovar } from '@ceak/core/auth/sessao
 import { APP_SESSAO_S, COOKIE_APP } from './lib/sessao-config';
 
 /** Telas de acesso: quem já tem sessão vai para o início. */
-const PUBLICAS = ['/entrar', '/entrar/codigo', '/cadastro'];
+const PUBLICAS = ['/entrar', '/entrar/codigo', '/cadastro', '/ativar-conta'];
 /** Livres para todos (página offline do service worker e health check). */
 const LIVRES = ['/offline', '/api/health'];
 
