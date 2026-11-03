@@ -8,6 +8,10 @@ import { errosDoZod, MSG_FALHA, MSG_LIMITE, textos, type EstadoForm } from '@/li
 import { dentroDoLimite, depsPagamento, log } from '@/lib/servidor';
 
 export async function doar(_: EstadoForm, form: FormData): Promise<EstadoForm> {
+  // Em ambiente publicado, nunca gere PIX usando dados fictícios.
+  if (process.env.NODE_ENV === 'production' && (process.env.PAYMENT_PROVIDER ?? 'mock') === 'mock') {
+    return { erro: 'Pagamentos indisponíveis neste ambiente de demonstração. Aguarde a integração oficial do PIX.' };
+  }
   const valores = textos(form, ['valor', 'outro', 'destino', 'nome', 'email']);
   const bruto = valores.valor === 'outro' ? valores.outro : valores.valor;
   const v = centavos.safeParse(bruto || '0');
