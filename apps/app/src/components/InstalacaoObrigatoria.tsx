@@ -26,6 +26,7 @@ function emModoAplicativo() {
  */
 export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
   const [plataforma, setPlataforma] = useState<Plataforma>('desktop');
+  const [samsungInternet, setSamsungInternet] = useState(false);
   const [estado, setEstado] = useState<Estado>('verificando');
   const [convite, setConvite] = useState<EventoInstalacao | null>(null);
   const [tentouInstalar, setTentouInstalar] = useState(false);
@@ -35,6 +36,9 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
     const ios = /iPad|iPhone|iPod/i.test(ua) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const android = /Android/i.test(ua);
+    // Samsung Internet pode gerar WebAPK com target SDK antigo e ser bloqueado
+    // pelo Play Protect. Evite oferecer seu prompt nativo de instalação.
+    setSamsungInternet(android && /SamsungBrowser\//i.test(ua));
     const dispositivo = ios ? 'ios' : android ? 'android' : 'desktop';
     setPlataforma(dispositivo);
 
@@ -43,6 +47,7 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
     };
     const antesDeInstalar = (e: Event) => {
       e.preventDefault();
+      if (android && /SamsungBrowser\//i.test(ua)) return;
       setConvite(e as EventoInstalacao);
       atualizar();
     };
@@ -96,7 +101,16 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
           O acesso à área do membro pelo celular é feito pelo aplicativo instalado, com ícone na tela inicial, agenda, estudos e notificações.
         </p>
 
-        {tentouInstalar || estado === 'aguardando' ? (
+        {samsungInternet ? (
+          <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
+            <p className="mb-3 font-semibold">Abra o CEAK no Google Chrome para instalar com segurança.</p>
+            <p className="mb-4">O Samsung Internet pode gerar uma instalação incompatível com as proteções mais recentes do Android. Não desative o Play Protect.</p>
+            <a href="intent://ceak-app-git-preview.vercel.app/#Intent;scheme=https;package=com.android.chrome;end" className="block w-full rounded-xl bg-[#2F5D46] px-5 py-4 text-center font-semibold text-white">Abrir no Google Chrome</a>
+            <p className="mt-4">Se o Chrome não abrir, copie este link, abra o Chrome manualmente e cole na barra de endereços:</p>
+            <p className="mt-2 break-all font-semibold">https://ceak-app-git-preview.vercel.app</p>
+            <p className="mt-3">No Chrome, toque em <strong>Instalar aplicativo</strong> ou use o menu ⋮.</p>
+          </div>
+        ) : tentouInstalar || estado === 'aguardando' ? (
           <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
             Instalação solicitada. Agora abra o ícone <strong>CEAK</strong> na tela inicial ou na lista de aplicativos do seu celular.
           </div>
