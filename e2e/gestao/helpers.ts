@@ -103,7 +103,10 @@ export async function consultar<T = Record<string, unknown>>(
   params: unknown[] = [],
 ): Promise<T[]> {
   const pg = (await import('pg')).default;
-  const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
+  const db = new pg.Client({
+    connectionString: process.env.DATABASE_URL,
+    ...(process.env.CEAK_DB_SCHEMA ? { options: `-c search_path=${process.env.CEAK_DB_SCHEMA}` } : {}),
+  });
   await db.connect();
   try {
     return (await db.query(sql, params)).rows as T[];
