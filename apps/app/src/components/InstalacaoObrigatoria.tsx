@@ -32,6 +32,8 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
   const [estado, setEstado] = useState<Estado>('verificando');
   const [convite, setConvite] = useState<EventoInstalacao | null>(null);
   const [tentouInstalar, setTentouInstalar] = useState(false);
+  const [mensagem, setMensagem] = useState('');
+  const [copiado, setCopiado] = useState(false);
 
   useEffect(() => {
     const ua = navigator.userAgent;
@@ -79,11 +81,27 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
     if (!convite) return;
     const evento = convite;
     setConvite(null);
-    await evento.prompt();
-    const escolha = await evento.userChoice;
-    if (escolha.outcome === 'accepted') {
-      setTentouInstalar(true);
-      setEstado('aguardando');
+    try {
+      await evento.prompt();
+      const escolha = await evento.userChoice;
+      if (escolha.outcome === 'accepted') {
+        setTentouInstalar(true);
+        setEstado('aguardando');
+      } else {
+        setMensagem('Instalação cancelada. Você pode tentar novamente pelo menu do navegador.');
+      }
+    } catch {
+      setMensagem('Não foi possível abrir a instalação. Utilize o menu do Chrome para instalar.');
+    }
+  }
+
+  async function copiarLink() {
+    try {
+      await navigator.clipboard.writeText(linkApp);
+      setCopiado(true);
+      setMensagem('');
+    } catch {
+      setMensagem('Selecione o endereço abaixo, copie e cole no Google Chrome.');
     }
   }
 
@@ -112,7 +130,8 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
             <p className="mb-4">O Samsung Internet pode gerar uma instalação incompatível com as proteções mais recentes do Android. Não desative o Play Protect.</p>
             <a href={linkChrome || '#'} className="block w-full rounded-xl bg-[#2F5D46] px-5 py-4 text-center font-semibold text-white">Abrir no Google Chrome</a>
             <p className="mt-4">Se o Chrome não abrir, copie este link, abra o Chrome manualmente e cole na barra de endereços:</p>
-            <p className="mt-2 break-all font-semibold">{linkApp}</p>
+            <p className="mt-2 select-all break-all font-semibold">{linkApp}</p>
+            <button type="button" onClick={copiarLink} className="mt-3 rounded-lg border border-[#2F5D46] px-4 py-2 font-semibold text-[#2F5D46]">{copiado ? 'Link copiado!' : 'Copiar link'}</button>
             <p className="mt-3">No Chrome, toque em <strong>Instalar aplicativo</strong> ou use o menu ⋮.</p>
           </div>
         ) : tentouInstalar || estado === 'aguardando' ? (
@@ -148,6 +167,7 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
             </ol>
           </div>
         )}
+        {mensagem && <p role="alert" className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">{mensagem}</p>}
         <p className="mt-5 text-xs leading-relaxed text-[#64776A]">
           Por segurança, nenhum site pode instalar um aplicativo automaticamente sem sua confirmação. Ao abrir pelo ícone instalado, esta tela desaparece.
         </p>
