@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { prisma, registrarDispositivoPush } from '@ceak/db';
+import { ErroNegocio, prisma, registrarDispositivoPush } from '@ceak/db';
 import { getSessao, log } from '@/lib/servidor';
 
 const inscricao = z.object({
@@ -14,7 +14,14 @@ export async function POST(req: Request) {
   if (!s) return NextResponse.json({ erro: 'Sessão expirada.' }, { status: 401 });
   const r = inscricao.safeParse(await req.json().catch(() => null));
   if (!r.success) return NextResponse.json({ erro: 'Inscrição inválida.' }, { status: 400 });
-  await registrarDispositivoPush(s.pessoaId, r.data);
+  try {
+    await registrarDispositivoPush(s.pessoaId, r.data);
+  } catch (e) {
+    if (e instanceof ErroNegocio && e.codigo === 'dispositivo_outra_conta') {
+      return NextResponse.json({ erro: e.message }, { status: 409 });
+    }
+    throw e;
+  }
   log.info('APLICACAO', 'push: aparelho registrado', { rota: '/api/push', status: 201 });
   return NextResponse.json({ ok: true }, { status: 201 });
 }
