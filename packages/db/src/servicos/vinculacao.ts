@@ -1,6 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { hashSenha } from '@ceak/core/auth';
-import { TERMO_LGPD_VERSAO } from '@ceak/core/validacao';
+import { TERMO_LGPD_VERSAO, senhaForte } from '@ceak/core/validacao';
 import { registrarAuditoria } from '../auditoria';
 import { prisma } from '../client';
 import { ErroNegocio } from './inscricoes';
@@ -19,6 +19,9 @@ export async function emitirConviteVinculacao(
   ip: string | null,
   baseApp: string,
 ) {
+  if (process.env.CEAK_ENABLE_ACCOUNT_LINKING !== 'sim') {
+    throw new ErroNegocio('Vinculação ainda não habilitada.', 'vinculacao_desativada');
+  }
   const admin = await prisma.usuario.findUnique({
     where: { id: administradorId },
     select: { ativo: true, perfil: true },
@@ -79,6 +82,12 @@ export async function ativarContaVinculada(
   senha: string,
   ip: string | null,
 ) {
+  if (process.env.CEAK_ENABLE_ACCOUNT_LINKING !== 'sim') {
+    throw new ErroNegocio('Vinculação ainda não habilitada.', 'vinculacao_desativada');
+  }
+  if (!senhaForte.safeParse(senha).success) {
+    throw new ErroNegocio('Escolha uma senha com pelo menos 10 caracteres, letras e números.', 'senha_invalida');
+  }
   if (!/^[0-9a-f-]{36}$/i.test(pessoaId) || !/^[A-Za-z0-9_-]{43}$/.test(token)) {
     throw new ErroNegocio('Convite inválido ou expirado.', 'convite_invalido');
   }
