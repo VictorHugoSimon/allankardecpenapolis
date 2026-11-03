@@ -30,6 +30,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://ceak:ceak@localhost:5432/ceak
       CEAK_DB_SCHEMA: ceak_v2
+      NEXT_PUBLIC_CEAK_E2E: sim
       CEAK_ENABLE_MOCK_PAYMENT_CONFIRMATION: sim
       AUTH_SECRET: ci-only-secret-0123456789-abcdefghijklmnopqrstuvwxyz
       AUTH_PROVIDER: local
