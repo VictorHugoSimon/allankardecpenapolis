@@ -10,7 +10,10 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: Request) {
   // Webhooks do mock são apenas para testes locais. Nunca aceite um evento
   // fictício como confirmação bancária em um ambiente publicado.
-  if (process.env.NODE_ENV === 'production' && (process.env.PAYMENT_PROVIDER ?? 'mock') === 'mock') {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (process.env.PAYMENT_PROVIDER ?? 'mock') === 'mock'
+  ) {
     return Response.json({ ok: false, motivo: 'provedor_pix_nao_integrado' }, { status: 503 });
   }
   const corpo = await req.text();

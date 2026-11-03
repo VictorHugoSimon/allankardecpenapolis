@@ -20,7 +20,10 @@ export async function GET(req: Request) {
     select: { pessoaId: true },
   });
   return NextResponse.json(
-    { vinculado: registro?.pessoaId === s.pessoaId, pertenceOutraConta: !!registro && registro.pessoaId !== s.pessoaId },
+    {
+      vinculado: registro?.pessoaId === s.pessoaId,
+      pertenceOutraConta: !!registro && registro.pessoaId !== s.pessoaId,
+    },
     { headers: { 'Cache-Control': 'no-store' } },
   );
 }

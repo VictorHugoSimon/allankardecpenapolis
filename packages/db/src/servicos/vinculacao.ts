@@ -98,7 +98,10 @@ export async function ativarContaVinculada(
     );
   }
   if (!senhaForte.safeParse(senha).success) {
-    throw new ErroNegocio('Escolha uma senha com pelo menos 10 caracteres, letras e números.', 'senha_invalida');
+    throw new ErroNegocio(
+      'Escolha uma senha com pelo menos 10 caracteres, letras e números.',
+      'senha_invalida',
+    );
   }
   if (!/^[0-9a-f-]{36}$/i.test(pessoaId) || !/^[A-Za-z0-9_-]{43}$/.test(token)) {
     throw new ErroNegocio('Convite inválido ou expirado.', 'convite_invalido');
@@ -123,7 +126,10 @@ export async function ativarContaVinculada(
       select: { email: true, usuario: { select: { id: true } }, anonimizadaEm: true },
     });
     if (!pessoa?.email || pessoa.anonimizadaEm || pessoa.usuario) {
-      throw new ErroNegocio('Este cadastro já possui conta ou não pode ser ativado.', 'conta_indisponivel');
+      throw new ErroNegocio(
+        'Este cadastro já possui conta ou não pode ser ativado.',
+        'conta_indisponivel',
+      );
     }
     // Consumo atômico: só uma requisição concorrente pode usar este convite.
     const consumo = await tx.codigoAcesso.updateMany({

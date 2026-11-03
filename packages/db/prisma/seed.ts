@@ -73,7 +73,9 @@ async function limpar() {
   // Nunca permita que CEAK_DB_SCHEMA ou DATABASE_URL apontem para o legado.
   const schema = process.env.CEAK_DB_SCHEMA;
   if (schema !== 'ceak_v2') {
-    throw new Error('Seed bloqueado: defina CEAK_DB_SCHEMA=ceak_v2. O schema public nunca pode ser limpo.');
+    throw new Error(
+      'Seed bloqueado: defina CEAK_DB_SCHEMA=ceak_v2. O schema public nunca pode ser limpo.',
+    );
   }
   const urlSchema = new URL(process.env.DATABASE_URL ?? '').searchParams.get('schema');
   if (urlSchema && urlSchema !== schema) {

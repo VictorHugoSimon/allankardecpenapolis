@@ -5,7 +5,13 @@ import { useActionState } from 'react';
 import { botaoPrimario, botaoSecundario, campo, textoErro } from '@/lib/estilos';
 import { entrar } from '../actions';
 
-export function FormEntrar({ next, codigoDisponivel }: { next?: string; codigoDisponivel?: boolean }) {
+export function FormEntrar({
+  next,
+  codigoDisponivel,
+}: {
+  next?: string;
+  codigoDisponivel?: boolean;
+}) {
   const [estado, enviar, enviando] = useActionState(entrar, {});
   return (
     <>

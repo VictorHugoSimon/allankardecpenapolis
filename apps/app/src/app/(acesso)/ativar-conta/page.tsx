@@ -15,8 +15,11 @@ export default async function AtivarContaPage({
   searchParams: Promise<{ p?: string; t?: string }>;
 }) {
   const { p, t } = await searchParams;
-  const valido = !!p && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(p)
-    && !!t && /^[A-Za-z0-9_-]{43}$/.test(t);
+  const valido =
+    !!p &&
+    /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(p) &&
+    !!t &&
+    /^[A-Za-z0-9_-]{43}$/.test(t);
   const habilitado = process.env.CEAK_ENABLE_ACCOUNT_LINKING === 'sim';
   return (
     <>

@@ -39,12 +39,16 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
         setEstado('inativo');
         return;
       }
-      const r = await fetch(`/api/push?endpoint=${encodeURIComponent(sub.endpoint)}`, { cache: 'no-store' });
+      const r = await fetch(`/api/push?endpoint=${encodeURIComponent(sub.endpoint)}`, {
+        cache: 'no-store',
+      });
       if (!r.ok) throw new Error(String(r.status));
       const status = (await r.json()) as { vinculado: boolean; pertenceOutraConta: boolean };
       setEstado(status.vinculado ? 'ativo' : 'inativo');
       if (status.pertenceOutraConta) {
-        setAviso('Este aparelho ainda tem notificações de outra conta. Ao ativar, será criada uma inscrição exclusiva para sua conta.');
+        setAviso(
+          'Este aparelho ainda tem notificações de outra conta. Ao ativar, será criada uma inscrição exclusiva para sua conta.',
+        );
       }
     })().catch(() => setEstado('indisponivel'));
   }, [chavePublica]);

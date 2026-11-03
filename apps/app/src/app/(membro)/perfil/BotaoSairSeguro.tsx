@@ -32,11 +32,13 @@ export function BotaoSairSeguro() {
     } catch {
       setErro(
         'Não foi possível desvincular as notificações deste aparelho. ' +
-        'Verifique sua conexão e tente novamente antes de sair, para proteger sua privacidade.',
+          'Verifique sua conexão e tente novamente antes de sair, para proteger sua privacidade.',
       );
       return;
     }
-    iniciar(() => { void sair(); });
+    iniciar(() => {
+      void sair();
+    });
   }
 
   return (
@@ -55,14 +57,18 @@ export function BotaoSairSeguro() {
           <button
             type="button"
             disabled={ocupado}
-            onClick={() => iniciar(() => { void sair(); })}
+            onClick={() =>
+              iniciar(() => {
+                void sair();
+              })
+            }
             className="text-sm font-semibold underline"
           >
             Sair mesmo assim
           </button>
           <p className="text-xs text-red-700">
-            Se continuar, as notificações podem permanecer neste aparelho.
-            Desative-as também nas configurações do navegador.
+            Se continuar, as notificações podem permanecer neste aparelho. Desative-as também nas
+            configurações do navegador.
           </p>
         </div>
       ) : null}

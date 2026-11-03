@@ -47,8 +47,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CarrinhoProvider>
           <div className="flex min-h-screen flex-col">
             {homologacao && (
-              <div role="status" className="bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-950">
-                AMBIENTE DE HOMOLOGAÇÃO — Dados de demonstração. Programação, contatos, diretoria e informações de PIX ainda não foram validados. Não realize pagamentos.
+              <div
+                role="status"
+                className="bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-950"
+              >
+                AMBIENTE DE HOMOLOGAÇÃO — Dados de demonstração. Programação, contatos, diretoria e
+                informações de PIX ainda não foram validados. Não realize pagamentos.
               </div>
             )}
             <Cabecalho appUrl={APP_URL} />

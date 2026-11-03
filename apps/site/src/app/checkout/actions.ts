@@ -11,8 +11,13 @@ export interface EstadoCheckout extends EstadoForm {
 
 export async function finalizarPedido(_: EstadoCheckout, form: FormData): Promise<EstadoCheckout> {
   // Em ambiente publicado, nunca gere PIX usando dados fictícios.
-  if (process.env.NODE_ENV === 'production' && (process.env.PAYMENT_PROVIDER ?? 'mock') === 'mock') {
-    return { erro: 'Pagamentos indisponíveis neste ambiente de demonstração. Aguarde a integração oficial do PIX.' };
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (process.env.PAYMENT_PROVIDER ?? 'mock') === 'mock'
+  ) {
+    return {
+      erro: 'Pagamentos indisponíveis neste ambiente de demonstração. Aguarde a integração oficial do PIX.',
+    };
   }
   const valores = textos(form, ['nome', 'whatsapp']);
   let itens: unknown = [];

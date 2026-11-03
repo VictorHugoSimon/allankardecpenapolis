@@ -1,10 +1,5 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import {
-  ativarContaVinculada,
-  emitirConviteVinculacao,
-  ErroNegocio,
-  prisma,
-} from '../src';
+import { ativarContaVinculada, emitirConviteVinculacao, ErroNegocio, prisma } from '../src';
 
 const temBanco = !!process.env.DATABASE_URL;
 const BASE = 'https://ceak-app.exemplo.invalid';
@@ -25,10 +20,12 @@ describe.skipIf(!temBanco)('vinculação supervisionada de cadastros', () => {
 
   beforeAll(async () => {
     process.env.CEAK_ENABLE_ACCOUNT_LINKING = 'sim';
-    administrador = (await prisma.usuario.findFirstOrThrow({
-      where: { perfil: 'ADMINISTRADOR', ativo: true },
-      select: { id: true },
-    })).id;
+    administrador = (
+      await prisma.usuario.findFirstOrThrow({
+        where: { perfil: 'ADMINISTRADOR', ativo: true },
+        select: { id: true },
+      })
+    ).id;
   });
 
   afterEach(async () => {
@@ -55,12 +52,14 @@ describe.skipIf(!temBanco)('vinculação supervisionada de cadastros', () => {
       where: { perfil: 'VISITANTE', ativo: true },
       select: { id: true },
     });
-    await expect(
-      emitirConviteVinculacao(pessoa.id, naoAdmin.id, null, BASE),
-    ).rejects.toMatchObject({ codigo: 'sem_permissao' });
-    expect(await prisma.codigoAcesso.count({
-      where: { destino: `vincular-app:${pessoa.id}` },
-    })).toBe(0);
+    await expect(emitirConviteVinculacao(pessoa.id, naoAdmin.id, null, BASE)).rejects.toMatchObject(
+      { codigo: 'sem_permissao' },
+    );
+    expect(
+      await prisma.codigoAcesso.count({
+        where: { destino: `vincular-app:${pessoa.id}` },
+      }),
+    ).toBe(0);
   });
 
   it('ativa o cadastro anterior uma vez e preserva a pessoa', async () => {
@@ -79,12 +78,18 @@ describe.skipIf(!temBanco)('vinculação supervisionada de cadastros', () => {
 
     const usuario = await ativarContaVinculada(pessoa.id, token, 'senhaSegura2026', null);
     expect(usuario.email).toBe(pessoa.email);
-    expect(await prisma.usuario.findUniqueOrThrow({
-      where: { id: usuario.id },
-    })).toMatchObject({ pessoaId: pessoa.id, perfil: 'VISITANTE' });
-    expect((await prisma.codigoAcesso.findUniqueOrThrow({
-      where: { id: registro.id },
-    })).usadoEm).not.toBeNull();
+    expect(
+      await prisma.usuario.findUniqueOrThrow({
+        where: { id: usuario.id },
+      }),
+    ).toMatchObject({ pessoaId: pessoa.id, perfil: 'VISITANTE' });
+    expect(
+      (
+        await prisma.codigoAcesso.findUniqueOrThrow({
+          where: { id: registro.id },
+        })
+      ).usadoEm,
+    ).not.toBeNull();
     await expect(
       ativarContaVinculada(pessoa.id, token, 'senhaSegura2026', null),
     ).rejects.toBeInstanceOf(ErroNegocio);
@@ -110,7 +115,12 @@ describe.skipIf(!temBanco)('vinculação supervisionada de cadastros', () => {
     const primeiro = await emitirConviteVinculacao(pessoa.id, administrador, null, BASE);
     const segundo = await emitirConviteVinculacao(pessoa.id, administrador, null, BASE);
     await expect(
-      ativarContaVinculada(pessoa.id, new URL(primeiro.url).searchParams.get('t')!, 'senhaSegura2026', null),
+      ativarContaVinculada(
+        pessoa.id,
+        new URL(primeiro.url).searchParams.get('t')!,
+        'senhaSegura2026',
+        null,
+      ),
     ).rejects.toMatchObject({ codigo: 'convite_invalido' });
     const ativado = await ativarContaVinculada(
       pessoa.id,

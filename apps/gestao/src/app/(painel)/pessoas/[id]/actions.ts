@@ -25,7 +25,11 @@ export async function gerarConviteVinculacao(
   if (!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(pessoaId)) {
     return { erro: 'Cadastro inválido.' };
   }
-  if (form.get('documento') !== 'sim' || form.get('contato') !== 'sim' || form.get('consentimento') !== 'sim') {
+  if (
+    form.get('documento') !== 'sim' ||
+    form.get('contato') !== 'sim' ||
+    form.get('consentimento') !== 'sim'
+  ) {
     return { erro: 'Confirme identificação presencial, contato e consentimento do titular.' };
   }
   try {

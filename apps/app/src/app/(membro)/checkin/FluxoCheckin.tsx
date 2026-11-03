@@ -167,8 +167,8 @@ export function FluxoCheckin({
             </span>
           </button>
           <p className="border-line text-muted rounded-2xl border bg-white p-4 text-[13px] leading-relaxed">
-            Não encontrou o QR Code? Solicite apoio à recepção do CEAK.
-            A confirmação manual de presença é realizada pela equipe.
+            Não encontrou o QR Code? Solicite apoio à recepção do CEAK. A confirmação manual de
+            presença é realizada pela equipe.
           </p>
         </>
       )}

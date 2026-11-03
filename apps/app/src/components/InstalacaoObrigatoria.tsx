@@ -39,8 +39,11 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
     const ua = navigator.userAgent;
     const url = new URL(window.location.href);
     setLinkApp(url.href);
-    setLinkChrome(`intent://${url.host}${url.pathname}${url.search}#Intent;scheme=${url.protocol.slice(0, -1)};package=com.android.chrome;end`);
-    const ios = /iPad|iPhone|iPod/i.test(ua) ||
+    setLinkChrome(
+      `intent://${url.host}${url.pathname}${url.search}#Intent;scheme=${url.protocol.slice(0, -1)};package=com.android.chrome;end`,
+    );
+    const ios =
+      /iPad|iPhone|iPod/i.test(ua) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const android = /Android/i.test(ua);
     // Samsung Internet pode gerar WebAPK com target SDK antigo e ser bloqueado
@@ -116,27 +119,62 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-[#F7F4EE] px-5 py-10 text-[#1F2A24]">
-      <section className="w-full max-w-[440px] rounded-3xl border border-[#dce5dd] bg-white p-7 shadow-lg" aria-labelledby="instalar-titulo">
-        <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-[22px] bg-[#2F5D46] font-serif text-3xl font-bold text-white" aria-hidden="true">AK</div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#2F5D46]">Centro Espírita Allan Kardec</p>
-        <h1 id="instalar-titulo" className="mb-3 font-serif text-3xl font-semibold">Instale o CEAK App para continuar</h1>
+      <section
+        className="w-full max-w-[440px] rounded-3xl border border-[#dce5dd] bg-white p-7 shadow-lg"
+        aria-labelledby="instalar-titulo"
+      >
+        <div
+          className="mb-5 flex h-20 w-20 items-center justify-center rounded-[22px] bg-[#2F5D46] font-serif text-3xl font-bold text-white"
+          aria-hidden="true"
+        >
+          AK
+        </div>
+        <p className="mb-2 text-xs font-semibold tracking-widest text-[#2F5D46] uppercase">
+          Centro Espírita Allan Kardec
+        </p>
+        <h1 id="instalar-titulo" className="mb-3 font-serif text-3xl font-semibold">
+          Instale o CEAK App para continuar
+        </h1>
         <p className="mb-6 leading-relaxed text-[#4A5B51]">
-          O acesso à área do membro pelo celular é feito pelo aplicativo instalado, com ícone na tela inicial, agenda, estudos e notificações.
+          O acesso à área do membro pelo celular é feito pelo aplicativo instalado, com ícone na
+          tela inicial, agenda, estudos e notificações.
         </p>
 
         {samsungInternet ? (
           <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
-            <p className="mb-3 font-semibold">Abra o CEAK no Google Chrome para instalar com segurança.</p>
-            <p className="mb-4">O Samsung Internet pode gerar uma instalação incompatível com as proteções mais recentes do Android. Não desative o Play Protect.</p>
-            <a href={linkChrome || '#'} className="block w-full rounded-xl bg-[#2F5D46] px-5 py-4 text-center font-semibold text-white">Abrir no Google Chrome</a>
-            <p className="mt-4">Se o Chrome não abrir, copie este link, abra o Chrome manualmente e cole na barra de endereços:</p>
-            <p className="mt-2 select-all break-all font-semibold">{linkApp}</p>
-            <button type="button" onClick={copiarLink} className="mt-3 rounded-lg border border-[#2F5D46] px-4 py-2 font-semibold text-[#2F5D46]">{copiado ? 'Link copiado!' : 'Copiar link'}</button>
-            <p className="mt-3">No Chrome, toque em <strong>Instalar aplicativo</strong> ou use o menu ⋮.</p>
+            <p className="mb-3 font-semibold">
+              Abra o CEAK no Google Chrome para instalar com segurança.
+            </p>
+            <p className="mb-4">
+              O Samsung Internet pode gerar uma instalação incompatível com as proteções mais
+              recentes do Android. Não desative o Play Protect.
+            </p>
+            <a
+              href={linkChrome || '#'}
+              className="block w-full rounded-xl bg-[#2F5D46] px-5 py-4 text-center font-semibold text-white"
+            >
+              Abrir no Google Chrome
+            </a>
+            <p className="mt-4">
+              Se o Chrome não abrir, copie este link, abra o Chrome manualmente e cole na barra de
+              endereços:
+            </p>
+            <p className="mt-2 font-semibold break-all select-all">{linkApp}</p>
+            <button
+              type="button"
+              onClick={copiarLink}
+              className="mt-3 rounded-lg border border-[#2F5D46] px-4 py-2 font-semibold text-[#2F5D46]"
+            >
+              {copiado ? 'Link copiado!' : 'Copiar link'}
+            </button>
+            <p className="mt-3">
+              No Chrome, toque em <strong>Instalar aplicativo</strong> ou use o menu ⋮.
+            </p>
           </div>
         ) : tentouInstalar || estado === 'aguardando' ? (
           <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
-            Instalação solicitada. Agora abra o ícone <strong>CEAK</strong> na tela inicial ou na lista de aplicativos do seu celular.
+            Instalação solicitada. Agora abra o ícone <strong>CEAK</strong> na tela inicial ou na
+            lista de aplicativos do seu celular.
           </div>
         ) : convite ? (
           <button
@@ -150,26 +188,48 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
           <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
             <p className="mb-3 font-semibold">No iPhone ou iPad:</p>
             <ol className="list-decimal space-y-2 pl-5">
-              <li>Abra este link no <strong>Safari</strong>, caso esteja em outro aplicativo.</li>
-              <li>Toque em <strong>Compartilhar</strong> (ícone de quadrado com seta).</li>
-              <li>Selecione <strong>Adicionar à Tela de Início</strong> e confirme.</li>
-              <li>Abra o ícone <strong>CEAK</strong> na tela inicial.</li>
+              <li>
+                Abra este link no <strong>Safari</strong>, caso esteja em outro aplicativo.
+              </li>
+              <li>
+                Toque em <strong>Compartilhar</strong> (ícone de quadrado com seta).
+              </li>
+              <li>
+                Selecione <strong>Adicionar à Tela de Início</strong> e confirme.
+              </li>
+              <li>
+                Abra o ícone <strong>CEAK</strong> na tela inicial.
+              </li>
             </ol>
           </div>
         ) : (
           <div className="rounded-xl bg-[#EFF5F0] p-4 text-sm leading-relaxed">
             <p className="mb-3 font-semibold">No Android:</p>
             <ol className="list-decimal space-y-2 pl-5">
-              <li>Abra este link no <strong>Google Chrome</strong>.</li>
-              <li>Toque no menu <strong>⋮</strong> do navegador.</li>
-              <li>Selecione <strong>Instalar aplicativo</strong> ou <strong>Adicionar à tela inicial</strong>.</li>
-              <li>Abra o ícone <strong>CEAK</strong> instalado.</li>
+              <li>
+                Abra este link no <strong>Google Chrome</strong>.
+              </li>
+              <li>
+                Toque no menu <strong>⋮</strong> do navegador.
+              </li>
+              <li>
+                Selecione <strong>Instalar aplicativo</strong> ou{' '}
+                <strong>Adicionar à tela inicial</strong>.
+              </li>
+              <li>
+                Abra o ícone <strong>CEAK</strong> instalado.
+              </li>
             </ol>
           </div>
         )}
-        {mensagem && <p role="alert" className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">{mensagem}</p>}
+        {mensagem && (
+          <p role="alert" className="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-950">
+            {mensagem}
+          </p>
+        )}
         <p className="mt-5 text-xs leading-relaxed text-[#64776A]">
-          Por segurança, nenhum site pode instalar um aplicativo automaticamente sem sua confirmação. Ao abrir pelo ícone instalado, esta tela desaparece.
+          Por segurança, nenhum site pode instalar um aplicativo automaticamente sem sua
+          confirmação. Ao abrir pelo ícone instalado, esta tela desaparece.
         </p>
       </section>
     </main>
