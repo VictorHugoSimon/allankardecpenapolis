@@ -25,7 +25,7 @@ export default async function EntrarPage({
       <p className="text-muted m-0 text-[15px] leading-normal">
         Agenda, check-in, estudos e comunicados do Centro Espírita Allan Kardec.
       </p>
-      <FormEntrar next={next} />
+      <FormEntrar next={next} codigoDisponivel={process.env.NODE_ENV !== 'production' || (process.env.WHATSAPP_PROVIDER && process.env.WHATSAPP_PROVIDER !== 'mock')} />
     </>
   );
 }
