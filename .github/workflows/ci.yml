@@ -63,6 +63,23 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm db:deploy
+      # O papel ceak_app tem políticas RLS em ceak_v2, mas a migração antiga
+      # concede USAGE somente em public. No Postgres descartável da CI,
+      # habilitamos USAGE no schema de homologação, nunca no legado real.
+      - name: Permitir schema isolado ao papel RLS
+        run: |
+          node - <<'NODE'
+          const { Client } = require('pg');
+          (async () => {
+            const db = new Client({ connectionString: process.env.DATABASE_URL });
+            await db.connect();
+            try {
+              await db.query('GRANT USAGE ON SCHEMA ceak_v2 TO ceak_app');
+            } finally {
+              await db.end();
+            }
+          })().catch((err) => { console.error(err); process.exitCode = 1; });
+          NODE
       - run: pnpm db:seed
       - run: pnpm test
       - run: pnpm build
