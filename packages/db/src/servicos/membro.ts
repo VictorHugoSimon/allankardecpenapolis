@@ -571,16 +571,33 @@ export async function registrarDispositivoPush(
   pessoaId: string,
   inscricao: { endpoint: string; keys: { p256dh: string; auth: string } },
 ) {
-  await prisma.dispositivoPush.upsert({
-    where: { endpoint: inscricao.endpoint },
-    create: {
-      pessoaId,
-      endpoint: inscricao.endpoint,
-      p256dh: inscricao.keys.p256dh,
-      auth: inscricao.keys.auth,
-    },
-    update: { pessoaId, p256dh: inscricao.keys.p256dh, auth: inscricao.keys.auth },
-  });
+  // O endpoint é único globalmente, mas nunca pode trocar de titular apenas
+  // porque outra sessão apresentou sua URL. Isso evita cruzar notificações
+  // pessoais em aparelhos compartilhados ou links de inscrição reutilizados.
+  try {
+    await prisma.dispositivoPush.create({
+      data: {
+        pessoaId,
+        endpoint: inscricao.endpoint,
+        p256dh: inscricao.keys.p256dh,
+        auth: inscricao.keys.auth,
+      },
+    });
+  } catch (erro) {
+    if ((erro as { code?: string }).code !== 'P2002') throw erro;
+    // Atualiza somente se o endpoint já pertence à própria pessoa.
+    // O filtro no UPDATE protege inclusive contra concorrência.
+    const atualizado = await prisma.dispositivoPush.updateMany({
+      where: { endpoint: inscricao.endpoint, pessoaId },
+      data: { p256dh: inscricao.keys.p256dh, auth: inscricao.keys.auth },
+    });
+    if (atualizado.count !== 1) {
+      throw new ErroNegocio(
+        'Este aparelho ainda recebe notificações de outra conta. Desative as notificações na conta anterior ou limpe os dados do aplicativo antes de ativar.',
+        'dispositivo_outra_conta',
+      );
+    }
+  }
 }
 
 export async function removerDispositivoPush(endpoint: string) {
