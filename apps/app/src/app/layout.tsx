@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Moldura } from '@/components/Moldura';
+import { InstalacaoObrigatoria } from '@/components/InstalacaoObrigatoria';
 import { RegistrarServiceWorker } from '@/components/RegistrarServiceWorker';
 import { fontVars } from '@/lib/fonts';
 import './globals.css';
@@ -31,7 +32,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Pular para o conteúdo
         </a>
-        <Moldura>{children}</Moldura>
+        <InstalacaoObrigatoria>
+          <Moldura>{children}</Moldura>
+        </InstalacaoObrigatoria>
         <RegistrarServiceWorker />
       </body>
     </html>
