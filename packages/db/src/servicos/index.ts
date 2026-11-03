@@ -16,3 +16,5 @@ export * from './gestao/config';
 export * from './senha';
 export * from './gestao/busca';
 export * from './doisFatores';
+
+export * from './vinculacao';
