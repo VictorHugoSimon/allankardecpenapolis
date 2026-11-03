@@ -400,7 +400,14 @@ export async function confirmarPixManual(
   if (!reg?.cobrancaId) return { pago: false };
   if (reg.statusPagamento === 'PAGO') return { pago: true };
   const valorCentavos = 'valorCentavos' in reg ? (reg.valorCentavos ?? 0) : reg.totalCentavos;
-  if (deps.pagamento.simularPagamento) {
+  // Nunca confirme pagamentos fictícios em um deploy publicado. Um clique do
+  // visitante não constitui confirmação do banco ou do provedor PIX.
+  // Simulação permitida exclusivamente em desenvolvimento local com opt-in.
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    process.env.CEAK_ENABLE_MOCK_PAYMENT_CONFIRMATION === 'sim' &&
+    deps.pagamento.simularPagamento
+  ) {
     const { corpo, assinatura } = deps.pagamento.simularPagamento({
       id: reg.cobrancaId,
       referencia: referencia({ tipo, id }),
