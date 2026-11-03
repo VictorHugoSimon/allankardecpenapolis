@@ -25,7 +25,16 @@ export async function autenticarComSenha(
     return { ok: false, motivo: 'bloqueado' };
   const identidade = await provider.entrarComSenha(email, senha);
   const sessao = identidade ? await sessaoParaIdentidade(identidade) : null;
-  if (sessao) return { ok: true, sessao };
+  if (sessao) {
+    // Um acesso válido encerra a sequência de tentativas malsucedidas.
+    if (usuario && (usuario.tentativasFalhas > 0 || usuario.bloqueadoAte)) {
+      await prisma.usuario.update({
+        where: { id: usuario.id },
+        data: { tentativasFalhas: 0, bloqueadoAte: null },
+      });
+    }
+    return { ok: true, sessao };
+  }
   if (usuario) {
     const tentativas = usuario.tentativasFalhas + 1;
     await prisma.usuario.update({
