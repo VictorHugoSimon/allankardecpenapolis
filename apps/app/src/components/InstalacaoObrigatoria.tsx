@@ -57,7 +57,9 @@ export function InstalacaoObrigatoria({ children }: { children: ReactNode }) {
       // em 20 min e não sobrevive ao redirecionamento de instalação.
       // Após ativar a conta, o acesso à área do membro volta a exigir o PWA.
       const ativacao = window.location.pathname === '/ativar-conta';
-      setEstado(emModoAplicativo() || dispositivo === 'desktop' || ativacao ? 'instalado' : 'instalar');
+      setEstado(
+        emModoAplicativo() || dispositivo === 'desktop' || ativacao ? 'instalado' : 'instalar',
+      );
     };
     const antesDeInstalar = (e: Event) => {
       e.preventDefault();
