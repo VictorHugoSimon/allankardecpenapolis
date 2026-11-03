@@ -3,13 +3,22 @@ import { PrismaClient } from './generated/prisma/client';
 
 const globalForPrisma = globalThis as unknown as { __ceakPrisma?: PrismaClient };
 
+function runtimeDatabaseUrl(url?: string, schema?: string) {
+  if (!url || !schema) return url;
+
+  const parsed = new URL(url);
+  // O pooler transacional do Neon não aceita `options=search_path` no startup.
+  // Os novos previews CEAK v2 usam a conexão direta e mantêm o legado intacto.
+  parsed.hostname = parsed.hostname.replace('-pooler.', '.');
+  parsed.searchParams.set('options', `-c search_path=${schema},public`);
+  return parsed.toString();
+}
+
 function criarClient(): PrismaClient {
-  const databaseUrl = process.env.DATABASE_URL;
-  const databaseSchema = process.env.CEAK_DB_SCHEMA?.trim();
-  const scopedDatabaseUrl =
-    databaseUrl && databaseSchema
-      ? `${databaseUrl}${databaseUrl.includes('?') ? '&' : '?'}options=${encodeURIComponent(`-c search_path=${databaseSchema},public`)}`
-      : databaseUrl;
+  const scopedDatabaseUrl = runtimeDatabaseUrl(
+    process.env.DATABASE_URL,
+    process.env.CEAK_DB_SCHEMA?.trim(),
+  );
 
   const adapter = new PrismaPg({ connectionString: scopedDatabaseUrl });
   return new PrismaClient({ adapter });
