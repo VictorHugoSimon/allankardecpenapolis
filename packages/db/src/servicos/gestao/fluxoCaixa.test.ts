@@ -26,7 +26,7 @@ describe('fluxo de caixa financeiro', () => {
       { tipo: 'RECEBER', valorCentavos: 300, status: 'PAGO', pagoEm: fim, vencimento: dentro },
       { tipo: 'RECEBER', valorCentavos: 100, status: 'PAGO', pagoEm: inicio, vencimento: fora },
     ], [...periodos]);
-    expect(m.entradas).toBe(100);
+    expect(m?.entradas).toBe(100);
   });
   it('inclui vencimentos no primeiro dia civil do mês (SQL DATE UTC)', () => {
     const [m] = consolidarFluxoCaixa([
@@ -38,7 +38,7 @@ describe('fluxo de caixa financeiro', () => {
         vencimento: new Date('2026-11-01T00:00:00.000Z'),
       },
     ], [...periodos]);
-    expect(m.entradasPrevistas).toBe(2500);
+    expect(m?.entradasPrevistas).toBe(2500);
   });
   it('mantém o saldo acumulado negativo, sem fingir saldo bancário', () => {
     const itens = consolidarFluxoCaixa([
