@@ -27,6 +27,7 @@ export default async function DashboardFinanceiroPage() {
           <div className="flex flex-wrap gap-3 text-sm">
             <Link href="/financeiro/novo?tipo=RECEBER" className="text-green-dark underline">Cadastrar receita</Link>
             <Link href="/financeiro/novo?tipo=PAGAR" className="text-green-dark underline">Cadastrar despesa</Link>
+            <Link href="/financeiro/categorias" className="text-green-dark underline">Configurar categorias</Link>
           </div>
         </div>
       )}
