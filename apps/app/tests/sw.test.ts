@@ -4,7 +4,7 @@ import { runInNewContext } from 'node:vm';
 
 const source = readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
 
-function carregarWorker(options?: { falharCache?: boolean }) {
+function carregarWorker(options?: { falharCache?: boolean; falharRede?: boolean }) {
   const handlers = new Map<string, (event: unknown) => void>();
   const openWindow = vi.fn(async () => undefined);
   const add = options?.falharCache
@@ -37,7 +37,9 @@ function carregarWorker(options?: { falharCache?: boolean }) {
     Response,
     URL,
     console: { warn: vi.fn() },
-    fetch: vi.fn(),
+    fetch: options?.falharRede
+      ? vi.fn(async () => { throw new Error('sem rede'); })
+      : vi.fn(),
   });
   return { handlers, self, caches, add, openWindow };
 }
@@ -72,5 +74,25 @@ describe('CEAK PWA: worker estático', () => {
     });
     await tarefa;
     expect(openWindow).toHaveBeenCalledWith(expected);
+  });
+});
+
+describe('fallback de navegação offline seguro', () => {
+  it('responde HTML independente sem scripts e sem dados do membro', async () => {
+    const { handlers } = carregarWorker({ falharRede: true });
+    let resultado: Promise<Response> | undefined;
+    handlers.get('fetch')!({
+      request: { mode: 'navigate', method: 'GET' },
+      respondWith: (p: Promise<Response>) => { resultado = p; },
+    });
+    expect(resultado).toBeDefined();
+    const resposta = await resultado!;
+    expect(resposta.status).toBe(200);
+    expect(resposta.headers.get('content-type')).toContain('text/html');
+    const html = await resposta.text();
+    expect(html).toContain('Você está sem conexão');
+    expect(html).toContain('Tentar novamente');
+    expect(html).not.toContain('<script');
+    expect(html).not.toContain('Dados pessoais</');
   });
 });
