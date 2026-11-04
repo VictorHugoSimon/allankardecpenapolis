@@ -130,7 +130,10 @@ test('Jornada 4 · webhook PIX rejeita assinatura inválida', async ({ request }
     }),
     headers: { 'content-type': 'application/json', 'x-ceak-assinatura': 'forjada' },
   });
-  expect(r.status()).toBe(401);
+  // Em build de produção sem PSP real, o endpoint inteiro falha de modo
+  // seguro; não processa nem mesmo uma assinatura de teste.
+  expect(r.status()).toBe(503);
+  expect(await r.json()).toMatchObject({ motivo: 'provedor_pix_nao_integrado' });
 });
 
 test('Jornada 5 · Loja: Loja → Produto → Carrinho → Checkout → PIX → Pedido (estoque baixado)', async ({
