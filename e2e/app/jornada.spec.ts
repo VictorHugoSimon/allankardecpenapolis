@@ -71,7 +71,9 @@ test('Jornada 2 · Membro: Login → Home → Check-in → Estudo → Palestra �
   await expect(
     page.getByRole('heading', { name: 'Estudo Sistematizado da Doutrina Espírita' }),
   ).toBeVisible();
-  await expect(page.getByText('A justiça da reencarnação')).toBeVisible();
+  // O conteúdo das aulas é gerenciado pelo instrutor e pode mudar;
+  // validar a estrutura e a navegação, não um título fixo do seed.
+  await expect(page.getByRole('navigation', { name: 'Seções do estudo' })).toBeVisible();
   await page.getByRole('link', { name: 'Presença' }).click();
   await expect(page.getByText(/Frequência mínima: 75% · Sua frequência: \d+%/)).toBeVisible();
   await page.getByRole('link', { name: 'Materiais' }).click();
