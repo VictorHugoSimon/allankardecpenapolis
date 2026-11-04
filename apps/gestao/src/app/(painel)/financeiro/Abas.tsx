@@ -10,6 +10,7 @@ const ABAS = [
   ['Conciliação', '/financeiro/conciliacao'],
   ['Contas a pagar', '/financeiro/pagar'],
   ['Contas a receber', '/financeiro/receber'],
+  ['Categorias', '/financeiro/categorias'],
 ] as const;
 
 export function AbasFinanceiro() {
