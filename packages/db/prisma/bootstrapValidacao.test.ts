@@ -3,7 +3,8 @@ import { validarBootstrap } from './bootstrapValidacao';
 
 const seguro = {
   CEAK_BOOTSTRAP_CONFIRM: 'CRIAR_PRIMEIRO_ADMIN_REAL',
-  AUTH_PROVIDER: 'local', CEAK_DB_SCHEMA: 'ceak_v2',
+  AUTH_PROVIDER: 'local',
+  CEAK_DB_SCHEMA: 'ceak_v2',
   DATABASE_URL: 'postgresql://usuario:senha@localhost:5432/ceak',
   AUTH_SECRET: 'segredo-aleatorio-real-1234567890abcdefgh',
   CEAK_ADMIN_NOME: 'Administrador Institucional',
@@ -16,7 +17,8 @@ describe('bootstrap seguro de primeiro acesso', () => {
   });
   it.each([
     { CEAK_BOOTSTRAP_CONFIRM: undefined },
-    { AUTH_PROVIDER: undefined }, { CEAK_DB_SCHEMA: 'public' },
+    { AUTH_PROVIDER: undefined },
+    { CEAK_DB_SCHEMA: 'public' },
     { DATABASE_URL: 'postgresql://localhost/ceak?schema=public' },
     { AUTH_SECRET: 'dev-only-secret-0123456789-abcdefghijklmnopqrstuvwxyz' },
     { CEAK_ADMIN_SENHA: 'ceak-dev-2026' },
