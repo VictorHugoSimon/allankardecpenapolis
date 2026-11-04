@@ -19,6 +19,7 @@
     "db:deploy": "pnpm --filter @ceak/db db:deploy",
     "db:reset": "pnpm --filter @ceak/db db:reset",
     "db:seed": "pnpm --filter @ceak/db db:seed",
+    "db:bootstrap": "pnpm --filter @ceak/db db:bootstrap",
     "db:totp": "pnpm --filter @ceak/db db:totp"
   },
   "devDependencies": {
