@@ -108,8 +108,9 @@ test('seletor de perfil só para quem tem duas ou mais funções e muda os menus
 test('financeiro: Tesouraria aprova e paga contas com auditoria', async ({ page }) => {
   await entrar(page, USUARIOS.TESOURARIA);
   await page.goto('/financeiro');
-  await expect(page.getByText('Realizado em setembro')).toBeVisible();
-  await expect(page.getByText('R$ 18.840').first()).toBeVisible();
+  // O dashboard sempre acompanha o último mês fechado, não um mês fixo do seed.
+  await expect(page.getByText(/Realizado em \w+ \(último mês fechado\)/)).toBeVisible();
+  await expect(page.getByText('Receitas', { exact: true }).first()).toBeVisible();
   await page.getByRole('link', { name: 'Contas a pagar' }).click();
   await page
     .getByRole('button', { name: 'Aprovar: CPFL Paulista — Energia elétrica — set/26' })
