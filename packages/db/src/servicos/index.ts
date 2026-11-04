@@ -16,6 +16,7 @@ export * from './gestao/confirmarConciliacao';
 export * from './gestao/painel';
 export * from './gestao/periodo';
 export * from './gestao/pessoas';
+export * from './gestao/cadastroPresencial';
 export * from './gestao/config';
 export * from './senha';
 export * from './gestao/busca';
