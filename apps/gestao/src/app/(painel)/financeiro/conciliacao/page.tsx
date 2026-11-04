@@ -5,6 +5,7 @@ import { painelConciliacao, referenciaDoMes } from '@ceak/db';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { Indicadores } from '@/components/Pagina';
 import { reais } from '@/lib/formato';
+import { FormPreviaExtrato } from './FormPreviaExtrato';
 
 export const metadata: Metadata = { title: 'Conciliação bancária' };
 export const dynamic = 'force-dynamic';
@@ -51,6 +52,7 @@ export default async function ConciliacaoPage({
       <p className="text-muted-2 m-0 text-sm">
         Créditos no extrato: <strong>{reais(dados.creditoCentavos)}</strong> · Débitos no extrato: <strong>{reais(dados.debitoCentavos)}</strong>
       </p>
+      <FormPreviaExtrato />
       <div className="border-line overflow-x-auto rounded-xl border bg-white">
         <table className="w-full min-w-[860px] text-left text-sm">
           <caption className="p-3 text-left font-semibold">Movimentações do extrato — {dados.periodo}</caption>
