@@ -17,30 +17,37 @@ try {
   await prisma.$transaction(async (tx) => {
     // Duas execuções simultâneas não podem criar dois administradores iniciais.
     await tx.$queryRaw`SELECT 1 FROM pg_advisory_xact_lock(19001, 26)`;
-    const [usuarios, pessoas] = await Promise.all([
-      tx.usuario.count(), tx.pessoa.count(),
-    ]);
+    const [usuarios, pessoas] = await Promise.all([tx.usuario.count(), tx.pessoa.count()]);
     if (usuarios !== 0 || pessoas !== 0) {
-      throw new Error('Bootstrap recusado: banco não está vazio. Utilize a gestão de usuários existente.');
+      throw new Error(
+        'Bootstrap recusado: banco não está vazio. Utilize a gestão de usuários existente.',
+      );
     }
     const hash = await hashSenha(dados.senha);
     const pessoa = await tx.pessoa.create({
       data: {
-        nome: dados.nome, email: dados.email,
-        perfil: 'ADMINISTRADOR', status: 'ATIVO',
+        nome: dados.nome,
+        email: dados.email,
+        perfil: 'ADMINISTRADOR',
+        status: 'ATIVO',
       },
     });
     const usuario = await tx.usuario.create({
       data: {
-        pessoaId: pessoa.id, email: dados.email,
-        perfil: 'ADMINISTRADOR', ativo: true, doisFatores: true,
+        pessoaId: pessoa.id,
+        email: dados.email,
+        perfil: 'ADMINISTRADOR',
+        ativo: true,
+        doisFatores: true,
         credencial: { create: { senhaHash: hash } },
       },
     });
     await tx.auditoria.create({
       data: {
-        usuarioId: usuario.id, acao: 'criou primeiro administrador real',
-        entidade: 'Usuario', entidadeId: usuario.id,
+        usuarioId: usuario.id,
+        acao: 'criou primeiro administrador real',
+        entidade: 'Usuario',
+        entidadeId: usuario.id,
         depois: { perfil: 'ADMINISTRADOR', bootstrap: true },
       },
     });
