@@ -6,6 +6,7 @@ import { contextoRls, exigirModulo } from '@/lib/auth';
 import { Indicadores } from '@/components/Pagina';
 import { reais } from '@/lib/formato';
 import { FormPreviaExtrato } from './FormPreviaExtrato';
+import { BotaoConfirmar } from './BotaoConfirmar';
 
 export const metadata: Metadata = { title: 'Conciliação bancária' };
 export const dynamic = 'force-dynamic';
@@ -72,7 +73,12 @@ export default async function ConciliacaoPage({
                 <td className="px-3 py-3">{rotulos[l.status]}</td>
                 <td className="px-3 py-3">{l.lancamento?.contraparte ?? l.referencia ?? 'Sem vínculo'}</td>
                 <td className="px-3 py-3">{l.alerta ?? (l.status === 'CONCILIADO' ? 'Conferido' : 'Aguardando validação')}</td>
-                <td className="px-3 py-3">{l.sugestao.candidato ? `Possível: ${l.sugestao.candidato.contraparte} (${l.sugestao.candidato.dataPagamento}) — confirmar manualmente` : l.sugestao.motivo}</td>
+                <td className="px-3 py-3">{l.sugestao.candidato ? (
+                  <span className="flex flex-col gap-2">
+                    <span>Possível: {l.sugestao.candidato.contraparte} ({l.sugestao.candidato.dataPagamento})</span>
+                    <BotaoConfirmar extratoId={l.id} lancamentoId={l.sugestao.candidato.id} descricao={l.descricao} />
+                  </span>
+                ) : l.sugestao.motivo}</td>
               </tr>
             ))}
           </tbody>
