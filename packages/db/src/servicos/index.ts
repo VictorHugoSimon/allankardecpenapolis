@@ -9,6 +9,7 @@ export * from './gestao/aprovacoes';
 export * from './gestao/atividades';
 export * from './gestao/conteudo';
 export * from './gestao/financeiro';
+export * from './gestao/categoriasFinanceiras';
 export * from './gestao/fluxoCaixa';
 export * from './gestao/conciliacao';
 export * from './gestao/confirmarConciliacao';
