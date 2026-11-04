@@ -24,6 +24,10 @@ test('manifest e ícones atendem aos critérios de instalação', async ({ page,
     expect(r.headers()['content-type']).toContain('image/png');
   }
   await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#2F5D46');
+  const worker = await request.get('/sw.js');
+  expect(worker.status()).toBe(200);
+  expect(worker.headers()['content-type']).toMatch(/javascript/);
+  expect(await worker.text()).toContain("addEventListener('install'");
 });
 
 test('service worker controla o App e mostra a página offline sem conexão', async ({
