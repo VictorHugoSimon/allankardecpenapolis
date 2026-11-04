@@ -57,7 +57,7 @@ export default async function DashboardFinanceiroPage() {
             series={[
               {
                 nome: 'Saldo',
-                valores: d.serie.map((m) => Math.max(0, m.receitas - m.despesas)),
+                valores: d.serie.map((m) => m.receitas - m.despesas),
                 cor: '#7FA08C',
               },
             ]}
