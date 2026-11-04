@@ -143,6 +143,8 @@ test('financeiro: Tesouraria aprova e paga contas com auditoria', async ({ page 
   await page.getByLabel('Valor (R$)').fill('86,40');
   await page.getByLabel('Vencimento').fill('2026-10-20');
   await page.getByRole('button', { name: 'Lançar' }).click();
+  // A lista de contas é filtrada por vencimento: este registro pertence a outubro/26.
+  await page.goto('/financeiro/pagar?mes=2026-10');
   await expect(
     page.getByRole('row', { name: /Papelaria Penápolis/ }).getByText('Pendente'),
   ).toBeVisible();
