@@ -67,7 +67,12 @@ export default async function EventosPage({
             <div className="border-line rounded-xl border bg-white p-4">
               <Vazio>Nenhum evento cadastrado para o período consultado.</Vazio>
               {podeEditarAgenda(s.perfil) && (
-                <Link href="/agenda/nova" className="text-green-dark mt-3 inline-block text-sm underline">Criar o primeiro evento real</Link>
+                <Link
+                  href="/agenda/nova"
+                  className="text-green-dark mt-3 inline-block text-sm underline"
+                >
+                  Criar o primeiro evento real
+                </Link>
               )}
             </div>
           )}

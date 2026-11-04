@@ -11,8 +11,9 @@ const base = {
 
 describe('cadastro presencial sem dados de exemplo', () => {
   it('normaliza nome e e-mail e não inventa consentimento', () => {
-    expect(validarCadastroPresencial({ ...base, nome: '  Maria  Silva ', email: ' MARIA@EXAMPLE.COM ' }))
-      .toMatchObject({ nome: 'Maria Silva', email: 'maria@example.com', consentimento: false });
+    expect(
+      validarCadastroPresencial({ ...base, nome: '  Maria  Silva ', email: ' MARIA@EXAMPLE.COM ' }),
+    ).toMatchObject({ nome: 'Maria Silva', email: 'maria@example.com', consentimento: false });
   });
   it('exige um contato', () => {
     expect(() => validarCadastroPresencial({ ...base, email: '' })).toThrow();
@@ -21,7 +22,8 @@ describe('cadastro presencial sem dados de exemplo', () => {
     expect(() => validarCadastroPresencial({ ...base, whatsapp: '11999999999' })).toThrow();
   });
   it('aceita telefone +55 com DDD', () => {
-    expect(validarCadastroPresencial({ ...base, email: '', whatsapp: '+5518999999999' }).whatsapp)
-      .toBe('+5518999999999');
+    expect(
+      validarCadastroPresencial({ ...base, email: '', whatsapp: '+5518999999999' }).whatsapp,
+    ).toBe('+5518999999999');
   });
 });

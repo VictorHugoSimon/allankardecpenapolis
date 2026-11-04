@@ -25,9 +25,20 @@ export default async function EstudosPage({
       <TituloPagina sub={instrutorId ? 'Suas turmas' : undefined}>Estudos e cursos</TituloPagina>
       {!instrutorId && ['ADMINISTRADOR', 'DIRETORIA', 'COORDENADOR'].includes(s.perfil) && (
         <div className="flex flex-wrap items-center gap-3">
-          <Link href="/estudos/novo" className={buttonClasses({ shape: 'rounded', size: 'sm' })}>Cadastrar curso ou turma</Link>
-          <Link href="/estudos/matricular" className={buttonClasses({ shape: 'rounded', size: 'sm', variant: 'secondary' })}>Matricular participante</Link>
-          {e.turmas.length === 0 && <span role="status" className="text-muted-2 text-sm">Nenhuma turma ainda. Cadastre o primeiro curso real para iniciar.</span>}
+          <Link href="/estudos/novo" className={buttonClasses({ shape: 'rounded', size: 'sm' })}>
+            Cadastrar curso ou turma
+          </Link>
+          <Link
+            href="/estudos/matricular"
+            className={buttonClasses({ shape: 'rounded', size: 'sm', variant: 'secondary' })}
+          >
+            Matricular participante
+          </Link>
+          {e.turmas.length === 0 && (
+            <span role="status" className="text-muted-2 text-sm">
+              Nenhuma turma ainda. Cadastre o primeiro curso real para iniciar.
+            </span>
+          )}
         </div>
       )}
       <Indicadores
@@ -79,7 +90,12 @@ export default async function EstudosPage({
         >
           <div>
             {['ADMINISTRADOR', 'DIRETORIA', 'COORDENADOR', 'INSTRUTOR'].includes(s.perfil) && (
-              <Link href={`/estudos/chamada?turma=${e.selecionada.id}`} className={buttonClasses({ shape: 'rounded', size: 'sm', variant: 'secondary' })}>Registrar presenças</Link>
+              <Link
+                href={`/estudos/chamada?turma=${e.selecionada.id}`}
+                className={buttonClasses({ shape: 'rounded', size: 'sm', variant: 'secondary' })}
+              >
+                Registrar presenças
+              </Link>
             )}
             <h2 id="turma-sel" className="m-0 text-[15px] font-semibold">
               {e.selecionada.titulo}

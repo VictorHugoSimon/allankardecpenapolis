@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { conferirTransicaoAssistencia, podeGerirAssistencia } from './assistenciaInicial';
 
-const contexto = { usuarioId: 'u', pessoaId: 'p', perfil: 'COORDENADOR' as const, coordAssistencia: false };
+const contexto = {
+  usuarioId: 'u',
+  pessoaId: 'p',
+  perfil: 'COORDENADOR' as const,
+  coordAssistencia: false,
+};
 describe('assistência com acesso reservado', () => {
   it('reserva gestão à coordenação de assistência designada', () => {
     expect(podeGerirAssistencia(contexto)).toBe(false);

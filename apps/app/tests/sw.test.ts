@@ -8,7 +8,9 @@ function carregarWorker(options?: { falharCache?: boolean }) {
   const handlers = new Map<string, (event: unknown) => void>();
   const openWindow = vi.fn(async () => undefined);
   const add = options?.falharCache
-    ? vi.fn(async () => { throw new Error('rede indisponível'); })
+    ? vi.fn(async () => {
+        throw new Error('rede indisponível');
+      })
     : vi.fn(async () => undefined);
   const caches = {
     open: vi.fn(async () => ({ add })),
@@ -18,7 +20,8 @@ function carregarWorker(options?: { falharCache?: boolean }) {
   };
   const self = {
     location: { origin: 'https://app.ceak.example' },
-    addEventListener: (event: string, handler: (event: unknown) => void) => handlers.set(event, handler),
+    addEventListener: (event: string, handler: (event: unknown) => void) =>
+      handlers.set(event, handler),
     clients: {
       matchAll: vi.fn(async () => []),
       openWindow,
@@ -28,7 +31,11 @@ function carregarWorker(options?: { falharCache?: boolean }) {
     skipWaiting: vi.fn(async () => undefined),
   };
   runInNewContext(source, {
-    self, caches, Request, Response, URL,
+    self,
+    caches,
+    Request,
+    Response,
+    URL,
     console: { warn: vi.fn() },
     fetch: vi.fn(),
   });
@@ -39,7 +46,11 @@ describe('CEAK PWA: worker estático', () => {
   it('permite registrar o worker mesmo se o cache offline falhar', async () => {
     const { handlers, self } = carregarWorker({ falharCache: true });
     let tarefa: Promise<unknown> | undefined;
-    handlers.get('install')!({ waitUntil: (p: Promise<unknown>) => { tarefa = p; } });
+    handlers.get('install')!({
+      waitUntil: (p: Promise<unknown>) => {
+        tarefa = p;
+      },
+    });
     await expect(tarefa).resolves.toBeUndefined();
     expect(self.skipWaiting).toHaveBeenCalledOnce();
   });
@@ -55,7 +66,9 @@ describe('CEAK PWA: worker estático', () => {
     let tarefa: Promise<unknown> | undefined;
     handlers.get('notificationclick')!({
       notification: { data: { path }, close: vi.fn() },
-      waitUntil: (p: Promise<unknown>) => { tarefa = p; },
+      waitUntil: (p: Promise<unknown>) => {
+        tarefa = p;
+      },
     });
     await tarefa;
     expect(openWindow).toHaveBeenCalledWith(expected);

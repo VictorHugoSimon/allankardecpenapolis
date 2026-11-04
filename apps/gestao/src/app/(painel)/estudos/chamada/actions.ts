@@ -6,7 +6,10 @@ import { criarAulaManual, registrarChamadaManual, ErroNegocio } from '@ceak/db';
 import { exigirModulo } from '@/lib/auth';
 import { contexto } from '@/lib/servidor';
 
-export interface EstadoChamada { erro?: string; sucesso?: string }
+export interface EstadoChamada {
+  erro?: string;
+  sucesso?: string;
+}
 const novaAula = z.object({
   turmaId: z.string().uuid(),
   numero: z.coerce.number().int().min(1).max(1000),
@@ -46,7 +49,10 @@ export async function salvarChamada(
     const resultado = await registrarChamadaManual(ctx, r.data.aulaId, r.data.alunos, ctx.ip);
     revalidatePath('/estudos');
     revalidatePath('/estudos/chamada');
-    return { ok: true, mensagem: `Chamada registrada: ${resultado.presentes} presentes de ${resultado.total} alunos.` };
+    return {
+      ok: true,
+      mensagem: `Chamada registrada: ${resultado.presentes} presentes de ${resultado.total} alunos.`,
+    };
   } catch (e) {
     if (e instanceof ErroNegocio) return { ok: false, mensagem: e.message };
     throw e;

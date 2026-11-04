@@ -20,6 +20,7 @@ export function prepararHorarioAtividade(data: string, hora: string, duracao: nu
     conferido.getUTCDate() !== Number(diaMes) ||
     conferido.getUTCHours() !== h ||
     conferido.getUTCMinutes() !== min
-  ) throw new Error('Data ou horário inexistente.');
+  )
+    throw new Error('Data ou horário inexistente.');
   return { inicio, fim: new Date(inicio.getTime() + duracao * 60_000) };
 }

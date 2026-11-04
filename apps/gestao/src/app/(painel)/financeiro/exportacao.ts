@@ -15,16 +15,14 @@ function celula(valor: string | number): string {
   // ou quando caracteres de controle precedem esses símbolos.
   let texto = String(valor).replaceAll('\0', '');
   let inicio = 0;
-  while (inicio < texto.length && (/\s/u.test(texto[inicio]!) || texto.charCodeAt(inicio) < 32)) inicio++;
+  while (inicio < texto.length && (/\s/u.test(texto[inicio]!) || texto.charCodeAt(inicio) < 32))
+    inicio++;
   const primeiro = texto[inicio];
   if (primeiro && '=+@-'.includes(primeiro)) texto = "'" + texto;
   return '"' + texto.replace(/"/g, '""') + '"';
 }
 
-export function gerarCsvContas(
-  tipo: 'PAGAR' | 'RECEBER',
-  linhas: LinhaFinanceiraCsv[],
-): string {
+export function gerarCsvContas(tipo: 'PAGAR' | 'RECEBER', linhas: LinhaFinanceiraCsv[]): string {
   const cabecalho = [
     tipo === 'PAGAR' ? 'Fornecedor' : 'Origem',
     'Descrição',
@@ -45,5 +43,7 @@ export function gerarCsvContas(
     l.rotulo,
     l.responsavel,
   ]);
-  return '\uFEFF' + [cabecalho, ...registros].map((r) => r.map(celula).join(';')).join('\r\n') + '\r\n';
+  return (
+    '\uFEFF' + [cabecalho, ...registros].map((r) => r.map(celula).join(';')).join('\r\n') + '\r\n'
+  );
 }

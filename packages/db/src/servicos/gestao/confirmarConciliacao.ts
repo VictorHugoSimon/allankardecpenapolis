@@ -9,18 +9,17 @@ interface RegistroConferencia {
   pagoEm: Date | null;
 }
 
-export function conferirConciliacao(
-  valorExtrato: number,
-  lancamento: RegistroConferencia,
-): void {
+export function conferirConciliacao(valorExtrato: number, lancamento: RegistroConferencia): void {
   if (lancamento.status !== 'PAGO' || !lancamento.pagoEm) {
     throw new ErroNegocio('Somente lançamentos pagos podem ser conciliados.', 'nao_pago');
   }
-  const valorEsperado = lancamento.tipo === 'RECEBER'
-    ? lancamento.valorCentavos
-    : -lancamento.valorCentavos;
+  const valorEsperado =
+    lancamento.tipo === 'RECEBER' ? lancamento.valorCentavos : -lancamento.valorCentavos;
   if (valorEsperado !== valorExtrato) {
-    throw new ErroNegocio('O valor e a natureza do lançamento devem corresponder exatamente ao extrato.', 'divergencia');
+    throw new ErroNegocio(
+      'O valor e a natureza do lançamento devem corresponder exatamente ao extrato.',
+      'divergencia',
+    );
   }
 }
 
@@ -45,7 +44,13 @@ export async function confirmarConciliacao(
     const [linha, lancamento, outroVinculo] = await Promise.all([
       tx.extratoLinha.findUnique({
         where: { id: extratoId },
-        select: { id: true, descricao: true, valorCentavos: true, status: true, lancamentoId: true },
+        select: {
+          id: true,
+          descricao: true,
+          valorCentavos: true,
+          status: true,
+          lancamentoId: true,
+        },
       }),
       tx.lancamento.findUnique({
         where: { id: lancamentoId },
@@ -60,10 +65,16 @@ export async function confirmarConciliacao(
       throw new ErroNegocio('Movimentação ou lançamento não encontrado.', 'nao_encontrado');
     }
     if (!['PENDENTE', 'SUGERIDO'].includes(linha.status) || linha.lancamentoId) {
-      throw new ErroNegocio('Esta movimentação já foi vinculada ou não aceita confirmação.', 'ja_conciliado');
+      throw new ErroNegocio(
+        'Esta movimentação já foi vinculada ou não aceita confirmação.',
+        'ja_conciliado',
+      );
     }
     if (outroVinculo) {
-      throw new ErroNegocio('Este lançamento já está vinculado a outra movimentação.', 'duplicidade');
+      throw new ErroNegocio(
+        'Este lançamento já está vinculado a outra movimentação.',
+        'duplicidade',
+      );
     }
     conferirConciliacao(linha.valorCentavos, lancamento);
     const resultado = await tx.extratoLinha.updateMany({
@@ -71,7 +82,10 @@ export async function confirmarConciliacao(
       data: { lancamentoId, status: 'CONCILIADO', conciliadoEm: new Date() },
     });
     if (resultado.count !== 1) {
-      throw new ErroNegocio('A movimentação foi alterada. Atualize a tela e tente novamente.', 'concorrencia');
+      throw new ErroNegocio(
+        'A movimentação foi alterada. Atualize a tela e tente novamente.',
+        'concorrencia',
+      );
     }
     await registrarAuditoria(tx, {
       usuarioId: ctx.usuarioId,

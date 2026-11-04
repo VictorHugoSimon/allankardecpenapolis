@@ -22,20 +22,30 @@ export default async function CategoriasFinanceirasPage() {
       <div className="border-line overflow-hidden rounded-xl border bg-white">
         <table className="w-full text-left text-sm">
           <caption className="p-4 text-left font-semibold">Categorias cadastradas</caption>
-          <thead><tr className="bg-surface-2">
-            <th scope="col" className="px-4 py-3">Categoria</th>
-            <th scope="col" className="px-4 py-3">Tipo</th>
-          </tr></thead>
+          <thead>
+            <tr className="bg-surface-2">
+              <th scope="col" className="px-4 py-3">
+                Categoria
+              </th>
+              <th scope="col" className="px-4 py-3">
+                Tipo
+              </th>
+            </tr>
+          </thead>
           <tbody>
             {dados.categorias.length === 0 && (
-              <tr><td colSpan={2} className="text-muted-2 px-4 py-5">
-                Nenhuma categoria cadastrada. Comece com o formulário acima.
-              </td></tr>
+              <tr>
+                <td colSpan={2} className="text-muted-2 px-4 py-5">
+                  Nenhuma categoria cadastrada. Comece com o formulário acima.
+                </td>
+              </tr>
             )}
             {dados.categorias.map((categoria) => (
               <tr key={categoria.id} className="border-line-soft border-t">
                 <td className="px-4 py-3">{categoria.nome}</td>
-                <td className="px-4 py-3">{categoria.tipo === 'RECEBER' ? 'Receita' : 'Despesa'}</td>
+                <td className="px-4 py-3">
+                  {categoria.tipo === 'RECEBER' ? 'Receita' : 'Despesa'}
+                </td>
               </tr>
             ))}
           </tbody>

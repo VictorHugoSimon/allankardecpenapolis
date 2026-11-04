@@ -14,7 +14,9 @@ const esquema = z.object({
   consentimento: z.boolean(),
 });
 
-export interface EstadoNovoVisitante { erro?: string }
+export interface EstadoNovoVisitante {
+  erro?: string;
+}
 
 export async function salvarVisitante(
   _: EstadoNovoVisitante,

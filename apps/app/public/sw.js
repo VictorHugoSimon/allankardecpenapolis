@@ -53,7 +53,10 @@ function caminhoSeguro(valor, fallback = '/notificacoes') {
   }
   try {
     const destino = new URL(valor, self.location.origin);
-    if (destino.origin !== self.location.origin || !['http:', 'https:'].includes(destino.protocol)) {
+    if (
+      destino.origin !== self.location.origin ||
+      !['http:', 'https:'].includes(destino.protocol)
+    ) {
       return fallback;
     }
     return `${destino.pathname}${destino.search}${destino.hash}`;

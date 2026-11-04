@@ -21,14 +21,19 @@ function lerCsv(texto: string): string[][] {
     const ch = texto[i]!;
     if (aspas) {
       if (ch === '"') {
-        if (texto[i + 1] === '"') { campo += '"'; i++; }
-        else aspas = false;
+        if (texto[i + 1] === '"') {
+          campo += '"';
+          i++;
+        } else aspas = false;
       } else campo += ch;
     } else if (ch === '"' && campo.length === 0) aspas = true;
-    else if (ch === ';') { linha.push(campo); campo = ''; }
-    else if (ch === '\n' || ch === '\r') {
+    else if (ch === ';') {
+      linha.push(campo);
+      campo = '';
+    } else if (ch === '\n' || ch === '\r') {
       if (ch === '\r' && texto[i + 1] === '\n') i++;
-      linha.push(campo); campo = '';
+      linha.push(campo);
+      campo = '';
       if (linha.some((v) => v.trim() !== '')) resultado.push(linha);
       linha = [];
     } else campo += ch;
@@ -42,8 +47,7 @@ function lerCsv(texto: string): string[][] {
 function dataIso(valor: string): string {
   const v = valor.trim();
   const br = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);
-  const iso = /^\d{4}-\d{2}-\d{2}$/.test(v) ? v :
-    br ? `${br[3]}-${br[2]}-${br[1]}` : '';
+  const iso = /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : br ? `${br[3]}-${br[2]}-${br[1]}` : '';
   if (!iso) throw new Error(`Data inválida: ${v.slice(0, 25)}`);
   const d = new Date(iso + 'T00:00:00.000Z');
   if (!Number.isFinite(d.getTime()) || d.toISOString().slice(0, 10) !== iso)
@@ -60,8 +64,7 @@ function valorCentavos(valor: string): number {
   const negativo = v.startsWith('-');
   const absoluto = negativo ? v.slice(1) : v;
   const [inteiro, frac = ''] = absoluto.split(',');
-  const centavos = Number(inteiro!.replace(/\./g, '')) * 100 +
-    Number(frac.padEnd(2, '0'));
+  const centavos = Number(inteiro!.replace(/\./g, '')) * 100 + Number(frac.padEnd(2, '0'));
   if (!Number.isSafeInteger(centavos) || centavos === 0 || centavos > 100_000_000_000)
     throw new Error('Valor fora do limite permitido.');
   return negativo ? -centavos : centavos;
@@ -86,7 +89,14 @@ export function prepararPreviaExtrato(conteudo: string): PreviaExtrato {
     if (campos.length !== 3) throw new Error(`Linha ${indice + 2}: esperado 3 colunas.`);
     const data = dataIso(campos[0]!);
     const descricao = campos[1]!.trim();
-    if (!descricao || descricao.length > 200 || Array.from(descricao).some((ch) => { const code = ch.charCodeAt(0); return code < 32 && code !== 9 && code !== 10 && code !== 13; }))
+    if (
+      !descricao ||
+      descricao.length > 200 ||
+      Array.from(descricao).some((ch) => {
+        const code = ch.charCodeAt(0);
+        return code < 32 && code !== 9 && code !== 10 && code !== 13;
+      })
+    )
       throw new Error(`Linha ${indice + 2}: descrição inválida.`);
     const valor = valorCentavos(campos[2]!);
     const chave = JSON.stringify([data, descricao.normalize('NFC'), valor]);

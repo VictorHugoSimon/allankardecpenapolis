@@ -101,8 +101,11 @@ export async function painelConciliacao(ctx: ContextoRls, referencia = new Date(
     const extras = vinculosGlobais
       .filter((l) => !linhas.some((m) => m.id === l.id))
       .map((l) => ({
-        id: l.id, lancamentoId: l.lancamentoId, data: l.data,
-        valorCentavos: l.valorCentavos, status: l.status,
+        id: l.id,
+        lancamentoId: l.lancamentoId,
+        data: l.data,
+        valorCentavos: l.valorCentavos,
+        status: l.status,
       }));
     const sugestoes = sugerirCorrespondencias([...linhas, ...extras], candidatos);
     const indiceSugestoes = new Map(sugestoes.map((s) => [s.extratoId, s]));
@@ -110,17 +113,22 @@ export async function painelConciliacao(ctx: ContextoRls, referencia = new Date(
       ...diagnosticarLinha(l),
       sugestao: indiceSugestoes.get(l.id)!,
     }));
-    const total = (status: StatusExtrato) =>
-      conferidas.filter((l) => l.status === status).length;
+    const total = (status: StatusExtrato) => conferidas.filter((l) => l.status === status).length;
     return {
       periodo: periodo.rotulo,
       total: conferidas.length,
       pendentes: total('PENDENTE'),
       sugeridas: total('SUGERIDO'),
       conciliadas: total('CONCILIADO'),
-      divergentes: total('DIVERGENTE') + conferidas.filter((l) => l.status !== 'DIVERGENTE' && l.alerta !== null).length,
-      creditoCentavos: conferidas.filter((l) => l.valorCentavos > 0).reduce((a, l) => a + l.valorCentavos, 0),
-      debitoCentavos: conferidas.filter((l) => l.valorCentavos < 0).reduce((a, l) => a - l.valorCentavos, 0),
+      divergentes:
+        total('DIVERGENTE') +
+        conferidas.filter((l) => l.status !== 'DIVERGENTE' && l.alerta !== null).length,
+      creditoCentavos: conferidas
+        .filter((l) => l.valorCentavos > 0)
+        .reduce((a, l) => a + l.valorCentavos, 0),
+      debitoCentavos: conferidas
+        .filter((l) => l.valorCentavos < 0)
+        .reduce((a, l) => a - l.valorCentavos, 0),
       linhas: conferidas,
     };
   });

@@ -7,7 +7,11 @@ import { exigirModulo } from '@/lib/auth';
 import { contexto } from '@/lib/servidor';
 
 const esquema = z.object({
-  nome: z.string().trim().min(2, 'Informe pelo menos 2 caracteres.').max(80, 'Máximo de 80 caracteres.'),
+  nome: z
+    .string()
+    .trim()
+    .min(2, 'Informe pelo menos 2 caracteres.')
+    .max(80, 'Máximo de 80 caracteres.'),
   tipo: z.enum(['RECEBER', 'PAGAR']),
 });
 

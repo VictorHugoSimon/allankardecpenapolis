@@ -32,7 +32,9 @@ function diaCivilSP(data: Date): string {
   // O pagamento é TIMESTAMPTZ. Comparar o dia bancário em São Paulo.
   return new Intl.DateTimeFormat('en-CA', {
     timeZone: 'America/Sao_Paulo',
-    year: 'numeric', month: '2-digit', day: '2-digit',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   }).format(data);
 }
 
@@ -45,9 +47,7 @@ export function sugerirCorrespondencias(
   movimentos: MovimentoParaSugestao[],
   lancamentos: CandidatoLancamento[],
 ): SugestaoConciliacao[] {
-  const candidatosDisponiveis = lancamentos.filter(
-    (l) => l.status === 'PAGO' && l.pagoEm !== null,
-  );
+  const candidatosDisponiveis = lancamentos.filter((l) => l.status === 'PAGO' && l.pagoEm !== null);
   // Um lançamento já vinculado a qualquer linha não pode ser oferecido novamente.
   const vinculados = new Set(movimentos.map((m) => m.lancamentoId).filter(Boolean));
   const preliminares = movimentos.map((m) => {
@@ -58,8 +58,9 @@ export function sugerirCorrespondencias(
     const candidatos = candidatosDisponiveis.filter((l) => {
       if (vinculados.has(l.id)) return false;
       const valorAssinado = (l.tipo === 'RECEBER' ? 1 : -1) * l.valorCentavos;
-      return valorAssinado === m.valorCentavos &&
-        diferencaDias(diaExtrato, diaCivilSP(l.pagoEm!)) <= 3;
+      return (
+        valorAssinado === m.valorCentavos && diferencaDias(diaExtrato, diaCivilSP(l.pagoEm!)) <= 3
+      );
     });
     return { movimento: m, candidatos, bloqueado: false };
   });
@@ -78,16 +79,22 @@ export function sugerirCorrespondencias(
     const candidato = unico && !repetido ? unico : null;
     return {
       extratoId: movimento.id,
-      candidato: candidato ? {
-        id: candidato.id,
-        contraparte: candidato.contraparte,
-        dataPagamento: diaCivilSP(candidato.pagoEm!),
-      } : null,
+      candidato: candidato
+        ? {
+            id: candidato.id,
+            contraparte: candidato.contraparte,
+            dataPagamento: diaCivilSP(candidato.pagoEm!),
+          }
+        : null,
       quantidadeCandidatos: candidatos.length,
-      motivo: bloqueado ? 'Já vinculado ou conciliado'
-        : repetido ? 'Mais de uma linha do extrato disputa o mesmo lançamento'
-          : candidatos.length > 1 ? 'Vários lançamentos possíveis — análise manual necessária'
-            : candidatos.length === 0 ? 'Nenhum pagamento compatível no período'
+      motivo: bloqueado
+        ? 'Já vinculado ou conciliado'
+        : repetido
+          ? 'Mais de uma linha do extrato disputa o mesmo lançamento'
+          : candidatos.length > 1
+            ? 'Vários lançamentos possíveis — análise manual necessária'
+            : candidatos.length === 0
+              ? 'Nenhum pagamento compatível no período'
               : 'Valor, natureza e data compatíveis — requer confirmação humana',
     };
   });

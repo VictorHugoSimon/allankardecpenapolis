@@ -8,7 +8,9 @@ export interface DadosCategoriaFinanceira {
 }
 
 /** Validação independente de banco, utilizada no cadastro e nos testes. */
-export function validarCategoriaFinanceira(dados: DadosCategoriaFinanceira): DadosCategoriaFinanceira {
+export function validarCategoriaFinanceira(
+  dados: DadosCategoriaFinanceira,
+): DadosCategoriaFinanceira {
   const nome = dados.nome.trim().replace(/\s+/g, ' ');
   if (nome.length < 2 || nome.length > 80) {
     throw new ErroNegocio('O nome da categoria deve ter de 2 a 80 caracteres.', 'nome');
@@ -31,7 +33,8 @@ export async function cadastrarCategoriaFinanceira(
       where: { nome_tipo: { nome, tipo } },
       select: { id: true },
     });
-    if (anterior) throw new ErroNegocio('Já existe uma categoria com este nome e tipo.', 'duplicada');
+    if (anterior)
+      throw new ErroNegocio('Já existe uma categoria com este nome e tipo.', 'duplicada');
     const categoria = await tx.categoriaFinanceira.create({
       data: { nome, tipo: dados.tipo },
       select: { id: true, nome: true, tipo: true },

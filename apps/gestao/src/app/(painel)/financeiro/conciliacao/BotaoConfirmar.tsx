@@ -22,15 +22,22 @@ export function BotaoConfirmar({
       variant="secondary"
       disabled={pendente}
       aria-label={`Confirmar conciliação: ${descricao}`}
-      onClick={() => iniciar(async () => {
-        if (!window.confirm(`Confirmar manualmente a conciliação de "${descricao}"? A decisão ficará registrada na auditoria.`)) return;
-        try {
-          const resultado = await confirmarVinculo(extratoId, lancamentoId);
-          toast.show(resultado.mensagem);
-        } catch {
-          toast.show('Não foi possível confirmar. Atualize a tela e tente novamente.');
-        }
-      })}
+      onClick={() =>
+        iniciar(async () => {
+          if (
+            !window.confirm(
+              `Confirmar manualmente a conciliação de "${descricao}"? A decisão ficará registrada na auditoria.`,
+            )
+          )
+            return;
+          try {
+            const resultado = await confirmarVinculo(extratoId, lancamentoId);
+            toast.show(resultado.mensagem);
+          } catch {
+            toast.show('Não foi possível confirmar. Atualize a tela e tente novamente.');
+          }
+        })
+      }
     >
       {pendente ? 'Conferindo…' : 'Confirmar vínculo'}
     </Button>

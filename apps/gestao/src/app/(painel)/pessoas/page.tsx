@@ -36,8 +36,14 @@ export default async function PessoasPage({
       </TituloPagina>
       {!instrutor && ['ADMINISTRADOR', 'SECRETARIA'].includes(s.perfil) && (
         <div className="flex items-center gap-3">
-          <Link href="/pessoas/novo" className={buttonClasses({ shape: 'rounded', size: 'sm' })}>Cadastrar visitante</Link>
-          {r.total === 0 && <span role="status" className="text-muted-2 text-sm">Nenhum cadastro ainda. Comece pelos visitantes reais.</span>}
+          <Link href="/pessoas/novo" className={buttonClasses({ shape: 'rounded', size: 'sm' })}>
+            Cadastrar visitante
+          </Link>
+          {r.total === 0 && (
+            <span role="status" className="text-muted-2 text-sm">
+              Nenhum cadastro ainda. Comece pelos visitantes reais.
+            </span>
+          )}
         </div>
       )}
       <AbasLink

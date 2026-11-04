@@ -5,10 +5,16 @@ import { ErroNegocio, matricularPessoaManual } from '@ceak/db';
 import { exigirModulo } from '@/lib/auth';
 import { contexto } from '@/lib/servidor';
 
-export interface EstadoMatricula { erro?: string; sucesso?: string }
+export interface EstadoMatricula {
+  erro?: string;
+  sucesso?: string;
+}
 const esquema = z.object({ turmaId: z.string().uuid(), pessoaId: z.string().uuid() });
 
-export async function salvarMatricula(_: EstadoMatricula, form: FormData): Promise<EstadoMatricula> {
+export async function salvarMatricula(
+  _: EstadoMatricula,
+  form: FormData,
+): Promise<EstadoMatricula> {
   const sessao = await exigirModulo('estudos');
   if (!['ADMINISTRADOR', 'DIRETORIA', 'COORDENADOR'].includes(sessao.perfil))
     return { erro: 'Você não tem permissão para realizar matrículas.' };

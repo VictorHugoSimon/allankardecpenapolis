@@ -21,10 +21,18 @@ const base: LinhaExtratoConciliacao = {
 
 describe('conferência de extrato sem mutações', () => {
   it('reconhece crédito vinculado de igual valor', () => {
-    expect(diagnosticarLinha(base)).toMatchObject({ esperado: 2500, divergente: false, alerta: null });
+    expect(diagnosticarLinha(base)).toMatchObject({
+      esperado: 2500,
+      divergente: false,
+      alerta: null,
+    });
   });
   it('reconhece débito correto por sinal negativo', () => {
-    const linha = { ...base, valorCentavos: -2500, lancamento: { ...base.lancamento!, tipo: 'PAGAR' as const } };
+    const linha = {
+      ...base,
+      valorCentavos: -2500,
+      lancamento: { ...base.lancamento!, tipo: 'PAGAR' as const },
+    };
     expect(diagnosticarLinha(linha)).toMatchObject({ esperado: -2500, divergente: false });
   });
   it('marca divergência de valor ou natureza', () => {
@@ -34,12 +42,19 @@ describe('conferência de extrato sem mutações', () => {
     });
   });
   it('sinaliza conciliação sem lançamento, mantendo o estado original', () => {
-    const r = diagnosticarLinha({ ...base, status: 'CONCILIADO', lancamentoId: null, lancamento: null });
+    const r = diagnosticarLinha({
+      ...base,
+      status: 'CONCILIADO',
+      lancamentoId: null,
+      lancamento: null,
+    });
     expect(r.status).toBe('CONCILIADO');
     expect(r.alerta).toContain('sem lançamento');
   });
   it('sinaliza vínculo cujo lançamento não foi pago', () => {
-    expect(diagnosticarLinha({ ...base, lancamento: { ...base.lancamento!, status: 'PENDENTE' } }).alerta)
-      .toContain('não está pago');
+    expect(
+      diagnosticarLinha({ ...base, lancamento: { ...base.lancamento!, status: 'PENDENTE' } })
+        .alerta,
+    ).toContain('não está pago');
   });
 });

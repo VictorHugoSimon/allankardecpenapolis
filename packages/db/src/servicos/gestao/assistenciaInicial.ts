@@ -6,8 +6,11 @@ type ContextoEquipe = ContextoRls & { usuarioId: string };
 export type EtapaAssistencia = 'PENDENTE' | 'AGENDADA' | 'CONCLUIDA' | 'CANCELADA';
 
 export function podeGerirAssistencia(ctx: ContextoRls): boolean {
-  return ctx.perfil === 'ADMINISTRADOR' || ctx.perfil === 'DIRETORIA' ||
-    (ctx.perfil === 'COORDENADOR' && ctx.coordAssistencia === true);
+  return (
+    ctx.perfil === 'ADMINISTRADOR' ||
+    ctx.perfil === 'DIRETORIA' ||
+    (ctx.perfil === 'COORDENADOR' && ctx.coordAssistencia === true)
+  );
 }
 
 /** Fluxo supervisionado. Nunca reabre um atendimento encerrado automaticamente. */
@@ -27,16 +30,30 @@ export async function painelAssistenciaInicial(ctx: ContextoRls) {
   if (!podeGerirAssistencia(ctx)) {
     return { permitido: false as const, total: 0, pendentes: 0, agendadas: 0, linhas: [] };
   }
-  return comRls(ctx, async tx => {
+  return comRls(ctx, async (tx) => {
     const [pendentes, agendadas, recentes] = await Promise.all([
       tx.solicitacaoAssistencia.count({ where: { status: 'PENDENTE' } }),
       tx.solicitacaoAssistencia.count({ where: { status: 'AGENDADA' } }),
       tx.solicitacaoAssistencia.findMany({
-        orderBy: { criadoEm: 'desc' }, take: 100,
-        select: { id: true, tipo: true, nomeExibicao: true, data: true, status: true, criadoEm: true },
+        orderBy: { criadoEm: 'desc' },
+        take: 100,
+        select: {
+          id: true,
+          tipo: true,
+          nomeExibicao: true,
+          data: true,
+          status: true,
+          criadoEm: true,
+        },
       }),
     ]);
-    return { permitido: true as const, total: pendentes + agendadas, pendentes, agendadas, linhas: recentes };
+    return {
+      permitido: true as const,
+      total: pendentes + agendadas,
+      pendentes,
+      agendadas,
+      linhas: recentes,
+    };
   });
 }
 
@@ -46,11 +63,14 @@ export async function alterarSituacaoAssistencia(
   destino: EtapaAssistencia,
   ip: string | null,
 ) {
-  if (!podeGerirAssistencia(ctx)) throw new ErroNegocio('Sem permissão para alterar solicitações.', 'sem_permissao');
-  if (!/^[0-9a-f-]{36}$/i.test(id)) throw new ErroNegocio('Identificador inválido.', 'identificador');
-  return comRls(ctx, async tx => {
+  if (!podeGerirAssistencia(ctx))
+    throw new ErroNegocio('Sem permissão para alterar solicitações.', 'sem_permissao');
+  if (!/^[0-9a-f-]{36}$/i.test(id))
+    throw new ErroNegocio('Identificador inválido.', 'identificador');
+  return comRls(ctx, async (tx) => {
     const atual = await tx.solicitacaoAssistencia.findUnique({
-      where: { id }, select: { id: true, status: true, data: true },
+      where: { id },
+      select: { id: true, status: true, data: true },
     });
     if (!atual) throw new ErroNegocio('Solicitação não encontrada.', 'nao_encontrada');
     conferirTransicaoAssistencia(atual.status, destino);
@@ -61,11 +81,19 @@ export async function alterarSituacaoAssistencia(
       where: { id, status: atual.status },
       data: { status: destino },
     });
-    if (gravado.count !== 1) throw new ErroNegocio('Solicitação alterada por outra pessoa. Atualize a página.', 'concorrencia');
+    if (gravado.count !== 1)
+      throw new ErroNegocio(
+        'Solicitação alterada por outra pessoa. Atualize a página.',
+        'concorrencia',
+      );
     await registrarAuditoria(tx, {
-      usuarioId: ctx.usuarioId, acao: 'alterou situação de solicitação de assistência',
-      entidade: 'SolicitacaoAssistencia', entidadeId: id,
-      antes: { status: atual.status }, depois: { status: destino }, ip,
+      usuarioId: ctx.usuarioId,
+      acao: 'alterou situação de solicitação de assistência',
+      entidade: 'SolicitacaoAssistencia',
+      entidadeId: id,
+      antes: { status: atual.status },
+      depois: { status: destino },
+      ip,
     });
     return { status: destino };
   });

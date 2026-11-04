@@ -3,7 +3,8 @@ import { prepararPreviaExtrato } from './parserExtrato';
 
 describe('prévia de extrato bancário CSV', () => {
   it('interpreta decimal brasileiro, aspas e duplicidades internas', () => {
-    const csv = 'data;descricao;valor\r\n04/11/2026;"PIX; doação";1.234,56\r\n04/11/2026;"PIX; doação";1.234,56\r\n05/11/2026;Despesa;-20,00\r\n';
+    const csv =
+      'data;descricao;valor\r\n04/11/2026;"PIX; doação";1.234,56\r\n04/11/2026;"PIX; doação";1.234,56\r\n05/11/2026;Despesa;-20,00\r\n';
     const p = prepararPreviaExtrato(csv);
     expect(p.creditosCentavos).toBe(246912);
     expect(p.debitosCentavos).toBe(2000);

@@ -33,7 +33,10 @@ export function validarCadastroPresencial(d: NovoCadastroPresencial) {
     throw new ErroNegocio('Cidade muito longa.', 'cidade');
   }
   if (!email && !whatsapp) {
-    throw new ErroNegocio('Informe pelo menos um contato para evitar cadastros sem identificação.', 'contato');
+    throw new ErroNegocio(
+      'Informe pelo menos um contato para evitar cadastros sem identificação.',
+      'contato',
+    );
   }
   return { nome, email, whatsapp, cidade, consentimento: d.consentimento === true };
 }
@@ -59,7 +62,10 @@ export async function cadastrarVisitantePresencial(
       select: { id: true },
     });
     if (duplicado) {
-      throw new ErroNegocio('Já existe um cadastro com este e-mail ou WhatsApp. Consulte a lista de pessoas.', 'duplicado');
+      throw new ErroNegocio(
+        'Já existe um cadastro com este e-mail ou WhatsApp. Consulte a lista de pessoas.',
+        'duplicado',
+      );
     }
     const pessoa = await tx.pessoa.create({
       data: {
@@ -69,10 +75,12 @@ export async function cadastrarVisitantePresencial(
         cidade: d.cidade,
         perfil: 'VISITANTE',
         status: 'NOVO',
-        ...(d.consentimento ? {
-          consentimentoEm: new Date(),
-          consentimentoVersao: TERMO_LGPD_VERSAO,
-        } : {}),
+        ...(d.consentimento
+          ? {
+              consentimentoEm: new Date(),
+              consentimentoVersao: TERMO_LGPD_VERSAO,
+            }
+          : {}),
       },
       select: { id: true },
     });

@@ -25,10 +25,7 @@ export interface PeriodoFluxo {
  * Previsto considera somente contas abertas; não mistura provisões com saldo realizado.
  * Nenhum resultado equivale ao saldo bancário conciliado.
  */
-export function consolidarFluxoCaixa(
-  movimentos: MovimentoFluxo[],
-  periodos: PeriodoFluxo[],
-) {
+export function consolidarFluxoCaixa(movimentos: MovimentoFluxo[], periodos: PeriodoFluxo[]) {
   let acumuladoPeriodo = 0;
   return periodos.map((p) => {
     let entradas = 0;

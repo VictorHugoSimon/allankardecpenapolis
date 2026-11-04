@@ -12,7 +12,8 @@ const esquema = z.object({
 });
 
 export async function atualizarSituacao(
-  id: string, destino: 'AGENDADA' | 'CONCLUIDA' | 'CANCELADA',
+  id: string,
+  destino: 'AGENDADA' | 'CONCLUIDA' | 'CANCELADA',
 ): Promise<{ ok: boolean; mensagem: string }> {
   const s = await exigirModulo('assistencia');
   const dados = esquema.safeParse({ id, destino });
@@ -20,10 +21,10 @@ export async function atualizarSituacao(
   const ctx = await contexto(s);
   try {
     await alterarSituacaoAssistencia(ctx, dados.data.id, dados.data.destino, ctx.ip);
-  } catch(e) {
-    if(e instanceof ErroNegocio) return {ok:false,mensagem:e.message};
+  } catch (e) {
+    if (e instanceof ErroNegocio) return { ok: false, mensagem: e.message };
     throw e;
   }
   revalidatePath('/assistencia');
-  return {ok:true,mensagem:'Situação atualizada com auditoria.'};
+  return { ok: true, mensagem: 'Situação atualizada com auditoria.' };
 }

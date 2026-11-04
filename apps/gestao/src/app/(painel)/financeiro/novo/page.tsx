@@ -24,17 +24,21 @@ export default async function NovoLancamentoPage({
         <div role="status" className="border-line rounded-xl border bg-white p-4 text-sm">
           <p className="m-0 font-semibold">Nenhuma categoria financeira cadastrada</p>
           <p className="text-muted-2 mt-2">
-            Para registrar a primeira receita ou despesa, será necessário configurar categorias.
-            Não serão criados dados fictícios automaticamente.
+            Para registrar a primeira receita ou despesa, será necessário configurar categorias. Não
+            serão criados dados fictícios automaticamente.
           </p>
-          <Link href="/financeiro/categorias" className="text-green-dark underline">Cadastrar categorias</Link>
+          <Link href="/financeiro/categorias" className="text-green-dark underline">
+            Cadastrar categorias
+          </Link>
         </div>
       )}
-      {o.categorias.length > 0 && <FormLancamento
-        tipoInicial={tipo === 'RECEBER' ? 'RECEBER' : 'PAGAR'}
-        categorias={o.categorias}
-        centros={o.centros}
-      />}
+      {o.categorias.length > 0 && (
+        <FormLancamento
+          tipoInicial={tipo === 'RECEBER' ? 'RECEBER' : 'PAGAR'}
+          categorias={o.categorias}
+          centros={o.centros}
+        />
+      )}
     </div>
   );
 }

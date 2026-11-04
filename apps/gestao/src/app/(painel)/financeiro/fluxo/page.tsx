@@ -29,41 +29,96 @@ export default async function FluxoCaixaPage({
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="m-0 flex-1 text-lg font-semibold">Fluxo de caixa</h2>
-        <Link href={`/financeiro/fluxo?mes=${mesAdjacente(ref, -1)}`} aria-label="Mês anterior" className="border-line-admin rounded-lg border bg-white px-3 py-2 no-underline">‹ Anterior</Link>
-        <Link href={`/financeiro/fluxo?mes=${mesAdjacente(ref, 1)}`} aria-label="Próximo mês" className="border-line-admin rounded-lg border bg-white px-3 py-2 no-underline">Próximo ›</Link>
+        <Link
+          href={`/financeiro/fluxo?mes=${mesAdjacente(ref, -1)}`}
+          aria-label="Mês anterior"
+          className="border-line-admin rounded-lg border bg-white px-3 py-2 no-underline"
+        >
+          ‹ Anterior
+        </Link>
+        <Link
+          href={`/financeiro/fluxo?mes=${mesAdjacente(ref, 1)}`}
+          aria-label="Próximo mês"
+          className="border-line-admin rounded-lg border bg-white px-3 py-2 no-underline"
+        >
+          Próximo ›
+        </Link>
       </div>
       <p className="text-muted-2 m-0 text-sm">
-        Realizado por data de pagamento; previsto por vencimento de contas abertas. Valores em reais.
-        O saldo acumulado abaixo é somente dos seis meses exibidos, não o saldo bancário conciliado.
+        Realizado por data de pagamento; previsto por vencimento de contas abertas. Valores em
+        reais. O saldo acumulado abaixo é somente dos seis meses exibidos, não o saldo bancário
+        conciliado.
       </p>
-      <Indicadores min={170} tamanho={23} itens={[
-        { rotulo: 'Entradas realizadas', valor: reais(atual.entradas), tom: 'verde' },
-        { rotulo: 'Saídas realizadas', valor: reais(atual.saidas), tom: 'ocre' },
-        { rotulo: 'Saldo realizado', valor: reais(atual.saldo), tom: atual.saldo < 0 ? 'erro' : undefined },
-        { rotulo: 'A receber', valor: reais(atual.entradasPrevistas) },
-        { rotulo: 'A pagar', valor: reais(atual.saidasPrevistas) },
-      ]} />
+      <Indicadores
+        min={170}
+        tamanho={23}
+        itens={[
+          { rotulo: 'Entradas realizadas', valor: reais(atual.entradas), tom: 'verde' },
+          { rotulo: 'Saídas realizadas', valor: reais(atual.saidas), tom: 'ocre' },
+          {
+            rotulo: 'Saldo realizado',
+            valor: reais(atual.saldo),
+            tom: atual.saldo < 0 ? 'erro' : undefined,
+          },
+          { rotulo: 'A receber', valor: reais(atual.entradasPrevistas) },
+          { rotulo: 'A pagar', valor: reais(atual.saidasPrevistas) },
+        ]}
+      />
       <Cartao titulo="Entradas e saídas realizadas" extra={dados.periodo}>
-        <Barras titulo="Comparativo realizado por mês" altura={220} formatar={reais}
+        <Barras
+          titulo="Comparativo realizado por mês"
+          altura={220}
+          formatar={reais}
           rotulos={dados.meses.map((m) => m.rotulo)}
           series={[
             { nome: 'Entradas', valores: dados.meses.map((m) => m.entradas), cor: '#2F5D46' },
             { nome: 'Saídas', valores: dados.meses.map((m) => m.saidas), cor: '#B5833A' },
-          ]} />
+          ]}
+        />
       </Cartao>
       <div className="border-line overflow-x-auto rounded-xl border bg-white">
         <table className="w-full min-w-[760px] text-left text-sm">
           <caption className="p-3 text-left font-semibold">Fluxo de caixa por mês (R$)</caption>
           <thead className="bg-surface-2">
-            <tr>{['Mês', 'Entradas', 'Saídas', 'Saldo', 'Acumulado do período', 'A receber', 'A pagar'].map((t) =>
-              <th key={t} scope="col" className="px-3 py-3 font-semibold">{t}</th>)}</tr>
+            <tr>
+              {[
+                'Mês',
+                'Entradas',
+                'Saídas',
+                'Saldo',
+                'Acumulado do período',
+                'A receber',
+                'A pagar',
+              ].map((t) => (
+                <th key={t} scope="col" className="px-3 py-3 font-semibold">
+                  {t}
+                </th>
+              ))}
+            </tr>
           </thead>
           <tbody>
-            {dados.meses.map((m) => <tr key={m.rotulo} className="border-line-soft border-t">
-              <th scope="row" className="px-3 py-3 font-medium">{m.rotulo}</th>
-              {[m.entradas, m.saidas, m.saldo, m.acumuladoPeriodo, m.entradasPrevistas, m.saidasPrevistas].map((v, i) =>
-                <td key={i} className={`px-3 py-3 text-right tabular-nums ${v < 0 ? 'text-danger' : ''}`}>{formatarCentavos(v)}</td>)}
-            </tr>)}
+            {dados.meses.map((m) => (
+              <tr key={m.rotulo} className="border-line-soft border-t">
+                <th scope="row" className="px-3 py-3 font-medium">
+                  {m.rotulo}
+                </th>
+                {[
+                  m.entradas,
+                  m.saidas,
+                  m.saldo,
+                  m.acumuladoPeriodo,
+                  m.entradasPrevistas,
+                  m.saidasPrevistas,
+                ].map((v, i) => (
+                  <td
+                    key={i}
+                    className={`px-3 py-3 text-right tabular-nums ${v < 0 ? 'text-danger' : ''}`}
+                  >
+                    {formatarCentavos(v)}
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
