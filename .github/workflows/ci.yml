@@ -122,6 +122,43 @@ jobs:
             }
           })().catch((err) => { console.error(err); process.exitCode = 1; });
           NODE
+      - name: Primeiro acesso sem dados de demonstração
+        env:
+          CEAK_BOOTSTRAP_CONFIRM: CRIAR_PRIMEIRO_ADMIN_REAL
+          CEAK_ADMIN_NOME: Administrador de Homologação
+          CEAK_ADMIN_EMAIL: homologacao@example.org
+          CEAK_ADMIN_SENHA: Homologacao#Unica2026!Seguro
+        run: |
+          pnpm db:bootstrap
+          # Segunda execução deve falhar, sem criar outro administrador.
+          if pnpm db:bootstrap; then
+            echo "ERRO: bootstrap permitiu segunda execução"
+            exit 1
+          fi
+          node - <<'NODE'
+          const { Client } = require('pg');
+          (async () => {
+            const db = new Client({ connectionString: process.env.DATABASE_URL });
+            await db.connect();
+            try {
+              const q = await db.query(
+                'SELECT (SELECT COUNT(*)::int FROM ceak_v2.pessoa) AS pessoas, ' +
+                '(SELECT COUNT(*)::int FROM ceak_v2.usuario) AS usuarios, ' +
+                '(SELECT COUNT(*)::int FROM ceak_v2.evento) AS eventos, ' +
+                '(SELECT COUNT(*)::int FROM ceak_v2.curso) AS cursos, ' +
+                '(SELECT COUNT(*)::int FROM ceak_v2.lancamento) AS lancamentos'
+              );
+              const data = q.rows[0];
+              if (data.pessoas !== 1 || data.usuarios !== 1 || data.eventos !== 0 ||
+                  data.cursos !== 0 || data.lancamentos !== 0) {
+                throw new Error('Primeiro acesso inseriu registros inesperados: ' + JSON.stringify(data));
+              }
+              console.log('Bootstrap inicial validado sem conteúdo fictício.');
+            } finally {
+              await db.end();
+            }
+          })().catch(err => { console.error(err); process.exitCode = 1; });
+          NODE
       - run: pnpm db:seed
       - run: pnpm test
       - run: pnpm build
