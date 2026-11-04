@@ -57,11 +57,11 @@ export default async function ConciliacaoPage({
         <table className="w-full min-w-[860px] text-left text-sm">
           <caption className="p-3 text-left font-semibold">Movimentações do extrato — {dados.periodo}</caption>
           <thead className="bg-surface-2"><tr>
-            {['Data', 'Descrição', 'Valor', 'Status', 'Lançamento vinculado', 'Conferência'].map((h) =>
+            {['Data', 'Descrição', 'Valor', 'Status', 'Lançamento vinculado', 'Conferência', 'Sugestão para revisão'].map((h) =>
               <th key={h} scope="col" className="px-3 py-3 font-semibold">{h}</th>)}
           </tr></thead>
           <tbody>
-            {dados.linhas.length === 0 && <tr><td colSpan={6} className="text-muted-2 p-5">
+            {dados.linhas.length === 0 && <tr><td colSpan={7} className="text-muted-2 p-5">
               Nenhuma movimentação de extrato cadastrada neste mês. Não significa que o banco não teve movimentação.
             </td></tr>}
             {dados.linhas.map((l) => (
@@ -72,6 +72,7 @@ export default async function ConciliacaoPage({
                 <td className="px-3 py-3">{rotulos[l.status]}</td>
                 <td className="px-3 py-3">{l.lancamento?.contraparte ?? l.referencia ?? 'Sem vínculo'}</td>
                 <td className="px-3 py-3">{l.alerta ?? (l.status === 'CONCILIADO' ? 'Conferido' : 'Aguardando validação')}</td>
+                <td className="px-3 py-3">{l.sugestao.candidato ? `Possível: ${l.sugestao.candidato.contraparte} (${l.sugestao.candidato.dataPagamento}) — confirmar manualmente` : l.sugestao.motivo}</td>
               </tr>
             ))}
           </tbody>
