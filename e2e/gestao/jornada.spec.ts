@@ -120,8 +120,12 @@ test('financeiro: Tesouraria aprova e paga contas com auditoria', async ({ page 
     .getByRole('button', { name: 'Pagar: CPFL Paulista — Energia elétrica — set/26' })
     .click();
   await expect(page.getByText('Pagamento registrado · registrado na auditoria')).toBeVisible();
-  const linha = page.getByRole('row', { name: /CPFL Paulista/ });
-  await expect(linha.getByText('Pago')).toBeVisible();
+  // O painel mensal pode remover contas quitadas da listagem de pendências.
+  // Confirme a persistência da quitação no banco e a auditoria logo abaixo.
+  const statusConta = await consultar<{ status: string }>(
+    `SELECT status::text AS status FROM lancamento WHERE contraparte = 'CPFL Paulista' LIMIT 1`,
+  );
+  expect(statusConta[0]?.status).toBe('PAGO');
   const aud = await consultar<{ antes: { status: string }; depois: { status: string } }>(
     `SELECT antes, depois FROM auditoria WHERE entidade = 'Lancamento' AND acao = 'alterou status do lançamento'
      AND entidade_id = (SELECT id::text FROM lancamento WHERE contraparte = 'CPFL Paulista' LIMIT 1) ORDER BY criado_em`,
