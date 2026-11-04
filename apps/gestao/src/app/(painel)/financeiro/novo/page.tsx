@@ -27,7 +27,7 @@ export default async function NovoLancamentoPage({
             Para registrar a primeira receita ou despesa, será necessário configurar categorias.
             Não serão criados dados fictícios automaticamente.
           </p>
-          <Link href="/financeiro" className="text-green-dark underline">Voltar ao financeiro</Link>
+          <Link href="/financeiro/categorias" className="text-green-dark underline">Cadastrar categorias</Link>
         </div>
       )}
       {o.categorias.length > 0 && <FormLancamento
