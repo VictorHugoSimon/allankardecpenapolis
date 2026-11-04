@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { painelEstudos } from '@ceak/db';
-import { Pill, Table } from '@ceak/ui';
+import { buttonClasses, Pill, Table } from '@ceak/ui';
 import { Indicadores, TituloPagina, Vazio } from '@/components/Pagina';
 import { exigirModulo } from '@/lib/auth';
 import { numero } from '@/lib/formato';
@@ -23,6 +23,12 @@ export default async function EstudosPage({
   return (
     <div className="flex flex-col gap-[18px]">
       <TituloPagina sub={instrutorId ? 'Suas turmas' : undefined}>Estudos e cursos</TituloPagina>
+      {!instrutorId && ['ADMINISTRADOR', 'DIRETORIA', 'COORDENADOR'].includes(s.perfil) && (
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/estudos/novo" className={buttonClasses({ shape: 'rounded', size: 'sm' })}>Cadastrar curso ou turma</Link>
+          {e.turmas.length === 0 && <span role="status" className="text-muted-2 text-sm">Nenhuma turma ainda. Cadastre o primeiro curso real para iniciar.</span>}
+        </div>
+      )}
       <Indicadores
         tamanho={28}
         itens={[
