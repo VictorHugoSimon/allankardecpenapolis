@@ -10,6 +10,7 @@ export * from './gestao/atividades';
 export * from './gestao/conteudo';
 export * from './gestao/financeiro';
 export * from './gestao/fluxoCaixa';
+export * from './gestao/conciliacao';
 export * from './gestao/painel';
 export * from './gestao/periodo';
 export * from './gestao/pessoas';
