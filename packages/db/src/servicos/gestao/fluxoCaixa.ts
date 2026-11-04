@@ -9,6 +9,11 @@ export interface MovimentoFluxo {
   vencimento: Date;
 }
 
+/** Datas @db.Date chegam à aplicação à meia-noite UTC; comparar por dia civil. */
+function dataCivilUtc(data: Date): string {
+  return data.toISOString().slice(0, 10);
+}
+
 export interface PeriodoFluxo {
   inicio: Date;
   fim: Date;
@@ -36,7 +41,8 @@ export function consolidarFluxoCaixa(
         else saidas += l.valorCentavos;
       } else if (
         ['PENDENTE', 'APROVADO', 'VENCIDO'].includes(l.status) &&
-        l.vencimento >= p.inicio && l.vencimento < p.fim
+        dataCivilUtc(l.vencimento) >= dataCivilUtc(p.inicio) &&
+        dataCivilUtc(l.vencimento) < dataCivilUtc(p.fim)
       ) {
         if (l.tipo === 'RECEBER') entradasPrevistas += l.valorCentavos;
         else saidasPrevistas += l.valorCentavos;
@@ -63,13 +69,15 @@ export async function fluxoCaixaFinanceiro(ctx: ContextoRls, referencia = new Da
   return comRls(ctx, async (tx) => {
     const inicio = periodos[0]!.inicio;
     const fim = periodos[periodos.length - 1]!.fim;
+    const inicioVencimento = new Date(`${dataCivilUtc(inicio)}T00:00:00.000Z`);
+    const fimVencimento = new Date(`${dataCivilUtc(fim)}T00:00:00.000Z`);
     const lancamentos = await tx.lancamento.findMany({
       where: {
         OR: [
           { status: 'PAGO', pagoEm: { gte: inicio, lt: fim } },
           {
             status: { in: ['PENDENTE', 'APROVADO', 'VENCIDO'] },
-            vencimento: { gte: inicio, lt: fim },
+            vencimento: { gte: inicioVencimento, lt: fimVencimento },
           },
         ],
       },
