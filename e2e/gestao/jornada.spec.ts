@@ -184,9 +184,13 @@ test('eventos: QR Code assinado da palestra atual', async ({ page }) => {
     ).toBeVisible();
     await page.getByRole('link', { name: 'QR Code do check-in' }).click();
     await expect(
-      page.getByRole('img', { name: /QR Code do check-in de Palestra de homologação CEAK/ }),
+      page.getByRole('img', {
+        name: /QR Code do check-in de Palestra de homologação CEAK/,
+      }),
     ).toBeVisible();
-    await expect(page.getByText(/\/checkin\?evento=[0-9a-f-]{36}&t=[\w-]{22}/)).toBeVisible();
+    await expect(
+      page.getByText(/\/checkin\?evento=[0-9a-f-]{36}&t=[\w-]{22}/),
+    ).toBeVisible();
   } finally {
     await removerEvento(evento.id);
   }
