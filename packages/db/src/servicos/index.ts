@@ -11,6 +11,7 @@ export * from './gestao/cadastroEstudos';
 export * from './gestao/matriculaManual';
 export * from './gestao/presencasManual';
 export * from './gestao/voluntariadoInicial';
+export * from './gestao/assistenciaInicial';
 export * from './gestao/conteudo';
 export * from './gestao/financeiro';
 export * from './gestao/categoriasFinanceiras';
