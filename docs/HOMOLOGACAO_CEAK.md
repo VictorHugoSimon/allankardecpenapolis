@@ -23,3 +23,11 @@ A implantação começa sem registros fictícios. Não executar o seed de desenv
 5. Revisão humana antes do merge e deploy.
 
 O Pull Request #1 permanece em rascunho até o cumprimento dos critérios.
+
+## Portão de publicação adicionado
+
+Execute `pnpm release:check` com as variáveis de ambiente de produção **sem publicar os seus valores**. A verificação bloqueia publicação se detectar dados institucionais fictícios e configurações críticas de demonstração: CNPJ, endereço, contatos, PIX, diretoria, imagens, histórico, programação semanal, segredo, URLs HTTPS, banco, autenticação ou ativação indevida de pagamentos simulados.
+
+O verificador falhar enquanto os dados oficiais não forem fornecidos **é o resultado esperado e seguro**. Nenhum dado oficial deve ser inferido de protótipos. O comando é uma verificação adicional, não substitui aprovação da instituição, análise de privacidade, backup, testes reais do PWA e da política RLS.
+
+Até a conclusão desses critérios, manter o PR em rascunho e não promover a produção.
