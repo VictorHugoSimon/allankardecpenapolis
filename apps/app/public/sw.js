@@ -39,8 +39,14 @@ self.addEventListener('fetch', (event) => {
   if (event.request.mode !== 'navigate' || event.request.method !== 'GET') return;
   event.respondWith(
     fetch(event.request).catch(async () => {
-      const fallback = await caches.match(OFFLINE_URL);
-      return fallback || Response.error();
+      // O HTML do Next.js pode depender de bundles que não ficam em cache.
+      // Em navegação offline, responda um documento isolado, sem JavaScript
+      // ou conteúdo privado. Evita erro de hidratação quando a rede cai.
+      const pagina = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#2F5D46"><title>Sem conexão · CEAK App</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;background:#F7F4EE;color:#1F2A24}main{max-width:30rem;padding:2rem}h1{font-size:2rem}p{line-height:1.6}button{border:0;border-radius:12px;background:#2F5D46;color:#fff;padding:1rem;font:inherit;cursor:pointer}</style></head><body><main><h1>Você está sem conexão</h1><p>Assim que a internet voltar, o CEAK App mostrará sua agenda e seus estudos. Dados pessoais não ficam guardados no aparelho.</p><form method="GET" action="/"><button type="submit">Tentar novamente</button></form></main></body></html>`;
+      return new Response(pagina, {
+        status: 200,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+      });
     }),
   );
 });
