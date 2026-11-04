@@ -38,7 +38,9 @@ function carregarWorker(options?: { falharCache?: boolean; falharRede?: boolean 
     URL,
     console: { warn: vi.fn() },
     fetch: options?.falharRede
-      ? vi.fn(async () => { throw new Error('sem rede'); })
+      ? vi.fn(async () => {
+          throw new Error('sem rede');
+        })
       : vi.fn(),
   });
   return { handlers, self, caches, add, openWindow };
@@ -83,7 +85,9 @@ describe('fallback de navegação offline seguro', () => {
     let resultado: Promise<Response> | undefined;
     handlers.get('fetch')!({
       request: { mode: 'navigate', method: 'GET' },
-      respondWith: (p: Promise<Response>) => { resultado = p; },
+      respondWith: (p: Promise<Response>) => {
+        resultado = p;
+      },
     });
     expect(resultado).toBeDefined();
     const resposta = await resultado!;
