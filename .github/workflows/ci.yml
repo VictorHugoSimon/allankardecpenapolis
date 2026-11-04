@@ -25,7 +25,25 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm format:check
+      - name: Verificar formatação original
+        run: pnpm format:check
+        continue-on-error: true
+      - name: Preparar correções Prettier para revisão
+        run: |
+          pnpm exec prettier --write .
+          git diff --binary > prettier.patch
+      - name: Disponibilizar patch de formatação
+        uses: actions/upload-artifact@v4
+        with:
+          name: ceak-prettier-patch
+          path: prettier.patch
+          retention-days: 7
+      - name: Falhar quando houver formatação pendente
+        run: |
+          if [ -s prettier.patch ]; then
+            echo "Arquivos fora do padrão. Aplicar o patch do artefato ceak-prettier-patch."
+            exit 1
+          fi
 
   tipos:
     name: TypeScript (independente)
