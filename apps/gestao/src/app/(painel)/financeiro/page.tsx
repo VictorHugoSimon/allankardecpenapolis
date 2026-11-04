@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { dashboardFinanceiro } from '@ceak/db';
 import { Barras, BarrasHorizontais } from '@/components/Graficos';
 import { Cartao, Indicadores } from '@/components/Pagina';
@@ -15,6 +16,20 @@ export default async function DashboardFinanceiroPage() {
   return (
     <>
       <p className="text-muted-2 m-0 text-[13px]">Realizado em {d.mes} (último mês fechado)</p>
+      {d.serie.every((m) => m.receitas === 0 && m.despesas === 0) && (
+        <div className="border-line rounded-xl border bg-white p-5">
+          <h2 className="m-0 text-lg font-semibold">Financeiro pronto para começar</h2>
+          <p className="text-muted-2 mt-2 text-sm">
+            Ainda não há movimentações pagas nos últimos seis meses. Nenhum valor de exemplo foi adicionado.
+            Você pode cadastrar as primeiras contas quando houver movimentações reais.
+            Contas bancárias e importação de extratos ficarão para depois.
+          </p>
+          <div className="flex flex-wrap gap-3 text-sm">
+            <Link href="/financeiro/novo?tipo=RECEBER" className="text-green-dark underline">Cadastrar receita</Link>
+            <Link href="/financeiro/novo?tipo=PAGAR" className="text-green-dark underline">Cadastrar despesa</Link>
+          </div>
+        </div>
+      )}
       <Indicadores
         min={170}
         tamanho={28}
