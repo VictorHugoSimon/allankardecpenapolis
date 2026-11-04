@@ -27,6 +27,21 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
 
+  tipos:
+    name: TypeScript (independente)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm typecheck
+
   qualidade:
     name: Lint, testes e build
     runs-on: ubuntu-24.04
