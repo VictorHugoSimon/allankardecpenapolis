@@ -95,3 +95,56 @@ export async function escalarVoluntario(ctx: ContextoEquipe, input: {
     return escala;
   });
 }
+
+/** Candidatos: pessoas reais já cadastradas e não anonimizadas. */
+export async function pessoasElegiveisVoluntariado(ctx: ContextoRls) {
+  return comRls(ctx, tx => tx.pessoa.findMany({
+    where: { anonimizadaEm: null, status: { not: 'INATIVO' } },
+    orderBy: { nome: 'asc' }, take: 200,
+    select: { id: true, nome: true, voluntario: { select: { id: true, ativo: true } } },
+  }));
+}
+
+/** Vínculo formal à área, realizado somente com ciência e autorização da pessoa. */
+export async function vincularVoluntarioArea(
+  ctx: ContextoEquipe,
+  input: { pessoaId: string; areaId: string; autorizado: boolean },
+  ip: string | null,
+) {
+  exigirGestao(ctx);
+  if (!UUID.test(input.pessoaId) || !UUID.test(input.areaId))
+    throw new ErroNegocio('Pessoa ou área inválida.', 'identificadores');
+  if (input.autorizado !== true)
+    throw new ErroNegocio('Confirme a autorização da pessoa antes de vinculá-la.', 'autorizacao');
+  return comRls(ctx, async tx => {
+    const [pessoa, area] = await Promise.all([
+      tx.pessoa.findFirst({ where: { id: input.pessoaId, anonimizadaEm: null, status: { not: 'INATIVO' } },
+        select: { id: true } }),
+      tx.area.findUnique({ where: { id: input.areaId }, select: { id: true } }),
+    ]);
+    if (!pessoa || !area) throw new ErroNegocio('Pessoa ou área não encontrada.', 'nao_encontrado');
+    let voluntario = await tx.voluntario.findUnique({
+      where: { pessoaId: input.pessoaId }, select: { id: true, ativo: true },
+    });
+    if (!voluntario) {
+      voluntario = await tx.voluntario.create({
+        data: { pessoaId: input.pessoaId, ativo: true }, select: { id: true, ativo: true },
+      });
+    } else if (!voluntario.ativo) {
+      throw new ErroNegocio('Este voluntário está inativo. Sua reativação exige procedimento próprio.', 'inativo');
+    }
+    const jaExiste = await tx.voluntarioArea.findUnique({
+      where: { voluntarioId_areaId: { voluntarioId: voluntario.id, areaId: input.areaId } },
+    });
+    if (jaExiste) throw new ErroNegocio('A pessoa já está vinculada a esta área.', 'duplicada');
+    await tx.voluntarioArea.create({
+      data: { voluntarioId: voluntario.id, areaId: input.areaId },
+    });
+    await registrarAuditoria(tx, {
+      usuarioId: ctx.usuarioId, acao: 'vinculou voluntário a área',
+      entidade: 'Voluntario', entidadeId: voluntario.id,
+      antes: null, depois: { areaId: input.areaId, pessoaId: input.pessoaId, autorizado: true }, ip,
+    });
+    return voluntario;
+  });
+}
