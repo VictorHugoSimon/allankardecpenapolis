@@ -46,7 +46,7 @@ O bootstrap exige banco vazio, não cria palestras, cursos, categorias, transaç
 
 ## Ambiente de demonstração e testes (isolado, nunca produção)
 
-Somente para um PostgreSQL descartável e schema `ceak_v2`, use `pnpm db:seed` após as migrações. **Esse comando apaga e recria registros do schema de destino.** Abaixo estão contas e senhas exclusivamente da base de demonstração.
+Somente para um PostgreSQL **local e descartável** (localhost ou 127.0.0.1), schema `ceak_v2`, use `SEED_CONFIRM=DESTRUIR_DADOS_DEMO pnpm db:seed` após as migrações. O comando recusa banco remoto, produção ou ausência da confirmação explícita. **Esse comando apaga e recria registros do schema de destino.** Abaixo estão contas e senhas exclusivamente da base de demonstração.
 
 Entre no Gestão em http://localhost:3002 ou no App em http://localhost:3001 com qualquer usuário abaixo (senha `ceak-dev-2026`, ou o valor de `SEED_SENHA`):
 
