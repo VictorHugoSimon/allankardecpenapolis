@@ -16,7 +16,7 @@ export function validarCategoriaFinanceira(dados: DadosCategoriaFinanceira): Dad
   if (dados.tipo !== 'PAGAR' && dados.tipo !== 'RECEBER') {
     throw new ErroNegocio('Tipo de categoria inválido.', 'tipo');
   }
-  return { nome, tipo: dados.tipo };
+  return { nome, tipo };
 }
 
 /** Cadastro manual: não insere categorias fictícias nem movimenta valores. */
