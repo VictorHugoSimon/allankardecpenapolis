@@ -52,8 +52,8 @@ const {
   EtapaFluxoPalestra,
 } = await import('../src/generated/prisma/enums');
 
-if (process.env.NODE_ENV === 'production' && process.env.SEED_FORCE !== 'sim') {
-  console.error('Seed bloqueado em produção (defina SEED_FORCE=sim para forçar).');
+if (process.env.NODE_ENV === 'production') {
+  console.error('Seed de dados fictícios permanentemente bloqueado em produção.');
   process.exit(1);
 }
 
