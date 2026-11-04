@@ -68,7 +68,7 @@ test('SEO: sitemap, robots, JSON-LD de Organization e Event', async ({ page, req
 });
 
 test('Agenda: filtro e calendário', async ({ page }) => {
-  await page.goto('/agenda?filtro=Assist%C3%AAncia');
+  await page.goto('/agenda?filtro=Assist%C3%AAncia&mes=2026-10');
   await expect(
     page.getByRole('heading', { level: 2, name: 'Atendimento fraterno e passe' }),
   ).toBeVisible();
