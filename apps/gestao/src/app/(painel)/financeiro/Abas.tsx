@@ -6,6 +6,7 @@ import { cn } from '@ceak/ui';
 
 const ABAS = [
   ['Dashboard', '/financeiro'],
+  ['Fluxo de caixa', '/financeiro/fluxo'],
   ['Contas a pagar', '/financeiro/pagar'],
   ['Contas a receber', '/financeiro/receber'],
 ] as const;
