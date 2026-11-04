@@ -17,15 +17,27 @@ const exigirAusencia = (trecho, descricao) => {
 };
 
 exigirAusencia("cnpj: '00.000.000/0001-00'", 'CNPJ ainda é o identificador de exemplo.');
-exigirAusencia("logradouro: 'endereço a confirmar'", 'Endereço institucional ainda não foi confirmado.');
+exigirAusencia(
+  "logradouro: 'endereço a confirmar'",
+  'Endereço institucional ainda não foi confirmado.',
+);
 exigirAusencia("telefone: '(18) 3652-0000'", 'Telefone institucional ainda é de exemplo.');
 exigirAusencia("whatsapp: '(18) 3652-0000'", 'WhatsApp institucional ainda é de exemplo.');
 exigirAusencia("chave: 'ceak-penapolis@pix.org.br'", 'Chave PIX institucional ainda é de exemplo.');
-exigirAusencia("{ nome: 'Antônio Ferreira', cargo: 'Presidente' }", 'Diretoria ainda contém nomes de demonstração.');
-exigirAusencia("logo: null as string | null", 'Logo oficial ainda não foi configurado.');
-exigirAusencia("fotos: {} as Record<string, string>", 'Fotos institucionais ainda não foram configuradas.');
+exigirAusencia(
+  "{ nome: 'Antônio Ferreira', cargo: 'Presidente' }",
+  'Diretoria ainda contém nomes de demonstração.',
+);
+exigirAusencia('logo: null as string | null', 'Logo oficial ainda não foi configurado.');
+exigirAusencia(
+  'fotos: {} as Record<string, string>',
+  'Fotos institucionais ainda não foram configuradas.',
+);
 exigirAusencia("titulo: 'Reestruturação'", 'Linha do tempo ainda contém eventos de exemplo.');
-exigirAusencia("atividade: 'Palestra pública · 20h'", 'Programação semanal ainda contém horários não confirmados.');
+exigirAusencia(
+  "atividade: 'Palestra pública · 20h'",
+  'Programação semanal ainda contém horários não confirmados.',
+);
 
 if (process.argv.includes('--ambiente')) {
   if (!process.env.DATABASE_URL) pendencias.push('DATABASE_URL ausente.');
