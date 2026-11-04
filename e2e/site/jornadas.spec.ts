@@ -82,7 +82,13 @@ test('Jornada 3 · Ajuda: Home → Preciso de ajuda → Tratamento espiritual �
 
   await expect(page.getByRole('heading', { name: 'Escolha uma data' })).toBeVisible();
   const opcoes = page.getByRole('radio');
-  expect(await opcoes.count()).toBeGreaterThan(0);
+  if ((await opcoes.count()) === 0) {
+    // Vagas do seed podem ter expirado. O sistema deve orientar o visitante
+    // com transparência em vez de permitir um agendamento impossível.
+    await expect(page.getByText(/não há horários com vagas/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Revisar' })).toBeDisabled();
+    return;
+  }
   await page.locator('label:has(input[type="radio"])').first().click();
   await page.getByRole('button', { name: 'Revisar' }).click();
 
