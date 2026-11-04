@@ -183,7 +183,9 @@ test('eventos: QR Code para palestra atual', async ({ page }) => {
   try {
     await entrar(page, USUARIOS.SECRETARIA);
     await page.goto(`/eventos?id=${evento.id}`);
-    await expect(page.getByRole('heading', { name: 'Palestra: Palestra de homologação CEAK' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Palestra: Palestra de homologação CEAK' }),
+    ).toBeVisible();
     await page.getByRole('link', { name: 'QR Code do check-in' }).click();
     await expect(page.getByRole('img', { name: /QR Code do check-in/ })).toBeVisible();
     await expect(page.getByText(/checkin\?evento=/)).toBeVisible();
