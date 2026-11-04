@@ -96,28 +96,15 @@ test('Jornada 3 · Ajuda: Home → Preciso de ajuda → Tratamento espiritual �
   await expect(page.getByText('O atendimento espiritual não substitui')).toBeVisible();
 });
 
-test('Jornada 4 · Doação: Home → Quero ajudar → Doação → PIX → Confirmação (webhook simulado)', async ({
-  page,
-}) => {
-  await page.goto('/');
-  await page.getByRole('link', { name: 'Quero ajudar' }).first().click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Quero ajudar' })).toBeVisible();
-  await expect(page.getByText('CAMPANHA ATIVA')).toBeVisible();
-  await page.getByRole('link', { name: /Quero contribuir financeiramente/ }).click();
-
+test('Doação: não gera PIX fictício sem provedor real', async ({ page }) => {
+  await page.goto('/doar');
   await expect(page.getByRole('heading', { name: 'Contribuir financeiramente' })).toBeVisible();
   await page.locator('label', { hasText: 'R$ 100' }).click();
-  await page.getByLabel('Destino').selectOption('Assistência social');
   await page.getByRole('button', { name: 'Doar R$ 100,00 via PIX' }).click();
-
-  await expect(page.getByRole('heading', { name: 'Pague com PIX' })).toBeVisible();
-  await expect(page.getByRole('img', { name: /QR Code PIX/ })).toBeVisible();
-  const brCode = await page.getByLabel('PIX copia e cola').inputValue();
-  expect(brCode).toMatch(/^000201.*br\.gov\.bcb\.pix.*5406100\.00.*6304[0-9A-F]{4}$/);
-
-  await page.getByRole('button', { name: 'Já fiz o PIX' }).click();
-  await expect(page.getByRole('heading', { name: 'Obrigado pela sua doação' })).toBeVisible();
-  await expect(page.getByText('Recebemos R$ 100,00.')).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText(
+    'Pagamentos indisponíveis neste ambiente de demonstração',
+  );
+  await expect(page.getByRole('heading', { name: 'Pague com PIX' })).toHaveCount(0);
 });
 
 test('Jornada 4 · webhook PIX rejeita assinatura inválida', async ({ request }) => {
