@@ -26,6 +26,7 @@ export default async function EstudosPage({
       {!instrutorId && ['ADMINISTRADOR', 'DIRETORIA', 'COORDENADOR'].includes(s.perfil) && (
         <div className="flex flex-wrap items-center gap-3">
           <Link href="/estudos/novo" className={buttonClasses({ shape: 'rounded', size: 'sm' })}>Cadastrar curso ou turma</Link>
+          <Link href="/estudos/matricular" className={buttonClasses({ shape: 'rounded', size: 'sm', variant: 'secondary' })}>Matricular participante</Link>
           {e.turmas.length === 0 && <span role="status" className="text-muted-2 text-sm">Nenhuma turma ainda. Cadastre o primeiro curso real para iniciar.</span>}
         </div>
       )}
