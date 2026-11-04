@@ -143,8 +143,9 @@ test('financeiro: Tesouraria aprova e paga contas com auditoria', async ({ page 
   await page.getByLabel('Valor (R$)').fill('86,40');
   await page.getByLabel('Vencimento').fill('2026-10-20');
   await page.getByRole('button', { name: 'Lançar' }).click();
-  // A lista de contas é filtrada por vencimento: este registro pertence a outubro/26.
-  await page.goto('/financeiro/pagar?mes=2026-10');
+  // A ação server-side já redireciona para o mês de vencimento.
+  // Aguarde esse redirecionamento em vez de disparar uma navegação concorrente.
+  await expect(page).toHaveURL(/\/financeiro\/pagar\?mes=2026-10$/);
   // Uma obrigação PENDENTE com vencimento anterior ao mês corrente
   // aparece corretamente como "Vencido" na interface.
   await expect(
