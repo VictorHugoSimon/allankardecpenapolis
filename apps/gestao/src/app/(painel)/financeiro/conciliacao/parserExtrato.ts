@@ -86,7 +86,7 @@ export function prepararPreviaExtrato(conteudo: string): PreviaExtrato {
     if (campos.length !== 3) throw new Error(`Linha ${indice + 2}: esperado 3 colunas.`);
     const data = dataIso(campos[0]!);
     const descricao = campos[1]!.trim();
-    if (!descricao || descricao.length > 200 || /[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(descricao))
+    if (!descricao || descricao.length > 200 || Array.from(descricao).some((ch) => { const code = ch.charCodeAt(0); return code < 32 && code !== 9 && code !== 10 && code !== 13; }))
       throw new Error(`Linha ${indice + 2}: descrição inválida.`);
     const valor = valorCentavos(campos[2]!);
     const chave = JSON.stringify([data, descricao.normalize('NFC'), valor]);
