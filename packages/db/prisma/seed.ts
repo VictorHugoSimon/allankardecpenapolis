@@ -56,6 +56,13 @@ if (process.env.NODE_ENV === 'production') {
   console.error('Seed de dados fictícios permanentemente bloqueado em produção.');
   process.exit(1);
 }
+if (process.env.SEED_CONFIRM !== 'DESTRUIR_DADOS_DEMO') {
+  throw new Error('Seed destrutivo bloqueado: confirmação SEED_CONFIRM ausente.');
+}
+const seedUrl = new URL(process.env.DATABASE_URL ?? '');
+if (!['localhost', '127.0.0.1', '[::1]'].includes(seedUrl.hostname)) {
+  throw new Error('Seed destrutivo proibido em banco remoto. Use somente PostgreSQL descartável local.');
+}
 
 /** Data/hora em Penápolis (UTC−3). */
 const d = (iso: string) => new Date(`${iso}${iso.length === 10 ? 'T12:00:00' : ''}-03:00`);
