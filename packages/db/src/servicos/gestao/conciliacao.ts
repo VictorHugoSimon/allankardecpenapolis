@@ -1,5 +1,6 @@
 import { comRls, type ContextoRls } from '../../rls';
 import { mes } from './periodo';
+import { sugerirCorrespondencias } from './sugestoesConciliacao';
 
 type StatusExtrato = 'PENDENTE' | 'SUGERIDO' | 'CONCILIADO' | 'DIVERGENTE';
 type Tipo = 'PAGAR' | 'RECEBER';
@@ -73,7 +74,42 @@ export async function painelConciliacao(ctx: ContextoRls, referencia = new Date(
       },
       orderBy: [{ data: 'desc' }, { id: 'asc' }],
     });
-    const conferidas = linhas.map(diagnosticarLinha);
+    // O motor considera pagamentos realizados dentro de uma janela de três dias.
+    // Busca vínculos de TODOS os meses para não sugerir um lançamento já usado.
+    const inicioCandidatos = new Date(inicio.getTime() - 4 * 86_400_000);
+    const fimCandidatos = new Date(fim.getTime() + 4 * 86_400_000);
+    const candidatos = await tx.lancamento.findMany({
+      where: {
+        status: 'PAGO',
+        pagoEm: { gte: inicioCandidatos, lt: fimCandidatos },
+      },
+      select: {
+        id: true,
+        tipo: true,
+        valorCentavos: true,
+        status: true,
+        pagoEm: true,
+        contraparte: true,
+      },
+    });
+    const vinculosGlobais = candidatos.length
+      ? await tx.extratoLinha.findMany({
+          where: { lancamentoId: { in: candidatos.map((l) => l.id) } },
+          select: { id: true, lancamentoId: true, data: true, valorCentavos: true, status: true },
+        })
+      : [];
+    const extras = vinculosGlobais
+      .filter((l) => !linhas.some((m) => m.id === l.id))
+      .map((l) => ({
+        id: l.id, lancamentoId: l.lancamentoId, data: l.data,
+        valorCentavos: l.valorCentavos, status: l.status,
+      }));
+    const sugestoes = sugerirCorrespondencias([...linhas, ...extras], candidatos);
+    const indiceSugestoes = new Map(sugestoes.map((s) => [s.extratoId, s]));
+    const conferidas = linhas.map((l) => ({
+      ...diagnosticarLinha(l),
+      sugestao: indiceSugestoes.get(l.id)!,
+    }));
     const total = (status: StatusExtrato) =>
       conferidas.filter((l) => l.status === status).length;
     return {
