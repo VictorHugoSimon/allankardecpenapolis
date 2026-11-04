@@ -16,7 +16,7 @@ export function validarCategoriaFinanceira(dados: DadosCategoriaFinanceira): Dad
   if (dados.tipo !== 'PAGAR' && dados.tipo !== 'RECEBER') {
     throw new ErroNegocio('Tipo de categoria inválido.', 'tipo');
   }
-  return { nome, tipo };
+  return { nome, tipo: dados.tipo };
 }
 
 /** Cadastro manual: não insere categorias fictícias nem movimenta valores. */
@@ -28,7 +28,7 @@ export async function cadastrarCategoriaFinanceira(
   const { nome, tipo } = validarCategoriaFinanceira(dados);
   return comRls(ctx, async (tx) => {
     const anterior = await tx.categoriaFinanceira.findUnique({
-      where: { nome_tipo: { nome, tipo: dados.tipo } },
+      where: { nome_tipo: { nome, tipo } },
       select: { id: true },
     });
     if (anterior) throw new ErroNegocio('Já existe uma categoria com este nome e tipo.', 'duplicada');
