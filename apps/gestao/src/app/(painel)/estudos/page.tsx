@@ -78,6 +78,9 @@ export default async function EstudosPage({
           className="border-line rounded-card flex flex-col gap-3 border bg-white p-5"
         >
           <div>
+            {['ADMINISTRADOR', 'DIRETORIA', 'COORDENADOR', 'INSTRUTOR'].includes(s.perfil) && (
+              <Link href={`/estudos/chamada?turma=${e.selecionada.id}`} className={buttonClasses({ shape: 'rounded', size: 'sm', variant: 'secondary' })}>Registrar presenças</Link>
+            )}
             <h2 id="turma-sel" className="m-0 text-[15px] font-semibold">
               {e.selecionada.titulo}
             </h2>
