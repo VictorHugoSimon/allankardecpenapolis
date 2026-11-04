@@ -41,14 +41,14 @@ export function FormAtividade() {
           { value: '240', label: '4 horas' },
         ]}
       />
-      <Input label="Local" name="local" placeholder="Salão principal" error={e.local} />
+      <Input label="Local" name="local" placeholder="Informe o local real" error={e.local} />
       <Input label="Responsável ou palestrante" name="responsavel" error={e.responsavel} />
       <Textarea label="Descrição" name="descricao" rows={3} className="col-span-full" />
       <Select
         label="Situação"
         name="status"
         defaultValue="RASCUNHO"
-        hint="Rascunhos não aparecem no site nem no App."
+        hint="Rascunhos não aparecem no site nem no App. Selecione Confirmada somente quando estiver pronta para divulgação."
         options={[
           { value: 'RASCUNHO', label: 'Rascunho' },
           { value: 'CONFIRMADO', label: 'Confirmada (publicar na agenda)' },
