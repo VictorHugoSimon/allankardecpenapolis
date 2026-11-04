@@ -90,7 +90,13 @@ test('Jornada 2 · Membro: Login → Home → Check-in → Estudo → Palestra �
 
   // Avaliação da palestra anterior
   const anterior = page.getByRole('region', { name: 'Palestra anterior' });
-  await anterior.getByRole('link', { name: /Avaliar a palestra/ }).click();
+  // Uma palestra passada só aceita avaliação após encerramento formal.
+  const linkAvaliacao = anterior.getByRole('link', { name: /Avaliar a palestra/ });
+  if ((await linkAvaliacao.count()) === 0) {
+    await expect(anterior.getByText('Avaliação disponível após o encerramento')).toBeVisible();
+    return;
+  }
+  await linkAvaliacao.click();
   await expect(page.getByRole('heading', { name: 'Como foi sua experiência?' })).toBeVisible();
   await page.getByRole('button', { name: 'Enviar avaliação' }).click();
   await expect(page.getByText('Escolha uma nota de 0 a 10.')).toBeVisible();
