@@ -20,13 +20,18 @@ export function validarBootstrap(env: NodeJS.ProcessEnv) {
   const nome = env.CEAK_ADMIN_NOME?.trim();
   const email = env.CEAK_ADMIN_EMAIL?.trim().toLowerCase();
   const senha = env.CEAK_ADMIN_SENHA;
-  if (!nome || nome.length < 3 || nome.length > 160)
-    throw new Error('CEAK_ADMIN_NOME inválido.');
+  if (!nome || nome.length < 3 || nome.length > 160) throw new Error('CEAK_ADMIN_NOME inválido.');
   if (!email || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
     throw new Error('CEAK_ADMIN_EMAIL inválido.');
-  if (!senha || senha.length < 16 || senha.length > 256 || !/[a-z]/i.test(senha) ||
-      !/[0-9]/.test(senha) || !/[^a-z0-9]/i.test(senha) ||
-      senha.toLowerCase().includes('ceak-dev'))
+  if (
+    !senha ||
+    senha.length < 16 ||
+    senha.length > 256 ||
+    !/[a-z]/i.test(senha) ||
+    !/[0-9]/.test(senha) ||
+    !/[^a-z0-9]/i.test(senha) ||
+    senha.toLowerCase().includes('ceak-dev')
+  )
     throw new Error('CEAK_ADMIN_SENHA precisa ter 16–256 caracteres, letras, número e símbolo.');
   return { nome, email, senha };
 }
