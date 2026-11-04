@@ -31,6 +31,9 @@ jobs:
     name: TypeScript (independente)
     runs-on: ubuntu-24.04
     timeout-minutes: 12
+    env:
+      DATABASE_URL: postgresql://ceak:ceak@localhost:5432/ceak
+      CEAK_DB_SCHEMA: ceak_v2
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
