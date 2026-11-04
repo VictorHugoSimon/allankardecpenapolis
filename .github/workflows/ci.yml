@@ -13,6 +13,20 @@ permissions:
   contents: read
 
 jobs:
+  formatacao:
+    name: Formatação Prettier
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+
   qualidade:
     name: Lint, testes e build
     runs-on: ubuntu-24.04
@@ -48,7 +62,6 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate
-      - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm db:deploy
