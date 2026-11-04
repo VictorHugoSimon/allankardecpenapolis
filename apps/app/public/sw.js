@@ -8,7 +8,12 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
       const cache = await caches.open(OFFLINE_CACHE);
-      await cache.add(new Request(OFFLINE_URL, { cache: 'reload' }));
+      // Uma falha temporária na página offline não deve impedir o registro do PWA.
+      try {
+        await cache.add(new Request(OFFLINE_URL, { cache: 'reload' }));
+      } catch (error) {
+        console.warn('[CEAK PWA] Não foi possível preparar a tela offline:', error);
+      }
       await self.skipWaiting();
     })(),
   );
@@ -40,6 +45,23 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+// Só permitir navegação para URLs da própria aplicação.
+// Caminhos como /\\dominio.com são interpretados pelo URL parser como externos.
+function caminhoSeguro(valor, fallback = '/notificacoes') {
+  if (typeof valor !== 'string' || !valor.startsWith('/') || valor.startsWith('//')) {
+    return fallback;
+  }
+  try {
+    const destino = new URL(valor, self.location.origin);
+    if (destino.origin !== self.location.origin || !['http:', 'https:'].includes(destino.protocol)) {
+      return fallback;
+    }
+    return `${destino.pathname}${destino.search}${destino.hash}`;
+  } catch {
+    return fallback;
+  }
+}
+
 self.addEventListener('push', (event) => {
   let message = {};
   try {
@@ -47,8 +69,7 @@ self.addEventListener('push', (event) => {
   } catch {
     message = { corpo: event.data ? event.data.text() : '' };
   }
-  const path = typeof message.url === 'string' && message.url.startsWith('/') &&
-    !message.url.startsWith('//') ? message.url : '/notificacoes';
+  const path = caminhoSeguro(message.url);
   event.waitUntil(
     self.registration.showNotification(message.titulo || 'CEAK', {
       body: message.corpo || '',
@@ -63,8 +84,7 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const path = event.notification.data && event.notification.data.path;
-  const safePath = typeof path === 'string' && path.startsWith('/') &&
-    !path.startsWith('//') ? path : '/notificacoes';
+  const safePath = caminhoSeguro(path);
   const url = new URL(safePath, self.location.origin).href;
   event.waitUntil(
     (async () => {
