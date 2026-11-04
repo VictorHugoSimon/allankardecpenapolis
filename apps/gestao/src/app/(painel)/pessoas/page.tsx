@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { ABAS_PESSOAS, listarPessoas } from '@ceak/db';
-import { Pill, Table } from '@ceak/ui';
+import { buttonClasses, Pill, Table } from '@ceak/ui';
 import { AbasLink, TituloPagina } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { numero } from '@/lib/formato';
@@ -34,6 +34,12 @@ export default async function PessoasPage({
       >
         Pessoas
       </TituloPagina>
+      {!instrutor && ['ADMINISTRADOR', 'SECRETARIA'].includes(s.perfil) && (
+        <div className="flex items-center gap-3">
+          <Link href="/pessoas/novo" className={buttonClasses({ shape: 'rounded', size: 'sm' })}>Cadastrar visitante</Link>
+          {r.total === 0 && <span role="status" className="text-muted-2 text-sm">Nenhum cadastro ainda. Comece pelos visitantes reais.</span>}
+        </div>
+      )}
       <AbasLink
         rotulo="Grupos de pessoas"
         ativo={r.aba}
