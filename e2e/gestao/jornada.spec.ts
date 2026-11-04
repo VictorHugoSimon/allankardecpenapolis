@@ -145,9 +145,15 @@ test('financeiro: Tesouraria aprova e paga contas com auditoria', async ({ page 
   await page.getByRole('button', { name: 'Lançar' }).click();
   // A lista de contas é filtrada por vencimento: este registro pertence a outubro/26.
   await page.goto('/financeiro/pagar?mes=2026-10');
+  // Uma obrigação PENDENTE com vencimento anterior ao mês corrente
+  // aparece corretamente como "Vencido" na interface.
   await expect(
-    page.getByRole('row', { name: /Papelaria Penápolis/ }).getByText('Pendente'),
+    page.getByRole('row', { name: /Papelaria Penápolis/ }).getByText('Vencido'),
   ).toBeVisible();
+  const registroNovo = await consultar<{ status: string }>(
+    `SELECT status::text AS status FROM lancamento WHERE contraparte = 'Papelaria Penápolis' AND descricao = 'Material para o ESDE' ORDER BY criado_em DESC LIMIT 1`,
+  );
+  expect(registroNovo[0]?.status).toBe('PENDENTE');
   await page.goto('/aprovacoes?tipo=FINANCEIRO');
   await expect(
     page.getByText(/Pagamento Papelaria Penápolis — Material para o ESDE · R\$\s86,40/),
