@@ -16,7 +16,7 @@ const { prisma } = await import('../src/client');
 try {
   await prisma.$transaction(async (tx) => {
     // Duas execuções simultâneas não podem criar dois administradores iniciais.
-    await tx.$queryRaw`SELECT pg_advisory_xact_lock(19001, 26)`;
+    await tx.$queryRaw`SELECT 1 FROM pg_advisory_xact_lock(19001, 26)`;
     const [usuarios, pessoas] = await Promise.all([
       tx.usuario.count(), tx.pessoa.count(),
     ]);
