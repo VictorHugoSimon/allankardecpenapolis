@@ -9,7 +9,7 @@ export interface DadosCategoriaFinanceira {
 
 /** Validação independente de banco, utilizada no cadastro e nos testes. */
 export function validarCategoriaFinanceira(dados: DadosCategoriaFinanceira): DadosCategoriaFinanceira {
-  const nome = dados.nome.trim().replace(/\\s+/g, ' ');
+  const nome = dados.nome.trim().replace(/\s+/g, ' ');
   if (nome.length < 2 || nome.length > 80) {
     throw new ErroNegocio('O nome da categoria deve ter de 2 a 80 caracteres.', 'nome');
   }
