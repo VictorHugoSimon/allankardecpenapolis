@@ -1,3 +1,13 @@
+## Decisão de escopo — 04/11/2026
+
+A implantação deve começar **sem dados financeiros fictícios**. Cadastro de contas bancárias, importação bancária persistente e conciliação bancária operacional ficam **adiados** até nova orientação.
+
+- Não executar `db:seed` no ambiente real; o seed existente é destinado exclusivamente a desenvolvimento e apaga/recria dados.
+- O painel financeiro deve exibir estado vazio quando não houver movimentações.
+- Se não houver categorias financeiras, o formulário de lançamento deve orientar a configuração sem inventar categorias.
+- A prévia de importação bancária foi retirada da navegação operacional; o código permanece preservado para retomada futura.
+- Prioridade de entrega muda para ativação inicial sem dados e demais módulos administrativos não dependentes de bancos.
+
 # CEAK Digital — Plano de conclusão (04/11/2026)
 
 ## Base auditada
