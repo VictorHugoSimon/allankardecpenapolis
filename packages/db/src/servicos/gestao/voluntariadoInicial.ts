@@ -40,7 +40,7 @@ export async function painelVoluntariadoInicial(ctx: ContextoRls) {
       tx.voluntario.findMany({
         where: { ativo: true, pessoa: { anonimizadaEm: null } },
         orderBy: { pessoa: { nome: 'asc' } },
-        select: { id: true, pessoa: { select: { nome: true } }, areas: { select: { area: { select: { nome: true } } } } },
+        select: { id: true, pessoa: { select: { nome: true } }, areas: { select: { area: { select: { id: true, nome: true } } } } },
       }),
       tx.escala.findMany({ where: { fim: { gte: new Date() } }, orderBy: { inicio: 'asc' }, take: 50,
         select: { id: true, inicio: true, fim: true, funcao: true,
