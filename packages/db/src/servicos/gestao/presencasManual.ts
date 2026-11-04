@@ -1,5 +1,5 @@
 import { registrarAuditoria } from '../../auditoria';
-import { comRls, type ContextoRls } from '../../rls';
+import { comRls, type ContextoRls, type Tx } from '../../rls';
 import { ErroNegocio } from '../inscricoes';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -13,6 +13,7 @@ export function validarNovaAula(input: { turmaId: string; numero: number; titulo
     throw new ErroNegocio('Número da aula inválido.', 'numero');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.data)) throw new ErroNegocio('Data inválida.', 'data');
   const data = new Date(input.data + 'T12:00:00-03:00');
+  if (!Number.isFinite(data.getTime())) throw new ErroNegocio('Data inexistente.', 'data');
   const componentes = new Date(data.getTime() - 3 * 3600000).toISOString().slice(0, 10);
   if (componentes !== input.data) throw new ErroNegocio('Data inexistente.', 'data');
   return { turmaId: input.turmaId, numero: input.numero, titulo, data };
@@ -31,7 +32,7 @@ export function validarChamada(alunosDaTurma: string[], marcacoes: { pessoaId: s
   return marcacoes;
 }
 
-async function autorizado(tx: Parameters<Parameters<typeof comRls>[1]>[0], ctx: ContextoEstudos, turmaId: string) {
+async function autorizado(tx: Tx, ctx: ContextoEstudos, turmaId: string) {
   const turma = await tx.turma.findUnique({
     where: { id: turmaId },
     select: { id: true, status: true, instrutorId: true },
