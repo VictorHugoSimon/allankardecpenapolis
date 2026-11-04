@@ -98,6 +98,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate
+      - name: Verificar bloqueio de publicação com dados fictícios
+        run: |
+          node --check scripts/verificar-publicacao.mjs
+          if node scripts/verificar-publicacao.mjs; then
+            echo "ERRO: o portão de publicação aceitou dados de demonstração."
+            exit 1
+          fi
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm db:deploy
