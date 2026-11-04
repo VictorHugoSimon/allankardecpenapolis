@@ -19,6 +19,8 @@ test('Jornada 1 · Visitante: Home → Agenda → Palestra → Inscrição → c
   await expect(page).toHaveURL(/\/agenda$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Agenda' })).toBeVisible();
 
+  // A palestra do seed é de outubro de 2026; não presumir mês atual.
+  await page.goto('/agenda?mes=2026-10');
   await page
     .getByRole('navigation', { name: 'Filtrar por categoria' })
     .getByRole('link', { name: 'Palestras' })
