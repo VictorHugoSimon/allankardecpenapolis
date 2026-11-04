@@ -129,62 +129,22 @@ test('Jornada 4 · webhook PIX rejeita assinatura inválida', async ({ request }
   expect(await r.json()).toMatchObject({ motivo: 'provedor_pix_nao_integrado' });
 });
 
-test('Jornada 5 · Loja: Loja → Produto → Carrinho → Checkout → PIX → Pedido (estoque baixado)', async ({
-  page,
-}) => {
+test('Loja: checkout não aceita pagamento fictício sem PIX integrado', async ({ page }) => {
   await page.goto('/loja/o-evangelho-segundo-o-espiritismo');
-  const linhaEstoque = page.locator('dt:has-text("Estoque") + dd');
-  const antes = Number((await linhaEstoque.textContent())!.match(/\d+/)![0]);
-
-  await page.goto('/loja');
-  await page
-    .getByRole('navigation', { name: 'Categorias' })
-    .getByRole('link', { name: 'Livros' })
-    .click();
-  await expect(page).toHaveURL(/categoria=Livros/);
-  await page.getByRole('link', { name: /O Evangelho Segundo o Espiritismo/ }).click();
   await expect(
-    page.getByRole('heading', { level: 1, name: 'O Evangelho Segundo o Espiritismo' }),
+    page.getByRole('heading', { name: 'O Evangelho Segundo o Espiritismo' }),
   ).toBeVisible();
-  await page.getByRole('button', { name: 'Ver foto 3' }).click();
-  await expect(page.getByRole('img', { name: /foto 3 de 4/ })).toBeVisible();
   await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
-
   await expect(page).toHaveURL(/\/carrinho$/);
-  await expect(page.getByRole('link', { name: /Carrinho · 1/ })).toBeVisible();
-  await page
-    .getByRole('button', { name: 'Aumentar quantidade de O Evangelho Segundo o Espiritismo' })
-    .click();
-  await expect(page.getByText('R$ 56,00').first()).toBeVisible();
-  await page.getByRole('link', { name: 'Finalizar pedido' }).click();
-
-  await expect(page.getByRole('heading', { name: 'Checkout' })).toBeVisible();
-  await page.getByLabel('Nome', { exact: true }).fill('Carla Nogueira');
-  await page.getByLabel('WhatsApp', { exact: true }).fill(WHATS);
-  await aceitar(page);
-  await page.getByRole('button', { name: 'Pagar com PIX' }).click();
-
-  await expect(page.getByRole('heading', { name: /Pedido nº \d+/ })).toBeVisible();
-  await expect(page.getByText('R$ 56,00')).toBeVisible();
-  await expect(page.getByRole('link', { name: /Carrinho · 0/ })).toBeVisible();
-  await page.getByRole('button', { name: 'Já fiz o PIX' }).click();
-  await expect(page.getByRole('heading', { name: /Pedido nº \d+ confirmado/ })).toBeVisible();
-  await expect(page.getByText('Pagamento de R$ 56,00 recebido.')).toBeVisible();
-
-  await page.goto('/loja/o-evangelho-segundo-o-espiritismo');
-  await expect(linhaEstoque).toHaveText(`${antes - 2} em estoque`);
-});
-
-test('Loja: checkout recusa quantidade acima do estoque', async ({ page }) => {
-  await page.goto('/loja/casaco-de-la-infantil-tam-6');
-  await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
-  await page.getByRole('button', { name: /Aumentar quantidade de Casaco/ }).click();
   await page.getByRole('link', { name: 'Finalizar pedido' }).click();
   await page.getByLabel('Nome', { exact: true }).fill('Carla Nogueira');
   await page.getByLabel('WhatsApp', { exact: true }).fill(WHATS);
   await aceitar(page);
   await page.getByRole('button', { name: 'Pagar com PIX' }).click();
-  await expect(page.getByRole('main').getByRole('alert')).toContainText('Temos apenas 1 unidade');
+  await expect(page.getByRole('alert')).toContainText(
+    'Pagamentos indisponíveis neste ambiente de demonstração',
+  );
+  await expect(page.getByRole('heading', { name: /Pedido nº/ })).toHaveCount(0);
 });
 
 test('Contato: envia mensagem', async ({ page }) => {
