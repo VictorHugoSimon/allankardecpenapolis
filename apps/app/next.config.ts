@@ -1,18 +1,9 @@
-import withSerwistInit from '@serwist/next';
 import { config as dotenv } from 'dotenv';
 import type { NextConfig } from 'next';
 import { resolve } from 'node:path';
 
 // Variáveis do .env na raiz do monorepo.
 dotenv({ path: resolve(process.cwd(), '../../.env'), quiet: true });
-
-const withSerwist = withSerwistInit({
-  swSrc: 'src/sw.ts',
-  swDest: 'public/sw.js',
-  // Em desenvolvimento (Turbopack) o service worker fica desligado.
-  disable: process.env.NODE_ENV === 'development',
-  additionalPrecacheEntries: [{ url: '/offline', revision: process.env.SOURCE_COMMIT ?? 'v1' }],
-});
 
 const config: NextConfig = {
   reactStrictMode: true,
@@ -45,4 +36,4 @@ const config: NextConfig = {
   },
 };
 
-export default withSerwist(config);
+export default config;
