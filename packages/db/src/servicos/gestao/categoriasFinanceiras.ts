@@ -7,19 +7,25 @@ export interface DadosCategoriaFinanceira {
   tipo: 'PAGAR' | 'RECEBER';
 }
 
-/** Cadastro manual: não insere categorias fictícias nem movimenta valores. */
-export async function cadastrarCategoriaFinanceira(
-  ctx: ContextoRls & { usuarioId: string },
-  dados: DadosCategoriaFinanceira,
-  ip: string | null,
-) {
-  const nome = dados.nome.trim().replace(/\s+/g, ' ');
+/** Validação independente de banco, utilizada no cadastro e nos testes. */
+export function validarCategoriaFinanceira(dados: DadosCategoriaFinanceira): DadosCategoriaFinanceira {
+  const nome = dados.nome.trim().replace(/\\s+/g, ' ');
   if (nome.length < 2 || nome.length > 80) {
     throw new ErroNegocio('O nome da categoria deve ter de 2 a 80 caracteres.', 'nome');
   }
   if (dados.tipo !== 'PAGAR' && dados.tipo !== 'RECEBER') {
     throw new ErroNegocio('Tipo de categoria inválido.', 'tipo');
   }
+  return { nome, tipo: dados.tipo };
+}
+
+/** Cadastro manual: não insere categorias fictícias nem movimenta valores. */
+export async function cadastrarCategoriaFinanceira(
+  ctx: ContextoRls & { usuarioId: string },
+  dados: DadosCategoriaFinanceira,
+  ip: string | null,
+) {
+  const { nome, tipo } = validarCategoriaFinanceira(dados);
   return comRls(ctx, async (tx) => {
     const anterior = await tx.categoriaFinanceira.findUnique({
       where: { nome_tipo: { nome, tipo: dados.tipo } },
