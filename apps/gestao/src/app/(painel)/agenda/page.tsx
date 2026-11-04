@@ -58,6 +58,17 @@ export default async function AgendaPage({
           Atividade criada e registrada na auditoria.
         </p>
       ) : null}
+      {a.atividades.length === 0 && (
+        <div role="status" className="border-line rounded-xl border bg-white p-5">
+          <h2 className="m-0 text-base font-semibold">Este mês ainda não tem atividades</h2>
+          <p className="text-muted-2 mt-2 text-sm">
+            O calendário começa vazio, sem palestras ou eventos fictícios. Registre a primeira atividade real quando a programação estiver definida.
+          </p>
+          {podeEditarAgenda(s.perfil) && (
+            <Link href="/agenda/nova" className={buttonClasses({ shape: 'rounded', size: 'sm' })}>Criar primeira atividade</Link>
+          )}
+        </div>
+      )}
       <section
         aria-labelledby="mes-titulo"
         className="border-line rounded-card overflow-x-auto border bg-white p-4"
