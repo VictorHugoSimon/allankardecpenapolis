@@ -173,18 +173,23 @@ test('agenda: Secretaria cria atividade; Instrutor só consulta', async ({ page 
   await expect(page.getByRole('heading', { name: 'Acesso não permitido' })).toBeVisible();
 });
 
-test('eventos: detalhe e QR Code assinado para a entrada do salão', async ({ page }) => {
-  await entrar(page, USUARIOS.SECRETARIA);
-  await page.goto('/eventos');
-  await page.getByRole('link', { name: /Palestra: A esperança que sustenta/ }).click();
-  await expect(
-    page.getByRole('heading', { name: 'Palestra: A esperança que sustenta' }),
-  ).toBeVisible();
-  await page.getByRole('link', { name: 'QR Code do check-in' }).click();
-  await expect(
-    page.getByRole('img', { name: /QR Code do check-in de A esperança que sustenta/ }),
-  ).toBeVisible();
-  await expect(page.getByText(/\/checkin\?evento=[0-9a-f-]{36}&t=[\w-]{22}/)).toBeVisible();
+test('eventos: QR Code assinado da palestra atual', async ({ page }) => {
+  const { criarPalestraAgora, removerEvento } = await import('../app/helpers');
+  const evento = await criarPalestraAgora('Palestra de homologação CEAK');
+  try {
+    await entrar(page, USUARIOS.SECRETARIA);
+    await page.goto(`/eventos?id=${evento.id}`);
+    await expect(
+      page.getByRole('heading', { name: 'Palestra de homologação CEAK' }),
+    ).toBeVisible();
+    await page.getByRole('link', { name: 'QR Code do check-in' }).click();
+    await expect(
+      page.getByRole('img', { name: /QR Code do check-in de Palestra de homologação CEAK/ }),
+    ).toBeVisible();
+    await expect(page.getByText(/\/checkin\?evento=[0-9a-f-]{36}&t=[\w-]{22}/)).toBeVisible();
+  } finally {
+    await removerEvento(evento.id);
+  }
 });
 
 test('convite: link por e-mail para definir a senha e entrar', async ({ page }) => {
