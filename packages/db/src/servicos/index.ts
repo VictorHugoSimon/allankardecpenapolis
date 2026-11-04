@@ -8,6 +8,7 @@ export * from './pessoas';
 export * from './gestao/aprovacoes';
 export * from './gestao/atividades';
 export * from './gestao/cadastroEstudos';
+export * from './gestao/matriculaManual';
 export * from './gestao/conteudo';
 export * from './gestao/financeiro';
 export * from './gestao/categoriasFinanceiras';
