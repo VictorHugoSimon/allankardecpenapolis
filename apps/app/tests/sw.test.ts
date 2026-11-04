@@ -5,7 +5,7 @@ import { runInNewContext } from 'node:vm';
 const source = readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
 
 function carregarWorker(options?: { falharCache?: boolean }) {
-  const handlers = new Map<string, (event: any) => void>();
+  const handlers = new Map<string, (event: unknown) => void>();
   const openWindow = vi.fn(async () => undefined);
   const add = options?.falharCache
     ? vi.fn(async () => { throw new Error('rede indisponível'); })
@@ -18,7 +18,7 @@ function carregarWorker(options?: { falharCache?: boolean }) {
   };
   const self = {
     location: { origin: 'https://app.ceak.example' },
-    addEventListener: (event: string, handler: (event: any) => void) => handlers.set(event, handler),
+    addEventListener: (event: string, handler: (event: unknown) => void) => handlers.set(event, handler),
     clients: {
       matchAll: vi.fn(async () => []),
       openWindow,
