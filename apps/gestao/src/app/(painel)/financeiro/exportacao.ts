@@ -13,8 +13,11 @@ export interface LinhaFinanceiraCsv {
 function celula(valor: string | number): string {
   // Excel pode executar fórmulas quando células começam com =, +, -, @,
   // ou quando caracteres de controle precedem esses símbolos.
-  let texto = String(valor).replace(/\u0000/g, '');
-  if (/^[\s\u0001-\u001f]*[=+@-]/u.test(texto)) texto = "'" + texto;
+  let texto = String(valor).replaceAll('\0', '');
+  let inicio = 0;
+  while (inicio < texto.length && (/\s/u.test(texto[inicio]!) || texto.charCodeAt(inicio) < 32)) inicio++;
+  const primeiro = texto[inicio];
+  if (primeiro && '=+@-'.includes(primeiro)) texto = "'" + texto;
   return '"' + texto.replace(/"/g, '""') + '"';
 }
 
