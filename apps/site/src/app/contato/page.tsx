@@ -35,7 +35,8 @@ export default async function ContatoPage({
             <h2 className="text-muted-2 m-0 mb-1.5 text-[13px] font-normal">Endereço</h2>
             <p className="m-0 text-[17px] font-medium">{instituicao.nome}</p>
             <p className="text-ink-3 mt-1 mb-0 text-[15px]">
-              {oficial.endereco || `${instituicao.cidade} – ${instituicao.uf} · Endereço a confirmar`}
+              {oficial.endereco ||
+                `${instituicao.cidade} – ${instituicao.uf} · Endereço a confirmar`}
             </p>
             {oficial.mapaUrl && (
               <a
