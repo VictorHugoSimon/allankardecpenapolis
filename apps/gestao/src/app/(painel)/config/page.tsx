@@ -1,14 +1,18 @@
 import type { Metadata } from 'next';
-import { dadosInstitucionais } from '@ceak/db';
+import { dadosInstitucionais, programacaoInstitucional } from '@ceak/db';
 import { exigirModulo } from '@/lib/auth';
 import { FormInstituicao } from './FormInstituicao';
+import { FormProgramacao } from './FormProgramacao';
 
 export const metadata: Metadata = { title: 'Instituição' };
 export const dynamic = 'force-dynamic';
 
 export default async function InstituicaoPage() {
   const sessao = await exigirModulo('config');
-  const dados = await dadosInstitucionais();
+  const [dados, programacao] = await Promise.all([
+    dadosInstitucionais(),
+    programacaoInstitucional(),
+  ]);
   const preenchidos = Object.values(dados).filter(Boolean).length;
   return (
     <>
@@ -22,7 +26,10 @@ export default async function InstituicaoPage() {
         são apresentados aqui nem publicados por este cadastro.
       </p>
       {sessao.perfil === 'ADMINISTRADOR' ? (
-        <FormInstituicao atual={dados} />
+        <>
+          <FormInstituicao atual={dados} />
+          <FormProgramacao atual={programacao} />
+        </>
       ) : (
         <p className="text-muted-2 mt-4 text-sm">
           Somente o administrador pode editar informações institucionais.
