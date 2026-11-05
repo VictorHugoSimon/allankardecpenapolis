@@ -39,9 +39,9 @@ export function validarDadosInstitucionais(dados: DadosInstitucionais): DadosIns
     try { url = new URL(limpos.mapaUrl); } catch { throw new ErroNegocio('URL do mapa inválida.', 'mapa'); }
     if (url.protocol !== 'https:') throw new ErroNegocio('O endereço do mapa deve usar HTTPS.', 'mapa');
   }
-  if (limpos.telefone && !/^[\d\s()+.\-]{8,30}$/.test(limpos.telefone))
+  if (limpos.telefone && !/^[\d\s()+.-]{8,30}$/.test(limpos.telefone))
     throw new ErroNegocio('Telefone inválido.', 'telefone');
-  if (limpos.whatsapp && !/^[\d\s()+.\-]{8,30}$/.test(limpos.whatsapp))
+  if (limpos.whatsapp && !/^[\d\s()+.-]{8,30}$/.test(limpos.whatsapp))
     throw new ErroNegocio('WhatsApp inválido.', 'whatsapp');
   return limpos;
 }
