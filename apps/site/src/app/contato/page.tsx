@@ -67,7 +67,7 @@ export default async function ContatoPage({
               <p className="text-muted-2 m-0">E-mail de atendimento a confirmar.</p>
             )}
             {oficial.telefone && <p className="m-0">Telefone: {oficial.telefone}</p>}
-            {oficial.whatsapp && <p className="m-0">WhatsApp: {oficial.whatsapp}</p>
+            {oficial.whatsapp && <p className="m-0">WhatsApp: {oficial.whatsapp}</p>}
           </div>
         </div>
         <div className="flex min-w-0 flex-[1.4_1_380px] flex-col gap-4">
