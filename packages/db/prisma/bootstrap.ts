@@ -17,13 +17,12 @@ try {
   await prisma.$transaction(async (tx) => {
     // Duas execuções simultâneas não podem criar dois administradores iniciais.
     await tx.$queryRaw`SELECT 1 FROM pg_advisory_xact_lock(19001, 26)`;
-    const [admins, pessoasAdministradoras, contaExistente, pessoaExistente] =
-      await Promise.all([
-        tx.usuario.count({ where: { perfil: 'ADMINISTRADOR' } }),
-        tx.pessoa.count({ where: { perfil: 'ADMINISTRADOR' } }),
-        tx.usuario.findUnique({ where: { email: dados.email }, select: { id: true } }),
-        tx.pessoa.findUnique({ where: { email: dados.email }, select: { id: true } }),
-      ]);
+    const [admins, pessoasAdministradoras, contaExistente, pessoaExistente] = await Promise.all([
+      tx.usuario.count({ where: { perfil: 'ADMINISTRADOR' } }),
+      tx.pessoa.count({ where: { perfil: 'ADMINISTRADOR' } }),
+      tx.usuario.findUnique({ where: { email: dados.email }, select: { id: true } }),
+      tx.pessoa.findUnique({ where: { email: dados.email }, select: { id: true } }),
+    ]);
     if (admins > 0 || pessoasAdministradoras > 0) {
       throw new Error('Bootstrap recusado: já existe administrador. Utilize a gestão de usuários.');
     }
