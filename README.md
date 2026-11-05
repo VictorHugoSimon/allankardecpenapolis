@@ -42,7 +42,7 @@ pnpm db:bootstrap              # cria APENAS o primeiro administrador, uma vez
 pnpm dev                       # desenvolvimento local; produção usa deploy próprio
 ```
 
-O bootstrap exige banco vazio, não cria palestras, cursos, categorias, transações ou voluntários de exemplo e deve ser executado apenas com autorização e credenciais administrativas temporárias. Para publicação, também é obrigatório substituir os dados institucionais fictícios em `packages/core/config/instituicao.ts` e homologar o PWA em dispositivos reais.
+O bootstrap exige que ainda não exista administrador, preserva visitantes cadastrados, não cria palestras, cursos, categorias, transações ou voluntários de exemplo e deve ser executado apenas com autorização e credenciais administrativas temporárias. Para publicação, também é obrigatório substituir os dados institucionais fictícios em `packages/core/config/instituicao.ts` e homologar o PWA em dispositivos reais.
 
 ## Ambiente de demonstração e testes (isolado, nunca produção)
 
