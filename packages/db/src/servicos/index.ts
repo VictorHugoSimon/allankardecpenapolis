@@ -23,6 +23,7 @@ export * from './gestao/periodo';
 export * from './gestao/pessoas';
 export * from './gestao/cadastroPresencial';
 export * from './gestao/config';
+export * from './gestao/instituicaoEditavel';
 export * from './senha';
 export * from './gestao/busca';
 export * from './doisFatores';
