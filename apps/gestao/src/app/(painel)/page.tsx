@@ -37,6 +37,36 @@ export default async function VisaoGeralPage() {
         <p className="text-muted-2 m-0 text-[13px]">Dados atualizados às {formatarHora(agora)}</p>
       </div>
 
+      {s.perfil === 'ADMINISTRADOR' &&
+        (k.eventosMes === 0 || k.areas === 0 || k.turmasAtivas === 0) && (
+          <section className="border-line rounded-card border bg-white p-5" aria-labelledby="primeiros-passos">
+            <h2 id="primeiros-passos" className="m-0 font-serif text-xl">
+              Primeiros passos do CEAK Digital
+            </h2>
+            <p className="text-muted-2 mt-2 text-sm">
+              O sistema funciona sem registros fictícios. Comece pelas informações confirmadas
+              e cadastre as atividades reais quando estiverem definidas.
+            </p>
+            <div className="flex flex-wrap gap-3 text-sm">
+              <Link href="/config" className="border-line-admin rounded-lg border px-3 py-2">
+                Configurar instituição
+              </Link>
+              <Link href="/pessoas/novo" className="border-line-admin rounded-lg border px-3 py-2">
+                Cadastrar pessoa
+              </Link>
+              <Link href="/agenda/nova" className="border-line-admin rounded-lg border px-3 py-2">
+                Criar atividade
+              </Link>
+              <Link href="/estudos/novo" className="border-line-admin rounded-lg border px-3 py-2">
+                Criar curso ou turma
+              </Link>
+              <Link href="/voluntariado" className="border-line-admin rounded-lg border px-3 py-2">
+                Organizar voluntários
+              </Link>
+            </div>
+          </section>
+        )}
+
       <Indicadores
         itens={[
           {
