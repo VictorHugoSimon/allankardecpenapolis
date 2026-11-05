@@ -16,14 +16,17 @@ const campos: { id: keyof DadosInstitucionais; label: string; dica?: string }[] 
 export function FormInstituicao({ atual }: { atual: DadosInstitucionais }) {
   const [estado, acao, pendente] = useActionState(salvarInstituicao, {});
   return (
-    <form action={acao} className="border-line rounded-card mt-4 flex flex-col gap-4 border bg-white p-5">
+    <form
+      action={acao}
+      className="border-line rounded-card mt-4 flex flex-col gap-4 border bg-white p-5"
+    >
       <h2 className="m-0 font-serif text-xl">Informações oficiais para o Site</h2>
       <p className="text-muted-2 m-0 text-sm">
-        Preencha somente informações confirmadas. Campos vazios permanecem ocultos no Site
-        ou aparecem como “A confirmar”. Não é necessário preencher tudo para utilizar o sistema.
+        Preencha somente informações confirmadas. Campos vazios permanecem ocultos no Site ou
+        aparecem como “A confirmar”. Não é necessário preencher tudo para utilizar o sistema.
       </p>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
-        {campos.map(c => (
+        {campos.map((c) => (
           <label key={c.id} className="flex flex-col gap-1 text-sm font-medium">
             {c.label}
             <input
@@ -37,8 +40,16 @@ export function FormInstituicao({ atual }: { atual: DadosInstitucionais }) {
           </label>
         ))}
       </div>
-      {estado.erro && <p role="alert" className="text-danger m-0 text-sm">{estado.erro}</p>}
-      {estado.sucesso && <p role="status" className="text-green-dark m-0 text-sm">{estado.sucesso}</p>}
+      {estado.erro && (
+        <p role="alert" className="text-danger m-0 text-sm">
+          {estado.erro}
+        </p>
+      )}
+      {estado.sucesso && (
+        <p role="status" className="text-green-dark m-0 text-sm">
+          {estado.sucesso}
+        </p>
+      )}
       <button
         type="submit"
         disabled={pendente}
