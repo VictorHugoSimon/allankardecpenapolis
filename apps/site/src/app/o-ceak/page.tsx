@@ -4,7 +4,7 @@ import { Secao } from '@/components/Elementos';
 export const metadata: Metadata = {
   title: 'O CEAK',
   description:
-    'Mais de seis décadas dedicadas ao estudo e à caridade em Penápolis: história, missão, valores, estrutura e diretoria do Centro Espírita Allan Kardec.',
+    'Conheça a missão, os valores e o trabalho fraterno do Centro Espírita Allan Kardec de Penápolis.',
   alternates: { canonical: '/o-ceak' },
 };
 
@@ -29,7 +29,7 @@ export default function OCeakPage() {
       <Secao estreita={1040} className="pt-16 pb-6">
         <p className="text-green m-0 text-[13px] font-semibold tracking-[.14em]">O CEAK</p>
         <h1 className="mt-3.5 mb-6 font-serif text-[clamp(38px,5vw,56px)] leading-[1.08] font-medium text-balance">
-          Mais de seis décadas dedicadas ao estudo e à caridade em Penápolis
+          Estudo, acolhimento e fraternidade em Penápolis
         </h1>
         <p className="text-ink-2 m-0 max-w-[760px] text-[19px] leading-[1.65]">
           O Centro Espírita Allan Kardec é um espaço de estudo, acolhimento e trabalho fraterno em
