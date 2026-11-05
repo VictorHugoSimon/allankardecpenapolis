@@ -1,8 +1,18 @@
 'use client';
 
 import { useActionState } from 'react';
-import { DIAS_PROGRAMACAO, type ProgramacaoSemanal } from '@ceak/db';
+import type { ProgramacaoSemanal } from '@ceak/db';
 import { salvarAgendaSemanal } from './actions';
+
+const dias: (keyof ProgramacaoSemanal)[] = [
+  'Segunda-feira',
+  'Terça-feira',
+  'Quarta-feira',
+  'Quinta-feira',
+  'Sexta-feira',
+  'Sábado',
+  'Domingo',
+];
 
 export function FormProgramacao({ atual }: { atual: ProgramacaoSemanal }) {
   const [estado, acao, pendente] = useActionState(salvarAgendaSemanal, {});
@@ -17,7 +27,7 @@ export function FormProgramacao({ atual }: { atual: ProgramacaoSemanal }) {
         Eventos com datas específicas continuam sendo cadastrados na Agenda.
       </p>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
-        {DIAS_PROGRAMACAO.map((dia) => (
+        {dias.map((dia) => (
           <label key={dia} className="flex flex-col gap-1 text-sm font-medium">
             {dia}
             <input
