@@ -109,10 +109,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm db:deploy
-      # O papel ceak_app tem políticas RLS em ceak_v2, mas a migração antiga
-      # concede USAGE somente em public. No Postgres descartável da CI,
-      # habilitamos USAGE no schema de homologação, nunca no legado real.
-      - name: Permitir schema isolado ao papel RLS
+      - name: Confirmar permissões mínimas e isolamento de segredos do RLS
         run: |
           node - <<'NODE'
           const { Client } = require('pg');
@@ -120,15 +117,25 @@ jobs:
             const db = new Client({ connectionString: process.env.DATABASE_URL });
             await db.connect();
             try {
-              await db.query('GRANT USAGE ON SCHEMA ceak_v2 TO ceak_app');
-              await db.query('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ceak_v2 TO ceak_app');
-              await db.query('GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ceak_v2 TO ceak_app');
-              // Manter as mesmas exclusões de segredos do RLS original.
-              await db.query('REVOKE ALL ON ceak_v2.credencial, ceak_v2.codigo_acesso, ceak_v2.integracao_segredo FROM ceak_app');
+              const r = await db.query(`
+                SELECT
+                  has_schema_privilege('ceak_app','ceak_v2','USAGE') AS schema_ok,
+                  has_table_privilege('ceak_app','ceak_v2.pessoa','SELECT') AS pessoa_ok,
+                  has_table_privilege('ceak_app','ceak_v2.turma','INSERT') AS turma_ok,
+                  has_table_privilege('ceak_app','ceak_v2.auditoria','INSERT') AS auditoria_ok,
+                  has_table_privilege('ceak_app','ceak_v2.credencial','SELECT') AS segredo_exposto,
+                  (SELECT relrowsecurity FROM pg_class WHERE oid='ceak_v2.turma'::regclass) AS turma_rls
+              `);
+              const p = r.rows[0];
+              if (!p.schema_ok || !p.pessoa_ok || !p.turma_ok || !p.auditoria_ok ||
+                  p.segredo_exposto || !p.turma_rls) {
+                throw new Error('Falha no RLS e nas permissões de acesso do CEAK v2.');
+              }
+              console.log('RLS operacional ativo e credenciais sem exposição.');
             } finally {
               await db.end();
             }
-          })().catch((err) => { console.error(err); process.exitCode = 1; });
+          })().catch(err => { console.error(err); process.exitCode = 1; });
           NODE
       - name: Primeiro acesso sem dados de demonstração
         env:
