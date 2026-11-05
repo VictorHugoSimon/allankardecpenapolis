@@ -53,8 +53,8 @@ export default function OCeakPage() {
           Linha do tempo
         </h2>
         <p className="text-muted-2 text-sm">
-          O histórico oficial está em preparação. Nenhuma data ou acontecimento de demonstração
-          será divulgado como informação confirmada.
+          O histórico oficial está em preparação. Nenhuma data ou acontecimento de demonstração será
+          divulgado como informação confirmada.
         </p>
       </Secao>
       <Secao estreita={1040} className="pt-6 pb-20" aria-labelledby="diretoria">
