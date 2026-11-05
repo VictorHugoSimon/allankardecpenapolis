@@ -24,6 +24,7 @@ export * from './gestao/pessoas';
 export * from './gestao/cadastroPresencial';
 export * from './gestao/config';
 export * from './gestao/instituicaoEditavel';
+export * from './gestao/programacaoInstitucional';
 export * from './senha';
 export * from './gestao/busca';
 export * from './doisFatores';
