@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  PROGRAMACAO_VAZIA,
-  validarProgramacaoSemanal,
-} from './programacaoInstitucional';
+import { PROGRAMACAO_VAZIA, validarProgramacaoSemanal } from './programacaoInstitucional';
 
 describe('programação semanal institucional', () => {
   it('inicia vazia sem gerar dias ou horários fictícios', () => {
