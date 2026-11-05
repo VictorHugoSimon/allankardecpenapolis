@@ -23,8 +23,8 @@ export function FormProgramacao({ atual }: { atual: ProgramacaoSemanal }) {
     >
       <h2 className="m-0 font-serif text-xl">Programação semanal confirmada</h2>
       <p className="text-muted-2 m-0 text-sm">
-        Informe somente horários e atividades oficiais. Dias em branco não serão publicados.
-        Eventos com datas específicas continuam sendo cadastrados na Agenda.
+        Informe somente horários e atividades oficiais. Dias em branco não serão publicados. Eventos
+        com datas específicas continuam sendo cadastrados na Agenda.
       </p>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
         {dias.map((dia) => (
