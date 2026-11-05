@@ -21,8 +21,8 @@ export const PROGRAMACAO_VAZIA: ProgramacaoSemanal = {
   'Quarta-feira': '',
   'Quinta-feira': '',
   'Sexta-feira': '',
-  'Sábado': '',
-  'Domingo': '',
+  Sábado: '',
+  Domingo: '',
 };
 
 /** Agenda semanal institucional confirmada; não usa os horários fictícios do protótipo. */
