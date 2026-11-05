@@ -1,5 +1,5 @@
 /**
- * Primeira instalação real, sem seed.
+ * Primeiro administrador real, sem seed e sem excluir visitantes existentes.
  *
  * Executar uma única vez com variáveis de ambiente de segredo, conexão
  * administrativa ao banco e confirmação explícita. Nunca imprime a senha.
@@ -17,10 +17,19 @@ try {
   await prisma.$transaction(async (tx) => {
     // Duas execuções simultâneas não podem criar dois administradores iniciais.
     await tx.$queryRaw`SELECT 1 FROM pg_advisory_xact_lock(19001, 26)`;
-    const [usuarios, pessoas] = await Promise.all([tx.usuario.count(), tx.pessoa.count()]);
-    if (usuarios !== 0 || pessoas !== 0) {
+    const [admins, pessoasAdministradoras, contaExistente, pessoaExistente] =
+      await Promise.all([
+        tx.usuario.count({ where: { perfil: 'ADMINISTRADOR' } }),
+        tx.pessoa.count({ where: { perfil: 'ADMINISTRADOR' } }),
+        tx.usuario.findUnique({ where: { email: dados.email }, select: { id: true } }),
+        tx.pessoa.findUnique({ where: { email: dados.email }, select: { id: true } }),
+      ]);
+    if (admins > 0 || pessoasAdministradoras > 0) {
+      throw new Error('Bootstrap recusado: já existe administrador. Utilize a gestão de usuários.');
+    }
+    if (contaExistente || pessoaExistente) {
       throw new Error(
-        'Bootstrap recusado: banco não está vazio. Utilize a gestão de usuários existente.',
+        'Bootstrap recusado: o e-mail informado já pertence a uma pessoa ou conta. Utilize um e-mail institucional exclusivo.',
       );
     }
     const hash = await hashSenha(dados.senha);
