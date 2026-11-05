@@ -39,13 +39,16 @@ export default async function VisaoGeralPage() {
 
       {s.perfil === 'ADMINISTRADOR' &&
         (k.eventosMes === 0 || k.areas === 0 || k.turmasAtivas === 0) && (
-          <section className="border-line rounded-card border bg-white p-5" aria-labelledby="primeiros-passos">
+          <section
+            className="border-line rounded-card border bg-white p-5"
+            aria-labelledby="primeiros-passos"
+          >
             <h2 id="primeiros-passos" className="m-0 font-serif text-xl">
               Primeiros passos do CEAK Digital
             </h2>
             <p className="text-muted-2 mt-2 text-sm">
-              O sistema funciona sem registros fictícios. Comece pelas informações confirmadas
-              e cadastre as atividades reais quando estiverem definidas.
+              O sistema funciona sem registros fictícios. Comece pelas informações confirmadas e
+              cadastre as atividades reais quando estiverem definidas.
             </p>
             <div className="flex flex-wrap gap-3 text-sm">
               <Link href="/config" className="border-line-admin rounded-lg border px-3 py-2">
