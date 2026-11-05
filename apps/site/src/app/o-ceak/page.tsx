@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-import { instituicao } from '@ceak/core';
-import { ImagePlaceholder } from '@ceak/ui';
 import { Secao } from '@/components/Elementos';
 
 export const metadata: Metadata = {
@@ -21,7 +19,7 @@ const BLOCOS = [
   ],
   [
     'Estrutura',
-    'Salão de palestras para 220 pessoas, 4 salas de estudo, biblioteca, sala de passe, bazar e cozinha da assistência social.',
+    'As informações oficiais sobre os espaços e as atividades serão disponibilizadas pela equipe do Centro.',
   ],
 ];
 
@@ -34,10 +32,9 @@ export default function OCeakPage() {
           Mais de seis décadas dedicadas ao estudo e à caridade em Penápolis
         </h1>
         <p className="text-ink-2 m-0 max-w-[760px] text-[19px] leading-[1.65]">
-          O Centro Espírita Allan Kardec foi fundado em {instituicao.fundacao} por um pequeno grupo
-          que se reunia para estudar as obras básicas da Doutrina Espírita. Desde então, a casa
-          cresceu sem perder o que a originou: o estudo sério, o acolhimento a quem chega e o
-          trabalho voluntário em favor de quem precisa.
+          O Centro Espírita Allan Kardec é um espaço de estudo, acolhimento e trabalho fraterno em
+          Penápolis. As informações históricas estão em atualização e serão divulgadas depois da
+          confirmação pela equipe responsável.
         </p>
       </Secao>
       <Secao
@@ -52,45 +49,21 @@ export default function OCeakPage() {
         ))}
       </Secao>
       <Secao estreita={1040} className="py-10" aria-labelledby="linha">
-        <h2 id="linha" className="m-0 mb-7 font-serif text-[34px] font-medium">
+        <h2 id="linha" className="m-0 mb-3 font-serif text-[34px] font-medium">
           Linha do tempo
         </h2>
-        <ol className="m-0 flex list-none flex-col p-0">
-          {instituicao.linhaDoTempo.map((t, i) => (
-            <li key={t.ano} className="grid grid-cols-[88px_24px_minmax(0,1fr)] gap-4">
-              <span className="text-green pb-7 font-serif text-[26px]">{t.ano}</span>
-              <span aria-hidden="true" className="flex flex-col items-center">
-                <span className="bg-green mt-2.5 size-3 rounded-full" />
-                {i < instituicao.linhaDoTempo.length - 1 ? (
-                  <span className="bg-line-2 w-px flex-1" />
-                ) : null}
-              </span>
-              <div className="pb-7">
-                <h3 className="mt-1 mb-0 text-lg font-semibold">{t.titulo}</h3>
-                <p className="text-muted mt-1 mb-0 text-[15px] leading-[1.55]">{t.texto}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <p className="text-muted-2 text-sm">
+          O histórico oficial está em preparação. Nenhuma data ou acontecimento de demonstração
+          será divulgado como informação confirmada.
+        </p>
       </Secao>
       <Secao estreita={1040} className="pt-6 pb-20" aria-labelledby="diretoria">
-        <h2 id="diretoria" className="m-0 mb-6 font-serif text-[34px] font-medium">
-          Diretoria 2025–2027
+        <h2 id="diretoria" className="m-0 mb-3 font-serif text-[34px] font-medium">
+          Diretoria
         </h2>
-        <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4 p-0">
-          {instituicao.diretoria.map((b) => (
-            <li key={b.nome} className="flex flex-col gap-2 text-center">
-              <ImagePlaceholder
-                caption="foto"
-                ratio="1"
-                radius="full"
-                className="justify-center text-center"
-              />
-              <span className="text-base font-semibold">{b.nome}</span>
-              <span className="text-muted text-sm">{b.cargo}</span>
-            </li>
-          ))}
-        </ul>
+        <p className="text-muted-2 text-sm">
+          Os nomes e cargos da diretoria serão apresentados após a confirmação institucional.
+        </p>
       </Secao>
     </>
   );
