@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { instituicao } from '@ceak/core';
-import { dadosInstitucionais } from '@ceak/db';
+import { dadosInstitucionais, DIAS_PROGRAMACAO, programacaoInstitucional } from '@ceak/db';
 import { ImagePlaceholder } from '@ceak/ui';
 import { Secao, Subtitulo, TituloPagina } from '@/components/Elementos';
 import { FormContato } from './FormContato';
@@ -21,7 +21,12 @@ export default async function ContatoPage({
 }: {
   searchParams: Promise<{ assunto?: string; item?: string }>;
 }) {
-  const [{ assunto, item }, oficial] = await Promise.all([searchParams, dadosInstitucionais()]);
+  const [{ assunto, item }, oficial, semanal] = await Promise.all([
+    searchParams,
+    dadosInstitucionais(),
+    programacaoInstitucional(),
+  ]);
+  const diasConfirmados = DIAS_PROGRAMACAO.filter((dia) => semanal[dia]);
   const mensagem = item
     ? `Gostaria de reservar o empréstimo de “${item.slice(0, 120)}”.`
     : undefined;
@@ -50,9 +55,23 @@ export default async function ContatoPage({
           </address>
           <div className={card}>
             <h2 className="text-muted-2 m-0 mb-2.5 text-[13px] font-normal">Programação semanal</h2>
-            <p className="text-muted-2 m-0 text-sm">
-              Programação em atualização. Consulte a Agenda para atividades confirmadas.
-            </p>
+            {diasConfirmados.length ? (
+              <dl className="m-0">
+                {diasConfirmados.map((dia) => (
+                  <div
+                    key={dia}
+                    className="border-beige-2 grid grid-cols-[110px_minmax(0,1fr)] gap-2.5 border-b py-[7px] text-sm"
+                  >
+                    <dt className="font-semibold">{dia}</dt>
+                    <dd className="m-0">{semanal[dia]}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <p className="text-muted-2 m-0 text-sm">
+                Programação em atualização. Consulte a Agenda para atividades confirmadas.
+              </p>
+            )}
           </div>
           <div className={`${card} flex flex-col gap-2 text-[15px]`}>
             <h2 className="text-muted-2 m-0 text-[13px] font-normal">Canais</h2>
