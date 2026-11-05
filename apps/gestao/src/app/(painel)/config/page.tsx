@@ -14,13 +14,12 @@ export default async function InstituicaoPage() {
     <>
       <h1 className="m-0 font-serif text-[28px]">Configurações da instituição</h1>
       <p className="text-muted-2 my-3 text-sm">
-        A Gestão pode ser utilizada sem dados institucionais previamente cadastrados.
-        As informações oficiais podem ser adicionadas à medida que forem confirmadas.
+        A Gestão pode ser utilizada sem dados institucionais previamente cadastrados. As informações
+        oficiais podem ser adicionadas à medida que forem confirmadas.
       </p>
       <p className="bg-pill-warn-bg text-pill-warn-fg rounded-input m-0 px-3.5 py-3 text-[13px] leading-normal">
-        {preenchidos} de 6 informações oficiais preenchidas.
-        Os valores fictícios dos protótipos não são apresentados aqui nem publicados
-        por este cadastro.
+        {preenchidos} de 6 informações oficiais preenchidas. Os valores fictícios dos protótipos não
+        são apresentados aqui nem publicados por este cadastro.
       </p>
       {sessao.perfil === 'ADMINISTRADOR' ? (
         <FormInstituicao atual={dados} />
