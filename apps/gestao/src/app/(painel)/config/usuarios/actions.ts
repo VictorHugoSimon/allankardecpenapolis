@@ -58,47 +58,10 @@ type EstadoConvite = {
   emailConvidado?: string;
 };
 
-export async function convidar(
-  _: EstadoConvite,
-  form: FormData,
-): Promise<EstadoConvite> {
+export async function convidar(_: EstadoConvite, form: FormData): Promise<EstadoConvite> {
   const s = await exigirModulo('config');
-  if (s.perfil !== 'ADMINISTRADOR') return { erro: 'Somente administradores podem convidar usuários.' };
+  if (s.perfil !== 'ADMINISTRADOR')
+    return { erro: 'Somente administradores podem convidar usuários.' };
   const r = convite.safeParse(Object.fromEntries(form));
   if (!r.success) {
-    const erros: Record<string, string> = {};
-    for (const i of r.error.issues) erros[String(i.path[0])] ??= i.message;
-    return { erros };
-  }
-  const ctx = await contexto(s);
-  try {
-    // O adapter de e-mail atual é mock; a entrega segura fica a cargo do administrador.
-    // O link não é gravado em logs nem incluído em redirects.
-    const novo = await convidarUsuario(
-      ctx,
-      { nome: r.data.nome, email: r.data.email, perfil: r.data.perfil as (typeof PERFIS)[number] },
-      {
-        urlBase: GESTAO_URL,
-        log,
-        ip: ctx.ip,
-      },
-    );
-    return { linkConvite: novo.link, emailConvidado: r.data.email };
-  } catch (e) {
-    if (e instanceof ErroNegocio) return { erros: { email: e.message } };
-    throw e;
-  }
-}
-
-/** Celular perdido: o autenticador é apagado e a pessoa configura de novo no próximo login. */
-export async function redefinirAutenticador(id: string): Promise<void> {
-  const s = await exigirModulo('config');
-  const ctx = await contexto(s);
-  await redefinir2fa(s.usuarioId, id, ctx.ip);
-  log.info('SEGURANCA', 'autenticador (2FA) redefinido', {
-    rota: '/config/usuarios',
-    status: 200,
-    usuario: s.nome,
-  });
-  redirect('/config/usuarios?ok=2fa');
-}
+    const erros: Record<st...[truncated]
