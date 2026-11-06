@@ -51,7 +51,10 @@ if (process.argv.includes('--ambiente')) {
     if (!url || !/^https:\/\//.test(url))
       pendencias.push(`URL HTTPS do ${endereco} não configurada (${chave}).`);
   }
-  if (process.env.PAYMENT_PROVIDER === 'mock' && process.env.CEAK_ENABLE_MOCK_PAYMENT_CONFIRMATION === 'sim')
+  if (
+    process.env.PAYMENT_PROVIDER === 'mock' &&
+    process.env.CEAK_ENABLE_MOCK_PAYMENT_CONFIRMATION === 'sim'
+  )
     pendencias.push('Confirmação de pagamento simulado não pode estar ativada.');
 }
 
