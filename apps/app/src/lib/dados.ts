@@ -40,7 +40,10 @@ export const CATEGORIA_EVENTO = {
 } as const;
 
 const STATUS_PUBLICOS = ['CONFIRMADO', 'EM_ANDAMENTO', 'ENCERRADO'] as const;
-const ondePublico = { publico: true, status: { in: [...STATUS_PUBLICOS] } };
+const ocultarDemo = process.env.CEAK_PUBLIC_HIDE_DEMO === 'sim';
+const semDemoTitulo = ocultarDemo ? { NOT: { titulo: { startsWith: '[DEMO]' } } } : {};
+const semDemoNome = ocultarDemo ? { NOT: { nome: { startsWith: '[DEMO]' } } } : {};
+const ondePublico = { publico: true, status: { in: [...STATUS_PUBLICOS] }, ...semDemoTitulo };
 
 const selectEvento = {
   id: true,
@@ -200,6 +203,7 @@ export async function biblioteca(f: { q?: string; tipo?: string }) {
   const contem = (campo: string) => ({ [campo]: { contains: q, mode: 'insensitive' as const } });
   const itens = await prisma.itemBiblioteca.findMany({
     where: {
+      ...semDemoTitulo,
       ...(tipo ? { tipo } : {}),
       ...(q
         ? {
@@ -237,7 +241,7 @@ const UNIDADE_META = {
 
 export async function campanhaEmDestaque() {
   const c = await prisma.campanha.findFirst({
-    where: { status: 'ATIVA', destaque: true },
+    where: { status: 'ATIVA', destaque: true, ...semDemoTitulo },
     orderBy: { fim: 'asc' },
   });
   if (!c) return null;
@@ -258,7 +262,7 @@ export async function campanhaEmDestaque() {
 
 export async function campanhaPorTitulo(titulo: string) {
   return prisma.campanha.findFirst({
-    where: { status: 'ATIVA', titulo },
+    where: { status: 'ATIVA', titulo, ...semDemoTitulo },
     select: { id: true },
   });
 }
@@ -272,7 +276,7 @@ const ORIGEM_CURTA = {
 
 export async function produtosDaLoja(n = 6) {
   const ps = await prisma.produto.findMany({
-    where: { status: 'ATIVO' },
+    where: { status: 'ATIVO', ...semDemoNome },
     orderBy: { criadoEm: 'asc' },
     take: n,
     select: { id: true, slug: true, nome: true, precoCentavos: true, origem: true },
