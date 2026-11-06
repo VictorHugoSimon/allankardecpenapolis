@@ -99,11 +99,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate
-      - name: Verificar bloqueio de publicação com dados fictícios
+      - name: Validar instituição vazia e proteção de produção
         run: |
           node --check scripts/verificar-publicacao.mjs
-          if node scripts/verificar-publicacao.mjs; then
-            echo "ERRO: o portão de publicação aceitou dados de demonstração."
+          node scripts/verificar-publicacao.mjs
+          if node scripts/verificar-publicacao.mjs --ambiente; then
+            echo "ERRO: o portão de produção aceitou ambiente de teste inseguro."
             exit 1
           fi
       - run: pnpm lint
