@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { instituicao } from '@ceak/core';
 import { Secao, TituloPagina } from '@/components/Elementos';
 
@@ -37,10 +38,19 @@ export default function PrivacidadePage() {
       </p>
       <h2 className={h2}>Seus direitos</h2>
       <p className={p}>
-        Você pode pedir a qualquer momento uma cópia dos seus dados, a correção ou a exclusão,
-        escrevendo para{' '}
-        <a href={`mailto:${instituicao.contato.email}`}>{instituicao.contato.email}</a> ou falando
-        com a secretaria.
+        Você pode pedir a qualquer momento uma cópia dos seus dados, a correção ou a exclusão
+        {instituicao.contato.email ? (
+          <>
+            , escrevendo para{' '}
+            <a href={`mailto:${instituicao.contato.email}`}>{instituicao.contato.email}</a>
+          </>
+        ) : (
+          <>
+            {' '}
+            pelo <Link href="/contato">formulário de contato</Link>
+          </>
+        )}{' '}
+        ou falando com a secretaria.
       </p>
       <p className="text-muted-2 mt-10 text-sm">Termo de consentimento versão 2026.1.</p>
     </Secao>
