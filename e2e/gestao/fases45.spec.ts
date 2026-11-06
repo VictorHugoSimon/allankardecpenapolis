@@ -22,7 +22,9 @@ test('fase 4: estoque permite cadastro e entrada real', async ({ page }) => {
   await page.getByLabel('Nome do item').fill('Arroz para campanha');
   await page.getByRole('button', { name: 'Salvar registro' }).first().click();
   await expect(page.getByText(sku)).toBeVisible();
-  await page.getByLabel('Item', { exact: true }).selectOption({ label: `Arroz para campanha — ${sku}` });
+  await page
+    .getByLabel('Item', { exact: true })
+    .selectOption({ label: `Arroz para campanha — ${sku}` });
   await page.getByLabel('Quantidade').fill('5');
   await page.getByLabel('Motivo do movimento').fill('Recebimento de alimentos');
   await page.getByRole('button', { name: 'Salvar registro' }).last().click();
