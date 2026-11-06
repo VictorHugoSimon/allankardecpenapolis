@@ -39,7 +39,7 @@ CREATE POLICY campanha_equipe_leitura ON ceak_v2.campanha FOR SELECT TO ceak_app
 ALTER TABLE ceak_v2.doacao ENABLE ROW LEVEL SECURITY;
 GRANT SELECT, INSERT ON ceak_v2.doacao TO ceak_app;
 CREATE POLICY doacao_equipe_leitura ON ceak_v2.doacao FOR SELECT TO ceak_app
-  USING (ceak_v2.app_perfil_em('ADMINISTRADOR', 'DIRETORIA', 'TESOURARIA'));
+  USING (ceak_v2.app_perfil_em('ADMINISTRADOR', 'DIRETORIA', 'TESOURARIA') OR pessoa_id = ceak_v2.app_pessoa_id());
 CREATE POLICY doacao_equipe_cadastro ON ceak_v2.doacao FOR INSERT TO ceak_app
   WITH CHECK (ceak_v2.app_perfil_em('ADMINISTRADOR', 'DIRETORIA', 'TESOURARIA'));
 
