@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { comRls, registrarAuditoria } from '@ceak/db';
+import { comRls, registrarAuditoria, type Tx } from '@ceak/db';
 import { exigirModulo } from '@/lib/auth';
 import { contexto } from '@/lib/servidor';
 
@@ -26,7 +26,7 @@ async function autorizacao(modulo: 'loja'|'estoque'|'doacoes'|'comunicacao'|'aut
   if (!permitido.includes(s.perfil)) falhar('Seu perfil não pode cadastrar neste módulo.');
   return contexto(s);
 }
-async function auditar(tx: Parameters<Parameters<typeof comRls>[1]>[0], ctx: Awaited<ReturnType<typeof contexto>>, entidade: string, id: string, dados: object) {
+async function auditar(tx: Tx, ctx: Awaited<ReturnType<typeof contexto>>, entidade: Parameters<typeof registrarAuditoria>[1]['entidade'], id: string, dados: Record<string, unknown>) {
   await registrarAuditoria(tx, { usuarioId: ctx.usuarioId, acao: 'cadastro operacional', entidade, entidadeId: id, antes: null, depois: dados, ip: ctx.ip });
 }
 
