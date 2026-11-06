@@ -17,7 +17,18 @@ export default function DoarPage() {
       <p className="text-muted m-0 mb-7 text-[17px] leading-[1.6]">
         Sua doação mantém a casa aberta e a assistência social funcionando.
       </p>
-      <FormDoacao valores={VALORES_DOACAO} destinos={DESTINOS_DOACAO} />
+      {process.env.CEAK_PUBLIC_HIDE_DEMO === 'sim' &&
+      (!process.env.PAYMENT_PROVIDER || process.env.PAYMENT_PROVIDER === 'mock') ? (
+        <p
+          role="status"
+          className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-base text-amber-950"
+        >
+          Doações por PIX ainda não estão disponíveis. O canal oficial de pagamento será publicado
+          após a confirmação dos dados bancários do Centro.
+        </p>
+      ) : (
+        <FormDoacao valores={VALORES_DOACAO} destinos={DESTINOS_DOACAO} />
+      )}
     </Secao>
   );
 }
