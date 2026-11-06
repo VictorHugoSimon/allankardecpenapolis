@@ -109,7 +109,7 @@ test('Doação: não gera PIX fictício sem provedor real', async ({ page }) => 
   await expect(page.getByRole('heading', { name: 'Contribuir financeiramente' })).toBeVisible();
   await page.locator('label', { hasText: 'R$ 100' }).click();
   await page.getByRole('button', { name: 'Doar R$ 100,00 via PIX' }).click();
-  await expect(page.getByRole('alert')).toContainText(
+  await expect(page.getByRole('main').getByRole('alert')).toContainText(
     'Pagamentos indisponíveis neste ambiente de demonstração',
   );
   await expect(page.getByRole('heading', { name: 'Pague com PIX' })).toHaveCount(0);
@@ -143,7 +143,7 @@ test('Loja: checkout não aceita pagamento fictício sem PIX integrado', async (
   await page.getByLabel('WhatsApp', { exact: true }).fill(WHATS);
   await aceitar(page);
   await page.getByRole('button', { name: 'Pagar com PIX' }).click();
-  await expect(page.getByRole('alert')).toContainText(
+  await expect(page.getByRole('main').getByRole('alert')).toContainText(
     'Pagamentos indisponíveis neste ambiente de demonstração',
   );
   await expect(page.getByRole('heading', { name: /Pedido nº/ })).toHaveCount(0);

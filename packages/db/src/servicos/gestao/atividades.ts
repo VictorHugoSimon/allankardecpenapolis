@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { type Logger } from '@ceak/core/logger';
 import { formatarHoraCurta, partesData, slugify } from '@ceak/core/format';
 import { ETAPA_FLUXO_LABEL, frequencia, STATUS_EVENTO, TIPO_EVENTO_LABEL } from '@ceak/core/regras';
@@ -82,8 +83,8 @@ export async function criarAtividade(
   deps: { log: Logger },
 ) {
   const base = slugify(`${dados.titulo}-${dados.inicio.toISOString().slice(0, 10)}`);
-  const existentes = await prisma.evento.count({ where: { slug: { startsWith: base } } });
-  const slug = existentes ? `${base}-${existentes + 1}` : base;
+  // O sufixo evita conflito entre duas criações simultâneas do mesmo evento.
+  const slug = `${base}-${randomUUID().slice(0, 12)}`;
   const ev = await prisma.$transaction(async (tx) => {
     const e = await tx.evento.create({
       data: {

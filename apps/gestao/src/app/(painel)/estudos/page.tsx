@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { painelEstudos } from '@ceak/db';
-import { Pill, Table } from '@ceak/ui';
+import { buttonClasses, Pill, Table } from '@ceak/ui';
 import { Indicadores, TituloPagina, Vazio } from '@/components/Pagina';
 import { exigirModulo } from '@/lib/auth';
 import { numero } from '@/lib/formato';
@@ -23,6 +23,24 @@ export default async function EstudosPage({
   return (
     <div className="flex flex-col gap-[18px]">
       <TituloPagina sub={instrutorId ? 'Suas turmas' : undefined}>Estudos e cursos</TituloPagina>
+      {!instrutorId && ['ADMINISTRADOR', 'DIRETORIA', 'COORDENADOR'].includes(s.perfil) && (
+        <div className="flex flex-wrap items-center gap-3">
+          <Link href="/estudos/novo" className={buttonClasses({ shape: 'rounded', size: 'sm' })}>
+            Cadastrar curso ou turma
+          </Link>
+          <Link
+            href="/estudos/matricular"
+            className={buttonClasses({ shape: 'rounded', size: 'sm', variant: 'secondary' })}
+          >
+            Matricular participante
+          </Link>
+          {e.turmas.length === 0 && (
+            <span role="status" className="text-muted-2 text-sm">
+              Nenhuma turma ainda. Cadastre o primeiro curso real para iniciar.
+            </span>
+          )}
+        </div>
+      )}
       <Indicadores
         tamanho={28}
         itens={[
@@ -71,6 +89,14 @@ export default async function EstudosPage({
           className="border-line rounded-card flex flex-col gap-3 border bg-white p-5"
         >
           <div>
+            {['ADMINISTRADOR', 'DIRETORIA', 'COORDENADOR', 'INSTRUTOR'].includes(s.perfil) && (
+              <Link
+                href={`/estudos/chamada?turma=${e.selecionada.id}`}
+                className={buttonClasses({ shape: 'rounded', size: 'sm', variant: 'secondary' })}
+              >
+                Registrar presenças
+              </Link>
+            )}
             <h2 id="turma-sel" className="m-0 text-[15px] font-semibold">
               {e.selecionada.titulo}
             </h2>

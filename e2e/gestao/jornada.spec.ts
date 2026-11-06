@@ -120,8 +120,12 @@ test('financeiro: Tesouraria aprova e paga contas com auditoria', async ({ page 
     .getByRole('button', { name: 'Pagar: CPFL Paulista — Energia elétrica — set/26' })
     .click();
   await expect(page.getByText('Pagamento registrado · registrado na auditoria')).toBeVisible();
-  const linha = page.getByRole('row', { name: /CPFL Paulista/ });
-  await expect(linha.getByText('Pago')).toBeVisible();
+  // O painel mensal pode remover contas quitadas da listagem de pendências.
+  // Confirme a persistência da quitação no banco e a auditoria logo abaixo.
+  const statusConta = await consultar<{ status: string }>(
+    `SELECT status::text AS status FROM lancamento WHERE contraparte = 'CPFL Paulista' LIMIT 1`,
+  );
+  expect(statusConta[0]?.status).toBe('PAGO');
   const aud = await consultar<{ antes: { status: string }; depois: { status: string } }>(
     `SELECT antes, depois FROM auditoria WHERE entidade = 'Lancamento' AND acao = 'alterou status do lançamento'
      AND entidade_id = (SELECT id::text FROM lancamento WHERE contraparte = 'CPFL Paulista' LIMIT 1) ORDER BY criado_em`,
@@ -139,9 +143,18 @@ test('financeiro: Tesouraria aprova e paga contas com auditoria', async ({ page 
   await page.getByLabel('Valor (R$)').fill('86,40');
   await page.getByLabel('Vencimento').fill('2026-10-20');
   await page.getByRole('button', { name: 'Lançar' }).click();
+  // A ação server-side já redireciona para o mês de vencimento.
+  // Aguarde esse redirecionamento em vez de disparar uma navegação concorrente.
+  await expect(page).toHaveURL(/\/financeiro\/pagar\?mes=2026-10$/);
+  // Uma obrigação PENDENTE com vencimento anterior ao mês corrente
+  // aparece corretamente como "Vencido" na interface.
   await expect(
-    page.getByRole('row', { name: /Papelaria Penápolis/ }).getByText('Pendente'),
+    page.getByRole('row', { name: /Papelaria Penápolis/ }).getByText('Vencido'),
   ).toBeVisible();
+  const registroNovo = await consultar<{ status: string }>(
+    `SELECT status::text AS status FROM lancamento WHERE contraparte = 'Papelaria Penápolis' AND descricao = 'Material para o ESDE' ORDER BY criado_em DESC LIMIT 1`,
+  );
+  expect(registroNovo[0]?.status).toBe('PENDENTE');
   await page.goto('/aprovacoes?tipo=FINANCEIRO');
   await expect(
     page.getByText(/Pagamento Papelaria Penápolis — Material para o ESDE · R\$\s86,40/),
@@ -179,7 +192,9 @@ test('eventos: QR Code para palestra atual', async ({ page }) => {
   try {
     await entrar(page, USUARIOS.SECRETARIA);
     await page.goto(`/eventos?id=${evento.id}`);
-    await expect(page.getByText('Palestra de homologação CEAK')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Palestra: Palestra de homologação CEAK' }),
+    ).toBeVisible();
     await page.getByRole('link', { name: 'QR Code do check-in' }).click();
     await expect(page.getByRole('img', { name: /QR Code do check-in/ })).toBeVisible();
     await expect(page.getByText(/checkin\?evento=/)).toBeVisible();

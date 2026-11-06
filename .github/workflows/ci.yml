@@ -13,6 +13,56 @@ permissions:
   contents: read
 
 jobs:
+  formatacao:
+    name: Formatação Prettier
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Verificar formatação original
+        run: pnpm format:check
+        continue-on-error: true
+      - name: Preparar correções Prettier para revisão
+        run: |
+          pnpm exec prettier --write .
+          git diff --binary > prettier.patch
+      - name: Disponibilizar patch de formatação
+        uses: actions/upload-artifact@v4
+        with:
+          name: ceak-prettier-patch
+          path: prettier.patch
+          retention-days: 7
+      - name: Falhar quando houver formatação pendente
+        run: |
+          if [ -s prettier.patch ]; then
+            echo "Arquivos fora do padrão. Aplicar o patch do artefato ceak-prettier-patch."
+            exit 1
+          fi
+
+  tipos:
+    name: TypeScript (independente)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      DATABASE_URL: postgresql://ceak:ceak@localhost:5432/ceak
+      CEAK_DB_SCHEMA: ceak_v2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:generate
+      - run: pnpm typecheck
+
   qualidade:
     name: Lint, testes e build
     runs-on: ubuntu-24.04
@@ -35,6 +85,7 @@ jobs:
       AUTH_SECRET: ci-only-secret-0123456789-abcdefghijklmnopqrstuvwxyz
       AUTH_PROVIDER: local
       SEED_SENHA: ceak-dev-2026
+      SEED_CONFIRM: DESTRUIR_DADOS_DEMO
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       NEXT_PUBLIC_APP_URL: http://localhost:3001
       NEXT_PUBLIC_GESTAO_URL: http://localhost:3002
@@ -48,14 +99,18 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate
-      - run: pnpm format:check
+      - name: Validar instituição vazia e proteção de produção
+        run: |
+          node --check scripts/verificar-publicacao.mjs
+          node scripts/verificar-publicacao.mjs
+          if node scripts/verificar-publicacao.mjs --ambiente; then
+            echo "ERRO: o portão de produção aceitou ambiente de teste inseguro."
+            exit 1
+          fi
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm db:deploy
-      # O papel ceak_app tem políticas RLS em ceak_v2, mas a migração antiga
-      # concede USAGE somente em public. No Postgres descartável da CI,
-      # habilitamos USAGE no schema de homologação, nunca no legado real.
-      - name: Permitir schema isolado ao papel RLS
+      - name: Confirmar permissões mínimas e isolamento de segredos do RLS
         run: |
           node - <<'NODE'
           const { Client } = require('pg');
@@ -63,15 +118,62 @@ jobs:
             const db = new Client({ connectionString: process.env.DATABASE_URL });
             await db.connect();
             try {
-              await db.query('GRANT USAGE ON SCHEMA ceak_v2 TO ceak_app');
-              await db.query('GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA ceak_v2 TO ceak_app');
-              await db.query('GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA ceak_v2 TO ceak_app');
-              // Manter as mesmas exclusões de segredos do RLS original.
-              await db.query('REVOKE ALL ON ceak_v2.credencial, ceak_v2.codigo_acesso, ceak_v2.integracao_segredo FROM ceak_app');
+              const r = await db.query(`
+                SELECT
+                  has_schema_privilege('ceak_app','ceak_v2','USAGE') AS schema_ok,
+                  has_table_privilege('ceak_app','ceak_v2.pessoa','SELECT') AS pessoa_ok,
+                  has_table_privilege('ceak_app','ceak_v2.turma','INSERT') AS turma_ok,
+                  has_table_privilege('ceak_app','ceak_v2.auditoria','INSERT') AS auditoria_ok,
+                  has_table_privilege('ceak_app','ceak_v2.credencial','SELECT') AS segredo_exposto,
+                  (SELECT relrowsecurity FROM pg_class WHERE oid='ceak_v2.turma'::regclass) AS turma_rls
+              `);
+              const p = r.rows[0];
+              if (!p.schema_ok || !p.pessoa_ok || !p.turma_ok || !p.auditoria_ok ||
+                  p.segredo_exposto || !p.turma_rls) {
+                throw new Error('Falha no RLS e nas permissões de acesso do CEAK v2.');
+              }
+              console.log('RLS operacional ativo e credenciais sem exposição.');
             } finally {
               await db.end();
             }
-          })().catch((err) => { console.error(err); process.exitCode = 1; });
+          })().catch(err => { console.error(err); process.exitCode = 1; });
+          NODE
+      - name: Primeiro acesso sem dados de demonstração
+        env:
+          CEAK_BOOTSTRAP_CONFIRM: CRIAR_PRIMEIRO_ADMIN_REAL
+          CEAK_ADMIN_NOME: Administrador de Homologação
+          CEAK_ADMIN_EMAIL: homologacao@example.org
+          CEAK_ADMIN_SENHA: Homologacao#Unica2026!Seguro
+        run: |
+          pnpm db:bootstrap
+          # Segunda execução deve falhar, sem criar outro administrador.
+          if pnpm db:bootstrap; then
+            echo "ERRO: bootstrap permitiu segunda execução"
+            exit 1
+          fi
+          node - <<'NODE'
+          const { Client } = require('pg');
+          (async () => {
+            const db = new Client({ connectionString: process.env.DATABASE_URL });
+            await db.connect();
+            try {
+              const q = await db.query(
+                'SELECT (SELECT COUNT(*)::int FROM ceak_v2.pessoa) AS pessoas, ' +
+                '(SELECT COUNT(*)::int FROM ceak_v2.usuario) AS usuarios, ' +
+                '(SELECT COUNT(*)::int FROM ceak_v2.evento) AS eventos, ' +
+                '(SELECT COUNT(*)::int FROM ceak_v2.curso) AS cursos, ' +
+                '(SELECT COUNT(*)::int FROM ceak_v2.lancamento) AS lancamentos'
+              );
+              const data = q.rows[0];
+              if (data.pessoas !== 1 || data.usuarios !== 1 || data.eventos !== 0 ||
+                  data.cursos !== 0 || data.lancamentos !== 0) {
+                throw new Error('Primeiro acesso inseriu registros inesperados: ' + JSON.stringify(data));
+              }
+              console.log('Bootstrap inicial validado sem conteúdo fictício.');
+            } finally {
+              await db.end();
+            }
+          })().catch(err => { console.error(err); process.exitCode = 1; });
           NODE
       - run: pnpm db:seed
       - run: pnpm test

@@ -2,16 +2,16 @@
  * Dados institucionais do Centro Espírita Allan Kardec — Penápolis/SP.
  *
  * ⚠️  PENDENTE DE PREENCHIMENTO COM DADOS REAIS.
- * Os valores abaixo são os fictícios dos protótipos. Os campos marcados com
- * `PENDENTE` devem ser substituídos antes da publicação: endereço, CNPJ, chave PIX,
- * diretoria, histórico/linha do tempo, programação semanal, logo e fotos.
+ * Campos institucionais não confirmados ficam vazios. Não inserir dados de
+ * demonstração em produção. Informações oficiais podem ser preenchidas depois
+ * pela Gestão, conforme os módulos forem disponibilizados.
  */
 export const instituicao = {
   nome: 'Centro Espírita Allan Kardec',
   sigla: 'CEAK',
   cidade: 'Penápolis',
   uf: 'SP',
-  fundacao: 1962,
+  fundacao: null as number | null,
   dominio: 'allankardecpenapolis.com.br',
   urls: {
     site: 'https://allankardecpenapolis.com.br',
@@ -20,11 +20,11 @@ export const instituicao = {
   },
 
   /** PENDENTE: CNPJ real. */
-  cnpj: '00.000.000/0001-00',
+  cnpj: '',
 
   /** PENDENTE: endereço completo. */
   endereco: {
-    logradouro: 'endereço a confirmar',
+    logradouro: '',
     numero: '',
     bairro: '',
     cidade: 'Penápolis',
@@ -35,10 +35,10 @@ export const instituicao = {
 
   contato: {
     /** PENDENTE: telefones reais. */
-    telefone: '(18) 3652-0000',
-    whatsapp: '(18) 3652-0000',
-    email: 'contato@allankardecpenapolis.com.br',
-    atendimento: 'Ter. a sáb., 19h às 21h30',
+    telefone: '',
+    whatsapp: '',
+    email: '',
+    atendimento: '',
   },
 
   redes: {
@@ -50,68 +50,19 @@ export const instituicao = {
 
   /** PENDENTE: chave PIX real (o BR Code dinâmico é gerado pelo PSP). */
   pix: {
-    chave: 'ceak-penapolis@pix.org.br',
+    chave: '',
     nomeRecebedor: 'Centro Espirita Allan Kardec',
     favorecido: 'Centro Espírita Allan Kardec',
   },
 
   /** PENDENTE: nomes reais da diretoria. */
-  diretoria: [
-    { nome: 'Antônio Ferreira', cargo: 'Presidente' },
-    { nome: 'Lúcia Moraes', cargo: 'Vice-presidente' },
-    { nome: 'Maria Silva', cargo: 'Tesoureira' },
-    { nome: 'Paulo Mendes', cargo: 'Secretário' },
-    { nome: 'Marta Andrade', cargo: 'Diretora doutrinária' },
-  ],
+  diretoria: [] as { nome: string; cargo: string }[],
 
   /** PENDENTE: programação semanal real. */
-  programacaoSemanal: [
-    { dia: 'Terça', atividade: 'Atendimento fraterno e passe · 19h' },
-    { dia: 'Quarta', atividade: 'Palestra pública · 20h' },
-    { dia: 'Quinta', atividade: 'Tratamento espiritual · 19h' },
-    { dia: 'Sexta', atividade: 'Palestra pública · 20h' },
-    { dia: 'Sábado', atividade: 'Estudo do Evangelho · 19h30 · Biblioteca 18h' },
-    { dia: 'Domingo', atividade: 'Mocidade e evangelização infantil · 9h30' },
-  ],
+  programacaoSemanal: [] as { dia: string; atividade: string }[],
 
   /** PENDENTE: histórico e linha do tempo reais. */
-  linhaDoTempo: [
-    {
-      ano: 1962,
-      titulo: 'Fundação',
-      texto: 'Primeiras reuniões de estudo na casa de um dos fundadores.',
-    },
-    {
-      ano: 1969,
-      titulo: 'Reestruturação',
-      texto: 'Estatuto, diretoria eleita e início das palestras públicas semanais.',
-    },
-    {
-      ano: 1972,
-      titulo: 'Sede própria',
-      texto: 'Inauguração do prédio atual, construído com doações e trabalho voluntário.',
-    },
-    {
-      ano: 1988,
-      titulo: 'Assistência social',
-      texto: 'Começa a distribuição mensal de cestas e o bazar beneficente.',
-    },
-    {
-      ano: 2004,
-      titulo: 'Biblioteca',
-      texto: 'Acervo organizado com mais de 3 mil títulos para empréstimo.',
-    },
-    {
-      ano: 2020,
-      titulo: 'Transmissões ao vivo',
-      texto: 'Palestras passam a ser transmitidas pelo YouTube e Facebook.',
-    },
-    {
-      ano: 2026,
-      titulo: 'CEAK Digital',
-      texto: 'Portal, aplicativo e sistema de gestão integrados.',
-    },
-  ],
+  linhaDoTempo: [] as { ano: number; titulo: string; texto: string }[],
 
   /** PENDENTE: caminhos do logo oficial e das fotos (em `public/` de cada app). */
   assets: {

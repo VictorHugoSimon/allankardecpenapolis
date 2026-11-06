@@ -28,15 +28,25 @@ docs/design protótipos e especificação (referência)
   - **Supabase local** (recomendado): `npx supabase start` (exige Docker). Banco em `127.0.0.1:54322`.
   - **Postgres próprio**: qualquer instância local; ajuste `DATABASE_URL`.
 
-## Primeiros passos
+## Primeira instalação real (sem dados de exemplo)
+
+**Para o Centro em funcionamento, não execute `pnpm db:seed`.** Esse comando é destrutivo, exclusivo de desenvolvimento e testes. O procedimento oficial fica em [Primeiro acesso sem seed](docs/PRIMEIRO_ACESSO_SEM_SEED.md).
 
 ```bash
-cp .env.example .env          # ajuste DATABASE_URL e AUTH_SECRET
+cp .env.example .env           # configure conexão e segredos reais, em ambiente seguro
 pnpm install
-pnpm db:deploy                # aplica as migrações (tabelas + RLS)
-pnpm db:seed                  # dados fictícios dos protótipos
-pnpm dev                      # sobe site, app e gestão
+pnpm db:deploy                 # cria as tabelas e aplica as políticas RLS
+# Configure CEAK_ADMIN_NOME, CEAK_ADMIN_EMAIL, CEAK_ADMIN_SENHA
+# e CEAK_BOOTSTRAP_CONFIRM conforme o guia de primeiro acesso.
+pnpm db:bootstrap              # cria APENAS o primeiro administrador, uma vez
+pnpm dev                       # desenvolvimento local; produção usa deploy próprio
 ```
+
+O bootstrap exige que ainda não exista administrador, preserva visitantes cadastrados, não cria palestras, cursos, categorias, transações ou voluntários de exemplo e deve ser executado apenas com autorização e credenciais administrativas temporárias. Para publicação, também é obrigatório substituir os dados institucionais fictícios em `packages/core/config/instituicao.ts` e homologar o PWA em dispositivos reais.
+
+## Ambiente de demonstração e testes (isolado, nunca produção)
+
+Somente para um PostgreSQL **local e descartável** (localhost ou 127.0.0.1), schema `ceak_v2`, use `SEED_CONFIRM=DESTRUIR_DADOS_DEMO pnpm db:seed` após as migrações. O comando recusa banco remoto, produção ou ausência da confirmação explícita. **Esse comando apaga e recria registros do schema de destino.** Abaixo estão contas e senhas exclusivamente da base de demonstração.
 
 Entre no Gestão em http://localhost:3002 ou no App em http://localhost:3001 com qualquer usuário abaixo (senha `ceak-dev-2026`, ou o valor de `SEED_SENHA`):
 

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { mesmoDia } from '@ceak/core/format';
+import { eventoParaAvaliar } from '@ceak/db';
 import { Tela } from '@/components/Tela';
 import { diaMes, diaRelativo, eventoPorSlug, palestraAnterior } from '@/lib/dados';
 import { exigirSessao } from '@/lib/servidor';
@@ -32,6 +33,9 @@ export default async function EventoPage({ params }: { params: Promise<{ slug: s
   const hoje = mesmoDia(e.inicio, agora);
   const encerrada = e.status === 'ENCERRADO' || (e.fim ?? e.inicio) < agora;
   const anterior = palestra ? await palestraAnterior(e.inicio) : null;
+  // Nem toda palestra anterior já foi encerrada formalmente. Sem essa
+  // verificação, o link de avaliação aponta para uma página 404.
+  const anteriorAvaliavel = anterior ? await eventoParaAvaliar(anterior.slug, agora) : null;
   const paginaSite = siteUrl(palestra ? `/palestras/${e.slug}` : `/agenda/${e.slug}`);
 
   return (
@@ -134,13 +138,19 @@ export default async function EventoPage({ params }: { params: Promise<{ slug: s
                 </a>
               ) : null}
             </div>
-            <Link
-              href={`/avaliacao/${anterior.slug}`}
-              aria-label={`Avaliar a palestra ${anterior.tituloCurto}`}
-              className="rounded-pill bg-beige text-ink hover:text-ink inline-flex min-h-11 items-center px-3.5 py-2.5 text-[13px] no-underline hover:no-underline"
-            >
-              Avaliar
-            </Link>
+            {anteriorAvaliavel ? (
+              <Link
+                href={`/avaliacao/${anterior.slug}`}
+                aria-label={`Avaliar a palestra ${anterior.tituloCurto}`}
+                className="rounded-pill bg-beige text-ink hover:text-ink inline-flex min-h-11 items-center px-3.5 py-2.5 text-[13px] no-underline hover:no-underline"
+              >
+                Avaliar
+              </Link>
+            ) : (
+              <span className="text-muted-2 text-xs" role="status">
+                Avaliação disponível após o encerramento
+              </span>
+            )}
           </section>
         ) : null}
       </div>

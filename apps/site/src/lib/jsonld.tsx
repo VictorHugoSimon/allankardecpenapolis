@@ -20,16 +20,15 @@ export function organizacaoLd() {
     name: instituicao.nome,
     alternateName: `${instituicao.sigla} ${instituicao.cidade}`,
     url: SITE_URL,
-    email: instituicao.contato.email,
-    telephone: instituicao.contato.telefone,
-    foundingDate: String(instituicao.fundacao),
+    ...(instituicao.contato.email ? { email: instituicao.contato.email } : {}),
+    ...(instituicao.contato.telefone ? { telephone: instituicao.contato.telefone } : {}),
+    ...(instituicao.fundacao ? { foundingDate: String(instituicao.fundacao) } : {}),
     address: {
       '@type': 'PostalAddress',
       addressLocality: instituicao.cidade,
       addressRegion: instituicao.uf,
       addressCountry: 'BR',
-      ...(instituicao.endereco.logradouro &&
-      !instituicao.endereco.logradouro.includes('a confirmar')
+      ...(instituicao.endereco.logradouro
         ? {
             streetAddress: `${instituicao.endereco.logradouro}, ${instituicao.endereco.numero}`,
             postalCode: instituicao.endereco.cep,

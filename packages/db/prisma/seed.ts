@@ -52,9 +52,18 @@ const {
   EtapaFluxoPalestra,
 } = await import('../src/generated/prisma/enums');
 
-if (process.env.NODE_ENV === 'production' && process.env.SEED_FORCE !== 'sim') {
-  console.error('Seed bloqueado em produção (defina SEED_FORCE=sim para forçar).');
+if (process.env.NODE_ENV === 'production') {
+  console.error('Seed de dados fictícios permanentemente bloqueado em produção.');
   process.exit(1);
+}
+if (process.env.SEED_CONFIRM !== 'DESTRUIR_DADOS_DEMO') {
+  throw new Error('Seed destrutivo bloqueado: confirmação SEED_CONFIRM ausente.');
+}
+const seedUrl = new URL(process.env.DATABASE_URL ?? '');
+if (!['localhost', '127.0.0.1', '[::1]'].includes(seedUrl.hostname)) {
+  throw new Error(
+    'Seed destrutivo proibido em banco remoto. Use somente PostgreSQL descartável local.',
+  );
 }
 
 /** Data/hora em Penápolis (UTC−3). */

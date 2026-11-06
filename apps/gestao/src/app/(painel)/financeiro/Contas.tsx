@@ -39,6 +39,13 @@ export async function Contas({ tipo, mes }: { tipo: 'PAGAR' | 'RECEBER'; mes?: s
           {formatarCentavos(c.total)}
         </p>
         <Link
+          href={`/financeiro/exportar?tipo=${tipo}&mes=${chave(ref, 0)}`}
+          className="border-line-admin text-ink flex min-h-9 items-center rounded-lg border bg-white px-3 text-sm no-underline hover:bg-gray-50"
+          aria-label={`Exportar contas a ${pagar ? 'pagar' : 'receber'} em CSV`}
+        >
+          Exportar CSV
+        </Link>
+        <Link
           href={`/financeiro/novo?tipo=${tipo}`}
           className={buttonClasses({ shape: 'rounded', size: 'sm' })}
         >
