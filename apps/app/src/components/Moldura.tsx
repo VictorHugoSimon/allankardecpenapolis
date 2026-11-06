@@ -8,7 +8,7 @@ import { type ReactNode } from 'react';
 export function Moldura({ children }: { children: ReactNode }) {
   return (
     <div className="bg-beige flex min-h-dvh items-stretch justify-center min-[600px]:px-6 min-[600px]:py-6">
-      <div className="bg-bg min-h-dvh w-full min-[600px]:min-h-[calc(100dvh-48px)] min-[600px]:max-w-[480px] min-[600px]:overflow-hidden min-[600px]:rounded-[24px] min-[600px]:shadow-app flex flex-col">
+      <div className="bg-bg min-[600px]:shadow-app flex min-h-dvh w-full flex-col min-[600px]:min-h-[calc(100dvh-48px)] min-[600px]:max-w-[480px] min-[600px]:overflow-hidden min-[600px]:rounded-[24px]">
         {children}
       </div>
     </div>
