@@ -41,9 +41,7 @@ export function Cabecalho({ appUrl }: { appUrl: string }) {
             <span className="block font-serif text-lg font-semibold">
               Centro Espírita Allan Kardec
             </span>
-            <span className="text-muted block text-[11px] tracking-[.1em]">
-              PENÁPOLIS · SP
-            </span>
+            <span className="text-muted block text-[11px] tracking-[.1em]">PENÁPOLIS · SP</span>
           </span>
         </Link>
         <nav
