@@ -41,7 +41,10 @@ self.addEventListener('fetch', (event) => {
   // Também ignoramos URLs inválidas e esquemas que não sejam HTTP(S).
   try {
     const destino = new URL(event.request.url);
-    if (destino.origin !== self.location.origin || !['http:', 'https:'].includes(destino.protocol)) return;
+    if (
+      destino.origin !== self.location.origin ||
+      !['http:', 'https:'].includes(destino.protocol)
+    ) return;
   } catch {
     return;
   }
