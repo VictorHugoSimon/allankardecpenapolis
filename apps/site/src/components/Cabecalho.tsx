@@ -42,7 +42,7 @@ export function Cabecalho({ appUrl }: { appUrl: string }) {
               Centro Espírita Allan Kardec
             </span>
             <span className="text-muted block text-[11px] tracking-[.1em]">
-              PENÁPOLIS · DESDE 1962
+              PENÁPOLIS · SP
             </span>
           </span>
         </Link>
