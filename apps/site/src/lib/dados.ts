@@ -553,7 +553,11 @@ export async function produtosEmDestaque() {
   const ordenados = slugs.map((s) => ps.find((p) => p.slug === s)).filter((p) => !!p);
   const lista = ordenados.length
     ? ordenados
-    : await prisma.produto.findMany({ where: { status: 'ATIVO', ...semDemoNome }, take: 4, select: selectProduto });
+    : await prisma.produto.findMany({
+        where: { status: 'ATIVO', ...semDemoNome },
+        take: 4,
+        select: selectProduto,
+      });
   return lista.map(mapearProduto);
 }
 
