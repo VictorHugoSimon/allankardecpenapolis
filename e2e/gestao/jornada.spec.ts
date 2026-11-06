@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { consultar, entrar, ultimoLink, USUARIOS } from './helpers';
+import { consultar, entrar, USUARIOS } from './helpers';
 
 const SITE = process.env.PLAYWRIGHT_SITE_URL ?? 'http://localhost:3000';
 
@@ -203,20 +203,20 @@ test('eventos: QR Code para palestra atual', async ({ page }) => {
   }
 });
 
-test('convite: link por e-mail para definir a senha e entrar', async ({ page }) => {
+test('convite: link privado para definir a senha e entrar', async ({ page }) => {
   const email = `convite.${Date.now()}@allankardecpenapolis.com.br`;
   await entrar(page, USUARIOS.ADMINISTRADOR);
   await page.goto('/config/usuarios');
-  await page.getByRole('link', { name: 'Convidar usuário' }).click();
+  await page.getByRole('link', { name: 'Criar usuário' }).click();
   await page.getByLabel('Nome completo').fill('Beatriz Lemos');
   await page.getByLabel('E-mail').fill(email);
   await page.getByLabel('Perfil').selectOption('SECRETARIA');
-  const t0 = Date.now();
-  await page.getByRole('button', { name: 'Enviar convite' }).click();
+  await page.getByRole('button', { name: 'Criar usuário e gerar convite' }).click();
   await expect(
-    page.getByText('Convite enviado por e-mail · registrado na auditoria.'),
+    page.getByRole('heading', { name: 'Usuário criado — convite pronto' }),
   ).toBeVisible();
-  const link = await ultimoLink(email, t0);
+  const link = await page.getByLabel('Link privado de ativação').inputValue();
+  expect(link).toContain('/redefinir-senha?');
   await page.getByRole('button', { name: 'Sair' }).click();
   await expect(page).toHaveURL(/\/login/);
 
