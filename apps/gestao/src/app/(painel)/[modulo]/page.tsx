@@ -74,8 +74,8 @@ export default async function ModuloOperacionalPage({
     {permite && modulo === 'estoque' ? <div className="grid gap-4 lg:grid-cols-2">
       <Formulario titulo="Cadastrar item de estoque" action={cadastrarItemEstoque}>
         <Campo nome="sku" rotulo="Código SKU" /><Campo nome="nome" rotulo="Nome do item" />
-        <Escolha nome="categoria" rotulo="Categoria" opcoes={[['ALIMENTOS','Alimentos'],['LOJA','Loja'],['LIMPEZA','Limpeza'],['DOACOES','Doações']].map(([value,text])=>({value,text}))}/>
-        <Escolha nome="unidade" rotulo="Unidade" opcoes={[['UN','Unidade'],['KG','Quilo'],['PECA','Peça'],['CESTA','Cesta'],['REAIS','Reais']].map(([value,text])=>({value,text}))}/>
+        <Escolha nome="categoria" rotulo="Categoria" opcoes={[{value:'ALIMENTOS',text:'Alimentos'},{value:'LOJA',text:'Loja'},{value:'LIMPEZA',text:'Limpeza'},{value:'DOACOES',text:'Doações'}]}/>
+        <Escolha nome="unidade" rotulo="Unidade" opcoes={[{value:'UN',text:'Unidade'},{value:'KG',text:'Quilo'},{value:'PECA',text:'Peça'},{value:'CESTA',text:'Cesta'},{value:'REAIS',text:'Reais'}]}/>
         <Campo nome="minimo" rotulo="Estoque mínimo" tipo="number" passo="0.001" valor="0" />
       </Formulario>
       <Formulario titulo="Entrada ou saída de estoque" action={movimentarEstoque}>
