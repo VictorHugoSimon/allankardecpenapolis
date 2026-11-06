@@ -25,13 +25,12 @@ export function validarBootstrap(env: NodeJS.ProcessEnv) {
     throw new Error('CEAK_ADMIN_EMAIL inválido.');
   if (
     !senha ||
-    senha.length < 16 ||
+    senha.length < 6 ||
     senha.length > 256 ||
     !/[a-z]/i.test(senha) ||
-    !/[0-9]/.test(senha) ||
     !/[^a-z0-9]/i.test(senha) ||
     senha.toLowerCase().includes('ceak-dev')
   )
-    throw new Error('CEAK_ADMIN_SENHA precisa ter 16–256 caracteres, letras, número e símbolo.');
+    throw new Error('CEAK_ADMIN_SENHA precisa ter 6–256 caracteres, letras e símbolo.');
   return { nome, email, senha };
 }

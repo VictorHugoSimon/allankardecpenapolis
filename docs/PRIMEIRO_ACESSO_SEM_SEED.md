@@ -6,7 +6,7 @@ A inicialização de produção usa **somente migrações**, jamais `pnpm db:see
 
 1. Configure um banco PostgreSQL exclusivo e o schema `ceak_v2`. Aplique as migrações com `pnpm db:deploy`, após backup/checagem de ambiente.
 2. Configure `AUTH_PROVIDER=local`, `AUTH_SECRET` aleatório com pelo menos 32 caracteres e `CEAK_DB_SCHEMA=ceak_v2`.
-3. Forneça `CEAK_ADMIN_NOME`, `CEAK_ADMIN_EMAIL` e `CEAK_ADMIN_SENHA` (senha exclusiva com no mínimo 16 caracteres, letras, número e símbolo) **pelo gerenciador de segredos da plataforma**, sem inserir senha em terminal compartilhado, arquivo versionado ou mensagem.
+3. Forneça `CEAK_ADMIN_NOME`, `CEAK_ADMIN_EMAIL` e `CEAK_ADMIN_SENHA` (senha exclusiva com no mínimo 6 caracteres, letras e símbolo; para administradores, recomenda-se senha longa e exclusiva, com segundo fator obrigatório) **pelo gerenciador de segredos da plataforma**, sem inserir senha em terminal compartilhado, arquivo versionado ou mensagem.
 4. Configure `CEAK_BOOTSTRAP_CONFIRM=CRIAR_PRIMEIRO_ADMIN_REAL` apenas para a execução autorizada de `pnpm db:bootstrap`. Remova as variáveis de bootstrap imediatamente depois.
 5. Confirme que o primeiro administrador consegue entrar e configurar o segundo fator; somente então convide os demais responsáveis.
 

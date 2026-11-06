@@ -15,6 +15,13 @@ describe('bootstrap seguro de primeiro acesso', () => {
   it('aceita credenciais explicitamente fornecidas', () => {
     expect(validarBootstrap(seguro).email).toBe('admin@exemplo.org');
   });
+  it('aceita senha de 8 caracteres com letras e símbolo, mantendo segundo fator obrigatório no login', () => {
+    const env = { ...seguro, CEAK_ADMIN_SENHA: 'Aadminz@' };
+    expect(validarBootstrap(env).senha).toBe(env.CEAK_ADMIN_SENHA);
+  });
+  it('recusa senha com menos de 6 caracteres', () => {
+    expect(() => validarBootstrap({ ...seguro, CEAK_ADMIN_SENHA: 'Ab@12' })).toThrow();
+  });
   it.each([
     { CEAK_BOOTSTRAP_CONFIRM: undefined },
     { AUTH_PROVIDER: undefined },
