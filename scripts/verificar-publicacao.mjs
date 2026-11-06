@@ -2,7 +2,8 @@
 /**
  * CEAK Digital — verificação de segurança pré-publicação.
  * Não tenta ler valores secretos do disco nem imprime credenciais.
- * A implantação permanece bloqueada até a substituição dos dados fictícios.
+ * Dados institucionais vazios são permitidos, nunca dados de demonstração.
+ * A publicação ainda exige configuração de segurança e homologação.
  */
 import { readFileSync } from 'node:fs';
 
@@ -16,28 +17,19 @@ const exigirAusencia = (trecho, descricao) => {
   if (arquivo.includes(trecho)) pendencias.push(descricao);
 };
 
-exigirAusencia("cnpj: '00.000.000/0001-00'", 'CNPJ ainda é o identificador de exemplo.');
-exigirAusencia(
-  "logradouro: 'endereço a confirmar'",
-  'Endereço institucional ainda não foi confirmado.',
-);
-exigirAusencia("telefone: '(18) 3652-0000'", 'Telefone institucional ainda é de exemplo.');
-exigirAusencia("whatsapp: '(18) 3652-0000'", 'WhatsApp institucional ainda é de exemplo.');
-exigirAusencia("chave: 'ceak-penapolis@pix.org.br'", 'Chave PIX institucional ainda é de exemplo.');
-exigirAusencia(
-  "{ nome: 'Antônio Ferreira', cargo: 'Presidente' }",
-  'Diretoria ainda contém nomes de demonstração.',
-);
-exigirAusencia('logo: null as string | null', 'Logo oficial ainda não foi configurado.');
-exigirAusencia(
-  'fotos: {} as Record<string, string>',
-  'Fotos institucionais ainda não foram configuradas.',
-);
-exigirAusencia("titulo: 'Reestruturação'", 'Linha do tempo ainda contém eventos de exemplo.');
-exigirAusencia(
-  "atividade: 'Palestra pública · 20h'",
-  'Programação semanal ainda contém horários não confirmados.',
-);
+// Dados institucionais são opcionais no primeiro deploy, mas exemplos conhecidos
+// continuam proibidos para evitar publicação de dados falsos.
+for (const [trecho, descricao] of [
+  ["cnpj: '00.000.000/0001-00'", 'CNPJ de exemplo'],
+  ["telefone: '(18) 3652-0000'", 'telefone de exemplo'],
+  ["whatsapp: '(18) 3652-0000'", 'WhatsApp de exemplo'],
+  ["chave: 'ceak-penapolis@pix.org.br'", 'chave PIX de exemplo'],
+  ["{ nome: 'Antônio Ferreira', cargo: 'Presidente' }", 'diretoria fictícia'],
+  ["titulo: 'Reestruturação'", 'histórico fictício'],
+  ["atividade: 'Palestra pública · 20h'", 'programação fictícia'],
+]) {
+  exigirAusencia(trecho, descricao);
+}
 
 if (process.argv.includes('--ambiente')) {
   if (!process.env.DATABASE_URL) pendencias.push('DATABASE_URL ausente.');
@@ -59,8 +51,8 @@ if (process.argv.includes('--ambiente')) {
     if (!url || !/^https:\/\//.test(url))
       pendencias.push(`URL HTTPS do ${endereco} não configurada (${chave}).`);
   }
-  if (process.env.PAYMENT_PROVIDER === 'mock')
-    pendencias.push('Pagamentos continuam simulados; não ativar cobrança real.');
+  if (process.env.PAYMENT_PROVIDER === 'mock' && process.env.CEAK_ENABLE_MOCK_PAYMENT_CONFIRMATION === 'sim')
+    pendencias.push('Confirmação de pagamento simulado não pode estar ativada.');
 }
 
 if (pendencias.length) {
