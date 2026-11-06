@@ -3,6 +3,9 @@ import { DESTINOS_DOACAO, VALORES_DOACAO } from '@ceak/core/regras';
 import { Secao } from '@/components/Elementos';
 import { FormDoacao } from './FormDoacao';
 
+// O modo de publicação é verificado a cada requisição, nunca fixado no build.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Doar',
   description:
