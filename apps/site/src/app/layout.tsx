@@ -51,8 +51,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 role="status"
                 className="bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-950"
               >
-                AMBIENTE DE HOMOLOGAÇÃO — Dados de demonstração. Programação, contatos, diretoria e
-                informações de PIX ainda não foram validados. Não realize pagamentos.
+                INFORMAÇÕES EM ATUALIZAÇÃO — Programação e contatos oficiais serão publicados após
+                confirmação. PIX temporariamente indisponível.
               </div>
             )}
             <Cabecalho appUrl={APP_URL} />
