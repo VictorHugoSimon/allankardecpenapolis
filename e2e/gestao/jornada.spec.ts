@@ -212,7 +212,9 @@ test('convite: link privado para definir a senha e entrar', async ({ page }) => 
   await page.getByLabel('E-mail').fill(email);
   await page.getByLabel('Perfil').selectOption('SECRETARIA');
   await page.getByRole('button', { name: 'Criar usuário e gerar convite' }).click();
-  await expect(page.getByRole('heading', { name: 'Usuário criado — convite pronto' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Usuário criado — convite pronto' }),
+  ).toBeVisible();
   const link = await page.getByLabel('Link privado de ativação').inputValue();
   expect(link).toContain('/redefinir-senha?');
   await page.getByRole('button', { name: 'Sair' }).click();
