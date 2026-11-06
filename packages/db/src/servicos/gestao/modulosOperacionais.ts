@@ -86,12 +86,12 @@ export async function painelModuloOperacional(ctx: ContextoRls, modulo: string):
       case 'ia':
       case 'sistema': {
         const [pessoas, atividades, estudos, lancamentos, produtos, doacoes, comunicacoes, automacoes] = await Promise.all([
-          tx.pessoa.count(), tx.atividade.count(), tx.turma.count(), tx.lancamento.count(),
+          tx.pessoa.count(), tx.evento.count(), tx.turma.count(), tx.lancamento.count(),
           tx.produto.count(), tx.doacao.count(), tx.comunicacao.count(), tx.automacao.count()
         ]);
         const indicadores = [
           { rotulo: 'Pessoas cadastradas', valor: String(pessoas) },
-          { rotulo: 'Atividades', valor: String(atividades) },
+          { rotulo: 'Eventos', valor: String(atividades) },
           { rotulo: 'Turmas de estudo', valor: String(estudos) },
           { rotulo: 'Lançamentos financeiros', valor: String(lancamentos) },
           { rotulo: 'Produtos', valor: String(produtos) },
