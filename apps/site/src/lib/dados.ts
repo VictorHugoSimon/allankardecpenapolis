@@ -54,6 +54,11 @@ const TIPOS_DO_FILTRO: Record<string, TipoEventoSite[]> = {
 
 const STATUS_PUBLICOS = ['CONFIRMADO', 'EM_ANDAMENTO', 'ENCERRADO'] as const;
 
+/** Em abertura pública, não exibir conteúdo que pertence ao seed de homologação. */
+const ocultarDemo = process.env.CEAK_PUBLIC_HIDE_DEMO === 'sim';
+const semDemoTitulo = ocultarDemo ? { NOT: { titulo: { startsWith: '[DEMO]' } } } : {};
+const semDemoNome = ocultarDemo ? { NOT: { nome: { startsWith: '[DEMO]' } } } : {};
+
 const selectEvento = {
   id: true,
   slug: true,
@@ -113,7 +118,7 @@ export function mapearEvento(e: EventoDb) {
 }
 export type EventoSite = ReturnType<typeof mapearEvento>;
 
-const ondePublico = { publico: true, status: { in: [...STATUS_PUBLICOS] } };
+const ondePublico = { publico: true, status: { in: [...STATUS_PUBLICOS] }, ...semDemoTitulo };
 
 export async function eventosDoMes(ano: number, mes: number, filtro: string = 'Todos') {
   const inicio = new Date(`${ano}-${String(mes + 1).padStart(2, '0')}-01T00:00:00-03:00`);
@@ -194,7 +199,7 @@ export async function eventoPorSlug(slug: string) {
 
 export async function cursos() {
   return prisma.curso.findMany({
-    where: { ativo: true },
+    where: { ativo: true, ...semDemoNome },
     orderBy: { ordem: 'asc' },
     select: {
       slug: true,
@@ -211,7 +216,7 @@ export async function cursos() {
 /** Cards de estudos da home: curso em destaque + turma com resumo público. */
 export async function estudosEmDestaque(agora = new Date()) {
   const cs = await prisma.curso.findMany({
-    where: { ativo: true, destaque: true },
+    where: { ativo: true, destaque: true, ...semDemoNome },
     orderBy: { ordem: 'asc' },
     select: {
       slug: true,
@@ -275,6 +280,7 @@ export const FOTO_POR_CATEGORIA: Record<string, string> = {
 
 const ondePostPublicado = {
   status: 'PUBLICADO' as const,
+  ...semDemoTitulo,
   slug: { not: null },
   publicadoEm: { not: null },
 };
@@ -371,6 +377,7 @@ export async function itensBiblioteca(f: FiltroBiblioteca) {
   const q = f.q?.trim();
   const itens = await prisma.itemBiblioteca.findMany({
     where: {
+      ...semDemoTitulo,
       ...(tipo ? { tipo } : {}),
       ...(f.assunto ? { OR: [{ assuntos: { has: f.assunto } }, { tema: f.assunto }] } : {}),
       ...(f.autor ? { autor: { contains: f.autor, mode: 'insensitive' as const } } : {}),
@@ -426,7 +433,7 @@ const UNIDADE_META = {
 
 export async function campanhaEmDestaque() {
   const c = await prisma.campanha.findFirst({
-    where: { status: 'ATIVA', destaque: true },
+    where: { status: 'ATIVA', destaque: true, ...semDemoTitulo },
     orderBy: { fim: 'asc' },
     include: { itens: true },
   });
@@ -435,7 +442,7 @@ export async function campanhaEmDestaque() {
 
 export async function campanhaPorSlug(slug: string) {
   const c = await prisma.campanha.findFirst({
-    where: { slug, status: { in: ['ATIVA', 'ENCERRADA'] } },
+    where: { slug, status: { in: ['ATIVA', 'ENCERRADA'] }, ...semDemoTitulo },
     include: { itens: true },
   });
   return c ? mapearCampanha(c) : null;
@@ -519,6 +526,7 @@ export async function produtos(categoria?: string) {
   const ps = await prisma.produto.findMany({
     where: {
       status: { in: ['ATIVO', 'ESGOTADO'] },
+      ...semDemoNome,
       ...(categoria && categoria !== 'Todos'
         ? categoria === 'Outros'
           ? { categoria: { notIn: CATEGORIAS_LOJA.filter((c) => c !== 'Todos' && c !== 'Outros') } }
@@ -539,19 +547,19 @@ export async function produtosEmDestaque() {
     'manta-de-croche',
   ];
   const ps = await prisma.produto.findMany({
-    where: { status: 'ATIVO', slug: { in: slugs } },
+    where: { status: 'ATIVO', slug: { in: slugs }, ...semDemoNome },
     select: selectProduto,
   });
   const ordenados = slugs.map((s) => ps.find((p) => p.slug === s)).filter((p) => !!p);
   const lista = ordenados.length
     ? ordenados
-    : await prisma.produto.findMany({ where: { status: 'ATIVO' }, take: 4, select: selectProduto });
+    : await prisma.produto.findMany({ where: { status: 'ATIVO', ...semDemoNome }, take: 4, select: selectProduto });
   return lista.map(mapearProduto);
 }
 
 export async function produtoPorSlug(slug: string) {
   const p = await prisma.produto.findFirst({
-    where: { slug, status: { in: ['ATIVO', 'ESGOTADO'] } },
+    where: { slug, status: { in: ['ATIVO', 'ESGOTADO'] }, ...semDemoNome },
     select: selectProduto,
   });
   return p ? mapearProduto(p) : null;
@@ -559,7 +567,7 @@ export async function produtoPorSlug(slug: string) {
 
 export async function produtosPorIds(ids: string[]) {
   const ps = await prisma.produto.findMany({
-    where: { id: { in: ids }, status: { in: ['ATIVO', 'ESGOTADO'] } },
+    where: { id: { in: ids }, status: { in: ['ATIVO', 'ESGOTADO'] }, ...semDemoNome },
     select: selectProduto,
   });
   return ps.map(mapearProduto);
