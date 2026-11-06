@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { listarUsuarios, situacao2fa } from '@ceak/db';
 import { buttonClasses, Pill, Table } from '@ceak/ui';
@@ -13,6 +14,7 @@ export default async function UsuariosPage({
   searchParams: Promise<{ ok?: string }>;
 }) {
   const s = await exigirModulo('config');
+  if (s.perfil !== 'ADMINISTRADOR') redirect('/sem-acesso');
   const { ok } = await searchParams;
   const us = await listarUsuarios(contextoRls(s));
   const f2 = await situacao2fa(us.map((u) => u.id));
@@ -24,7 +26,7 @@ export default async function UsuariosPage({
           className="bg-green-soft text-green-dark rounded-input m-0 px-3.5 py-3 text-sm"
         >
           {ok === 'convite'
-            ? 'Convite enviado por e-mail · registrado na auditoria.'
+            ? 'Convite registrado na auditoria. Compartilhe o link de ativação de forma privada.'
             : ok === '2fa'
               ? 'Autenticador redefinido · a pessoa vai configurar de novo no próximo login.'
               : 'Usuário atualizado · registrado na auditoria.'}
