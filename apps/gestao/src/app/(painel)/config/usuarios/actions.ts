@@ -6,7 +6,7 @@ import { isPerfil, PERFIS } from '@ceak/core/rbac';
 import { atualizarUsuario, convidarUsuario, ErroNegocio, redefinir2fa } from '@ceak/db';
 import { exigirModulo } from '@/lib/auth';
 import { log } from '@/lib/log';
-import { contexto, enviarEmail, GESTAO_URL } from '@/lib/servidor';
+import { contexto, GESTAO_URL } from '@/lib/servidor';
 
 const perfilGestao = z.enum(
   PERFIS.filter((p) => p !== 'MEMBRO' && p !== 'VISITANTE') as [string, ...string[]],
@@ -51,11 +51,19 @@ const convite = z.object({
   perfil: perfilGestao,
 });
 
+type EstadoConvite = {
+  erro?: string;
+  erros?: Record<string, string>;
+  linkConvite?: string;
+  emailConvidado?: string;
+};
+
 export async function convidar(
-  _: { erro?: string; erros?: Record<string, string> },
+  _: EstadoConvite,
   form: FormData,
-): Promise<{ erro?: string; erros?: Record<string, string> }> {
+): Promise<EstadoConvite> {
   const s = await exigirModulo('config');
+  if (s.perfil !== 'ADMINISTRADOR') return { erro: 'Somente administradores podem convidar usuários.' };
   const r = convite.safeParse(Object.fromEntries(form));
   if (!r.success) {
     const erros: Record<string, string> = {};
@@ -64,21 +72,22 @@ export async function convidar(
   }
   const ctx = await contexto(s);
   try {
-    await convidarUsuario(
+    // O adapter de e-mail atual é mock; a entrega segura fica a cargo do administrador.
+    // O link não é gravado em logs nem incluído em redirects.
+    const novo = await convidarUsuario(
       ctx,
       { nome: r.data.nome, email: r.data.email, perfil: r.data.perfil as (typeof PERFIS)[number] },
       {
-        enviarEmail,
         urlBase: GESTAO_URL,
         log,
         ip: ctx.ip,
       },
     );
+    return { linkConvite: novo.link, emailConvidado: r.data.email };
   } catch (e) {
     if (e instanceof ErroNegocio) return { erros: { email: e.message } };
     throw e;
   }
-  redirect('/config/usuarios?ok=convite');
 }
 
 /** Celular perdido: o autenticador é apagado e a pessoa configura de novo no próximo login. */
