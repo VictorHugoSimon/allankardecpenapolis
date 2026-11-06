@@ -54,16 +54,21 @@ export async function enviarConvite(
   email: string,
   nome: string,
   deps: {
-    enviarEmail: (para: string, assunto: string, texto: string) => Promise<unknown>;
+    enviarEmail?: (para: string, assunto: string, texto: string) => Promise<unknown>;
     urlBase: string;
   },
 ) {
   const link = await gerarLink(email, CONVITE_TTL_MS, deps.urlBase);
-  await deps.enviarEmail(
-    email,
-    'Convite · CEAK Gestão',
-    `Olá, ${nome.split(' ')[0]}. Você recebeu acesso ao CEAK Gestão. Defina sua senha pelo link abaixo (válido por 48 horas).\n\n${link}`,
-  );
+  // Sem provedor real, o administrador entrega o link de forma privada.
+  // Nunca afirmar que e-mail foi enviado pelo adapter mock.
+  if (deps.enviarEmail) {
+    await deps.enviarEmail(
+      email,
+      'Convite · CEAK Gestão',
+      `Olá, ${nome.split(' ')[0]}. Você recebeu acesso ao CEAK Gestão. Defina sua senha pelo link abaixo (válido por 48 horas).\n\n${link}`,
+    );
+  }
+  return link;
 }
 
 /** Valida o token e grava a nova senha (uso único). */
