@@ -79,12 +79,41 @@ describe('CEAK PWA: worker estático', () => {
   });
 });
 
+describe('isolamento de navegações externas', () => {
+  it.each([
+    'https://outro-dominio.example/pagina',
+    'http://app.ceak.example/agenda',
+    'mailto:contato@example.org',
+    'url-invalida',
+  ])('não intercepta links fora da origem do PWA (%s)', (url) => {
+    const { handlers } = carregarWorker({ falharRede: true });
+    const respondWith = vi.fn();
+    handlers.get('fetch')!({
+      request: { mode: 'navigate', method: 'GET', url },
+      respondWith,
+    });
+    expect(respondWith).not.toHaveBeenCalled();
+  });
+
+  it('não intercepta pedidos que não sejam navegação GET', () => {
+    const { handlers } = carregarWorker();
+    const respondWith = vi.fn();
+    for (const request of [
+      { mode: 'cors', method: 'GET', url: 'https://app.ceak.example/api/me' },
+      { mode: 'navigate', method: 'POST', url: 'https://app.ceak.example/agenda' },
+    ]) {
+      handlers.get('fetch')!({ request, respondWith });
+    }
+    expect(respondWith).not.toHaveBeenCalled();
+  });
+});
+
 describe('fallback de navegação offline seguro', () => {
   it('responde HTML independente sem scripts e sem dados do membro', async () => {
     const { handlers } = carregarWorker({ falharRede: true });
     let resultado: Promise<Response> | undefined;
     handlers.get('fetch')!({
-      request: { mode: 'navigate', method: 'GET' },
+      request: { mode: 'navigate', method: 'GET', url: 'https://app.ceak.example/agenda' },
       respondWith: (p: Promise<Response>) => {
         resultado = p;
       },
