@@ -37,6 +37,14 @@ self.addEventListener('activate', (event) => {
 // responda somente com a tela pública que foi colocada no cache na instalação.
 self.addEventListener('fetch', (event) => {
   if (event.request.mode !== 'navigate' || event.request.method !== 'GET') return;
+  // Navegações externas não pertencem ao PWA e não devem receber o fallback CEAK.
+  // Também ignoramos URLs inválidas e esquemas que não sejam HTTP(S).
+  try {
+    const destino = new URL(event.request.url);
+    if (destino.origin !== self.location.origin || !['http:', 'https:'].includes(destino.protocol)) return;
+  } catch {
+    return;
+  }
   event.respondWith(
     fetch(event.request).catch(async () => {
       // O HTML do Next.js pode depender de bundles que não ficam em cache.
