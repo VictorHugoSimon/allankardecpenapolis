@@ -37,7 +37,7 @@ export default async function UsuariosPage({
           href="/config/usuarios/convidar"
           className={buttonClasses({ shape: 'rounded', size: 'sm' })}
         >
-          Convidar usuário
+          Criar usuário
         </Link>
       </div>
       <Table
