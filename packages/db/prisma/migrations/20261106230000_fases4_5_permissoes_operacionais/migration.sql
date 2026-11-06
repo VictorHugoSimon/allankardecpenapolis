@@ -56,3 +56,9 @@ CREATE POLICY automacao_equipe_leitura ON ceak_v2.automacao FOR SELECT TO ceak_a
   USING (ceak_v2.app_perfil_em('ADMINISTRADOR', 'DIRETORIA'));
 CREATE POLICY automacao_equipe_cadastro ON ceak_v2.automacao FOR INSERT TO ceak_app
   WITH CHECK (ceak_v2.app_perfil_em('ADMINISTRADOR', 'DIRETORIA'));
+
+-- A contagem de execuções exibida no painel requer leitura controlada desta tabela.
+ALTER TABLE ceak_v2.execucao ENABLE ROW LEVEL SECURITY;
+GRANT SELECT ON ceak_v2.execucao TO ceak_app;
+CREATE POLICY execucao_equipe_leitura ON ceak_v2.execucao FOR SELECT TO ceak_app
+  USING (ceak_v2.app_perfil_em('ADMINISTRADOR', 'DIRETORIA'));
