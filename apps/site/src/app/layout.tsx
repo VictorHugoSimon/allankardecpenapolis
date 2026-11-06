@@ -46,15 +46,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
         <CarrinhoProvider>
           <div className="flex min-h-screen flex-col">
-            {homologacao && (
-              <div
-                role="status"
-                className="bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-950"
-              >
-                INFORMAÇÕES EM ATUALIZAÇÃO — Programação e contatos oficiais serão publicados após
-                confirmação. PIX temporariamente indisponível.
-              </div>
-            )}
             <Cabecalho appUrl={APP_URL} />
             <main id="conteudo" className="flex-1">
               {children}
