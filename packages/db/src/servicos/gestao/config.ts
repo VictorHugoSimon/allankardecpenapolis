@@ -125,7 +125,7 @@ export async function convidarUsuario(
   ctx: ContextoRls & { usuarioId: string },
   dados: { nome: string; email: string; perfil: Perfil },
   deps: {
-    enviarEmail: (para: string, assunto: string, texto: string) => Promise<unknown>;
+    enviarEmail?: (para: string, assunto: string, texto: string) => Promise<unknown>;
     urlBase: string;
     log: Logger;
     ip: string | null;
@@ -161,12 +161,12 @@ export async function convidarUsuario(
     });
     return u;
   });
-  await enviarConvite(email, dados.nome, deps);
+  const link = await enviarConvite(email, dados.nome, deps);
   deps.log.info('SEGURANCA', `usuario.convidado · ${dados.perfil}`, {
     rota: '/config',
     status: 201,
   });
-  return novo;
+  return { ...novo, link };
 }
 
 /** Itens de Segurança e LGPD (Configuração). */
