@@ -44,7 +44,9 @@ self.addEventListener('fetch', (event) => {
     if (
       destino.origin !== self.location.origin ||
       !['http:', 'https:'].includes(destino.protocol)
-    ) return;
+    ) {
+      return;
+    }
   } catch {
     return;
   }
