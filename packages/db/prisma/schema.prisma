@@ -772,6 +772,24 @@ model Notificacao {
   @@map("notificacao")
 }
 
+/// Fila persistente de entrega push. Uma linha por comunicado/aparelho.
+model EntregaPush {
+  id             String    @id @default(uuid()) @db.Uuid
+  comunicacaoId   String    @map("comunicacao_id") @db.Uuid
+  dispositivoId   String    @map("dispositivo_id") @db.Uuid
+  status          String    @default("PENDENTE")
+  tentativas      Int       @default(0)
+  proximaEm       DateTime  @default(now()) @map("proxima_em")
+  bloqueadoAte    DateTime? @map("bloqueado_ate")
+  ultimoErro      String?   @map("ultimo_erro")
+  enviadoEm       DateTime? @map("enviado_em")
+  criadoEm        DateTime  @default(now()) @map("criado_em")
+
+  @@unique([comunicacaoId, dispositivoId])
+  @@index([status, proximaEm])
+  @@map("entrega_push")
+}
+
 /// Inscrição Web Push (VAPID) de um dispositivo.
 model DispositivoPush {
   id       String   @id @default(uuid()) @db.Uuid
