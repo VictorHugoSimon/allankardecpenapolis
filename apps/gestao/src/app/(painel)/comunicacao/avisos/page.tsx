@@ -17,10 +17,17 @@ export default async function AvisosInternosPage() {
   const avisos = await comRls(contextoRls(sessao), (tx) =>
     tx.comunicacao.findMany({
       where: { canal: 'APP' },
-      take: 60, orderBy: { criadoEm: 'desc' },
+      take: 60,
+      orderBy: { criadoEm: 'desc' },
       select: {
-        id: true, titulo: true, mensagem: true, publico: true, status: true,
-        enviados: true, criadoEm: true, enviadoEm: true,
+        id: true,
+        titulo: true,
+        mensagem: true,
+        publico: true,
+        status: true,
+        enviados: true,
+        criadoEm: true,
+        enviadoEm: true,
       },
     }),
   );
@@ -28,14 +35,21 @@ export default async function AvisosInternosPage() {
     <div className="flex flex-col gap-5">
       <TituloPagina
         sub="Mensagens na caixa de avisos do aplicativo · dados reais"
-        acoes={<Link href="/comunicacao" className="border-line rounded-input border bg-white px-4 py-2 text-sm">Voltar a Comunicação</Link>}
+        acoes={
+          <Link
+            href="/comunicacao"
+            className="border-line rounded-input border bg-white px-4 py-2 text-sm"
+          >
+            Voltar a Comunicação
+          </Link>
+        }
       >
         Avisos internos
       </TituloPagina>
       <div className="border-line rounded-card border bg-white p-4 text-sm">
-        Este módulo distribui comunicados somente na caixa de avisos do CEAK App, para
-        contas ativas com consentimento registrado. Não envia WhatsApp, e-mail ou
-        notificações push do navegador. O administrador revisa e publica cada mensagem.
+        Este módulo distribui comunicados somente na caixa de avisos do CEAK App, para contas ativas
+        com consentimento registrado. Não envia WhatsApp, e-mail ou notificações push do navegador.
+        O administrador revisa e publica cada mensagem.
       </div>
       <section className="grid gap-3 sm:grid-cols-3" aria-label="Resumo dos avisos">
         {[
@@ -59,9 +73,19 @@ export default async function AvisosInternosPage() {
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium">Mensagem</span>
-              <textarea name="mensagem" rows={5} minLength={10} maxLength={2000} required className={input} />
+              <textarea
+                name="mensagem"
+                rows={5}
+                minLength={10}
+                maxLength={2000}
+                required
+                className={input}
+              />
             </label>
-            <button type="submit" className="bg-green rounded-input min-h-11 self-start px-5 py-2 font-semibold text-white">
+            <button
+              type="submit"
+              className="bg-green rounded-input min-h-11 self-start px-5 py-2 font-semibold text-white"
+            >
               Salvar rascunho
             </button>
           </form>
@@ -70,19 +94,28 @@ export default async function AvisosInternosPage() {
       <section className="border-line rounded-card overflow-x-auto border bg-white">
         <h2 className="m-0 p-4 text-lg font-semibold">Comunicações registradas</h2>
         {avisos.length === 0 ? (
-          <p className="text-muted-2 m-0 p-5">Nenhum comunicado interno cadastrado. Não foram criados dados de exemplo.</p>
+          <p className="text-muted-2 m-0 p-5">
+            Nenhum comunicado interno cadastrado. Não foram criados dados de exemplo.
+          </p>
         ) : (
           <table className="w-full min-w-[670px] text-left text-sm">
             <thead className="bg-[#f5f1e8]">
-              <tr><th className="p-3">Comunicado</th><th className="p-3">Público</th><th className="p-3">Situação</th><th className="p-3">Entregas</th></tr>
+              <tr>
+                <th className="p-3">Comunicado</th>
+                <th className="p-3">Público</th>
+                <th className="p-3">Situação</th>
+                <th className="p-3">Entregas</th>
+              </tr>
             </thead>
             <tbody>
               {avisos.map((a) => (
                 <tr key={a.id} className="border-line border-t align-top">
                   <td className="p-3">
                     <strong className="block">{a.titulo}</strong>
-                    <p className="my-1 max-w-md whitespace-pre-wrap text-sm">{a.mensagem}</p>
-                    <span className="text-muted-2 block text-xs">Criado: {formatoData(a.criadoEm)}</span>
+                    <p className="my-1 max-w-md text-sm whitespace-pre-wrap">{a.mensagem}</p>
+                    <span className="text-muted-2 block text-xs">
+                      Criado: {formatoData(a.criadoEm)}
+                    </span>
                   </td>
                   <td className="p-3">{a.publico}</td>
                   <td className="p-3">
@@ -90,11 +123,18 @@ export default async function AvisosInternosPage() {
                     {administra && a.status === 'RASCUNHO' ? (
                       <form action={publicarAvisoInterno} className="mt-2">
                         <input type="hidden" name="id" value={a.id} />
-                        <button type="submit" className="border-line rounded-input min-h-11 border bg-white px-3 text-sm font-medium">
+                        <button
+                          type="submit"
+                          className="border-line rounded-input min-h-11 border bg-white px-3 text-sm font-medium"
+                        >
                           Publicar no aplicativo
                         </button>
                       </form>
-                    ) : a.enviadoEm ? <span className="text-muted-2 mt-1 block text-xs">Publicado: {formatoData(a.enviadoEm)}</span> : null}
+                    ) : a.enviadoEm ? (
+                      <span className="text-muted-2 mt-1 block text-xs">
+                        Publicado: {formatoData(a.enviadoEm)}
+                      </span>
+                    ) : null}
                   </td>
                   <td className="p-3">{a.enviados}</td>
                 </tr>
