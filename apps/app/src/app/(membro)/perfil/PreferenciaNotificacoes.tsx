@@ -16,9 +16,10 @@ export function PreferenciaNotificacoes({ chavePublica, pessoaId }: { chavePubli
   useEffect(() => {
     try {
       const armazenado = window.localStorage.getItem(chavePreferencia);
-      if (armazenado === 'nao') setPreferencia('nao');
+      setPreferencia(armazenado === 'nao' ? 'nao' : 'sim');
     } catch {
       // A escolha continua disponível mesmo sem armazenamento local.
+      setPreferencia('sim');
     }
     setMontado(true);
   }, [chavePreferencia]);
