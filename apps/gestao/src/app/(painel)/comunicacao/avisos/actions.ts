@@ -161,3 +161,12 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
   });
   revalidatePath('/comunicacao/avisos');
 }
+
+/** Executa um lote de até 50 inscrições sob comando de administrador. */
+export async function processarLotePush(): Promise<void> {
+  const sessao = await exigirModulo('comunicacao');
+  if (sessao.perfil !== 'ADMINISTRADOR') throw new Error('Acesso restrito.');
+  const { processarFilaPush } = await import('@/lib/processarFilaPush');
+  await processarFilaPush();
+  revalidatePath('/comunicacao/avisos');
+}
