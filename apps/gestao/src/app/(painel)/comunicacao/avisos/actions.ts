@@ -77,6 +77,12 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     throw new Error('Apenas administradores podem publicar avisos gerais.');
   const id = String(form.get('id') ?? '');
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error('Aviso inválido.');
+  const [infraFila] = await prisma.$queryRaw<Array<{ existe: boolean }>>`
+    SELECT to_regclass('ceak_v2.entrega_push') IS NOT NULL AS existe
+  `;
+  if (!infraFila?.existe) {
+    throw new Error('Atualização da fila de notificações pendente. Publique após aplicar a migração do banco.');
+  }
   // Obtém somente IDs, sem endpoints/chaves. A inserção da fila ocorrerá
   // na MESMA transação da publicação, para não perder envios em caso de falha.
   const dispositivosCandidatos = await prisma.dispositivoPush.findMany({
