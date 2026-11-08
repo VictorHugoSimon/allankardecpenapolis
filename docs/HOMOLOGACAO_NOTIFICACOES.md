@@ -31,7 +31,12 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 - **Sim** é a preferência inicial, mas não substitui o consentimento exigido por Android, iOS e navegadores.
 - A caixa interna funciona independentemente de permissão push.
 - Envio externo é tentado apenas com VAPID configurado e provedor `webpush`, sem simulação.
-- Na implantação atual, o fluxo síncrono envia Web Push apenas quando existem até 100 inscrições elegíveis; acima disso, registra que é necessário um processador em lotes. Nunca declara que os demais receberam push.
+- A nova fila persistente suporta **mais de 1.000 aparelhos inscritos**; cada comunicado e aparelho tem uma entrada única no PostgreSQL.
+- A publicação cria os avisos internos e a fila de push na mesma transação. O processamento é tentado automaticamente após a resposta, em lotes de 50, com até 10 envios simultâneos.
+- O processamento automático pós-resposta depende do tempo disponível na hospedagem; se for interrompido, o restante permanece na fila.
+- Para retomada imediata existe o botão **Processar próximo lote (até 50)** no CEAK Gestão. A rota protegida `GET /api/cron/notificacoes` aceita `Authorization: Bearer <CRON_SECRET>` de agendador autorizado. O agendamento periódico externo ainda precisa ser ativado.
+- Falhas transitórias são retentadas até cinco vezes, com espera progressiva. O serviço registra aceites e falhas, sem prometer que o sistema operacional exibiu o alerta.
+- O plano Vercel **Hobby** não foi assumido como agendador de alta frequência; a publicação não deve ser chamada de totalmente automatizada até testar recuperação dos lotes interrompidos.
 - O painel separa quantidade de avisos internos e tentativas Web Push aceitas/falhas.
 - A notificação push abre o CEAK App em `/notificacoes`, onde o usuário pode tocar no link externo compartilhado.
 - Não existe publicação automática no Facebook. O endereço fornecido é um **link de referência**, não uma integração Meta autorizada.
@@ -39,7 +44,10 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 
 ## Pendências para aceite final
 
+- [ ] Aplicar antes do deploy a migração `20261108193000_entrega_push_fila` ao banco `ceak_v2` com `pnpm db:deploy` e gerar o Prisma Client.
 - [ ] Fazer novo deploy dos dois aplicativos após liberação do limite da Vercel.
+- [ ] Conectar agendador recorrente autenticado à rota `/api/cron/notificacoes`; configurar horário adequado e testar retomada de fila interrompida.
+- [ ] Verificar 1.000 aparelhos inscritos em ambiente de teste com métricas de aceites/falhas sem envio acidental para usuários reais.
 - [ ] Executar build, lint e TypeScript na versão publicada.
 - [ ] Testar primeiro consentimento e o botão push no Android Chrome.
 - [ ] Testar no iPhone com PWA instalado pela Tela de Início.
