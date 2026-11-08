@@ -48,9 +48,7 @@ export default async function AvisosInternosPage() {
         Central de notificações
       </TituloPagina>
       <div className="border-line rounded-card border bg-white p-4 text-sm">
-        Este módulo distribui comunicados somente na caixa de avisos do CEAK App, para contas ativas
-        com consentimento registrado. Não envia WhatsApp, e-mail ou notificações push do navegador.
-        O administrador revisa e publica cada mensagem.
+        As mensagens são publicadas na caixa de avisos de usuários elegíveis. Quando o Web Push estiver configurado, também são enviadas aos aparelhos que autorizaram notificações. Não envia WhatsApp nem e-mail. O administrador revisa cada publicação.
       </div>
       <section className="grid gap-3 sm:grid-cols-3" aria-label="Resumo dos avisos">
         {[
@@ -129,6 +127,12 @@ export default async function AvisosInternosPage() {
                   <td className="p-3">
                     <strong className="block">{a.titulo}</strong>
                     <p className="my-1 max-w-md text-sm whitespace-pre-wrap">{a.mensagem}</p>
+                    {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) &&
+                    typeof (a.filtro as Record<string, unknown>).resumoPush === 'string' ? (
+                      <p className="text-muted-2 my-2 max-w-md text-xs">
+                        {String((a.filtro as Record<string, unknown>).resumoPush)}
+                      </p>
+                    ) : null}
                     {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) && typeof (a.filtro as Record<string, unknown>).url === 'string' ? (
                       <p className="my-2 max-w-md break-all text-xs text-green">
                         Link: {String((a.filtro as Record<string, unknown>).url)}
