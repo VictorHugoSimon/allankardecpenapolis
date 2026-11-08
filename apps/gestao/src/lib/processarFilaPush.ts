@@ -46,7 +46,20 @@ export async function processarFilaPush() {
           }),
           prisma.dispositivoPush.findUnique({ where: { id: item.dispositivo_id } }),
         ]);
-        if (!comunicado || comunicado.status !== 'ENVIADO' || !dispositivo) {
+        const pessoaAutorizada = dispositivo?.pessoaId
+          ? await prisma.pessoa.findFirst({
+              where: {
+                id: dispositivo.pessoaId,
+                consentimentoEm: { not: null },
+                exclusaoSolicitadaEm: null,
+                anonimizadaEm: null,
+                usuario: { is: { ativo: true } },
+              },
+              select: { id: true },
+            })
+          : null;
+        // O usuário pode revogar autorização ou excluir a conta depois da publicação.
+        if (!comunicado || comunicado.status !== 'ENVIADO' || !dispositivo || !pessoaAutorizada) {
           await prisma.entregaPush.update({ where: { id: item.id },
             data: { status: 'EXPIRADO', bloqueadoAte: null, ultimoErro: 'Destino indisponível' } });
           return;
