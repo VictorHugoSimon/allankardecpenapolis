@@ -6,7 +6,7 @@ import { perfilMembro } from '@ceak/db';
 import { Tela } from '@/components/Tela';
 import { exigirSessao } from '@/lib/servidor';
 import { BotaoSairSeguro } from './BotaoSairSeguro';
-import { AtivarPush } from './AtivarPush';
+import { PreferenciaNotificacoes } from './PreferenciaNotificacoes';
 
 export const metadata: Metadata = { title: 'Perfil' };
 export const dynamic = 'force-dynamic';
@@ -68,7 +68,7 @@ export default async function PerfilPage() {
           </ul>
         </nav>
         <div className="border-line rounded-[18px] border bg-white px-4 py-2">
-          <AtivarPush chavePublica={process.env.VAPID_PUBLIC_KEY ?? null} />
+          <PreferenciaNotificacoes chavePublica={process.env.VAPID_PUBLIC_KEY ?? null} />
         </div>
         <BotaoSairSeguro />
       </div>
