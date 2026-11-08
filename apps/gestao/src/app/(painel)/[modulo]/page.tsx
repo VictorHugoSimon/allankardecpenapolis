@@ -386,7 +386,7 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
   const operacoes: Operacao[] = ['doacoes', 'loja', 'estoque', 'comunicacao', 'automacoes'];
   const editavel = s.perfil === 'ADMINISTRADOR' && operacoes.some((o) => o === modulo);
   return (
-    <main className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5">
       <TituloPagina sub="Dados reais · CEAK Gestão">{MODULO_LABEL[modulo as Modulo]}</TituloPagina>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {visao.indicadores.map((k) => (
@@ -431,6 +431,6 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
           </p>
         </section>
       )}
-    </main>
+    </div>
   );
 }
