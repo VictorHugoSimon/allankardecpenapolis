@@ -18,6 +18,20 @@ export default async function AvisosInternosPage() {
   const administra = sessao.perfil === 'ADMINISTRADOR';
   const fila = administra ? await prisma.entregaPush.groupBy({ by: ['status'], _count: { _all: true } }) : [];
   const contagem = (status: string) => fila.find(x => x.status === status)?._count._all ?? 0;
+  const porComunicado = administra
+    ? await prisma.entregaPush.groupBy({
+        by: ['comunicacaoId', 'status'],
+        _count: { _all: true },
+      })
+    : [];
+  const metricasComunicado = (id: string) => ({
+    fila: porComunicado.filter(x => x.comunicacaoId === id && ['PENDENTE', 'PROCESSANDO'].includes(x.status))
+      .reduce((n, x) => n + x._count._all, 0),
+    aceitos: porComunicado.filter(x => x.comunicacaoId === id && x.status === 'ENVIADO')
+      .reduce((n, x) => n + x._count._all, 0),
+    erros: porComunicado.filter(x => x.comunicacaoId === id && ['FALHA', 'EXPIRADO'].includes(x.status))
+      .reduce((n, x) => n + x._count._all, 0),
+  });
   const avisos = await comRls(contextoRls(sessao), (tx) =>
     tx.comunicacao.findMany({
       where: { canal: 'APP' },
@@ -158,6 +172,11 @@ export default async function AvisosInternosPage() {
                     {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) && typeof (a.filtro as Record<string, unknown>).url === 'string' ? (
                       <p className="my-2 max-w-md break-all text-xs text-green">
                         Link: {String((a.filtro as Record<string, unknown>).url)}
+                      </p>
+                    ) : null}
+                    {administra && a.status === 'ENVIADO' ? (
+                      <p className="text-muted-2 my-2 text-xs">
+                        Push: {metricasComunicado(a.id).aceitos} aceitos · {metricasComunicado(a.id).fila} pendentes · {metricasComunicado(a.id).erros} falhas
                       </p>
                     ) : null}
                     <span className="text-muted-2 block text-xs">
