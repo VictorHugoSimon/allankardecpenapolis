@@ -29,7 +29,7 @@ export async function salvarOperacao(modulo: Operacao, form: FormData): Promise<
   const ctx = contextoRls(s);
   const tipo = campo(form, 'tipo', 30);
   await comRls(ctx, async (tx) => {
-    let entidade = '';
+    let entidade: 'Doacao' | 'Produto' | 'ItemEstoque' | 'Movimentacao' | 'Comunicacao' | 'Automacao' = 'Doacao';
     let entidadeId = '';
     if (modulo === 'doacoes') {
       const nome = campo(form, 'nome', 120);
@@ -38,6 +38,7 @@ export async function salvarOperacao(modulo: Operacao, form: FormData): Promise<
       const itens = tipo === 'ITEM';
       const descricao = campo(form, 'descricao', 500);
       if (itens && !descricao) throw new Error('Descreva os itens recebidos.');
+      if (!itens && !campo(form, 'valor')) throw new Error('Informe o valor recebido.');
       const doacao = await tx.doacao.create({
         data: {
           doadorNome: nome,
@@ -74,7 +75,11 @@ export async function salvarOperacao(modulo: Operacao, form: FormData): Promise<
         const item = await tx.itemEstoque.findUnique({ where: { id } });
         if (!item) throw new Error('Item inexistente.');
         if (movimento === 'SAIDA' && Number(item.saldo) < q) throw new Error('Saldo insuficiente.');
-        await tx.itemEstoque.update({ where: { id }, data: { saldo: { increment: movimento === 'ENTRADA' ? q : -q } } });
+        const alterado = await tx.itemEstoque.updateMany({
+          where: { id, ...(movimento === 'SAIDA' ? { saldo: { gte: q } } : {}) },
+          data: { saldo: { increment: movimento === 'ENTRADA' ? q : -q } },
+        });
+        if (!alterado.count) throw new Error('Saldo insuficiente ou item indisponível.');
         const mov = await tx.movimentacao.create({
           data: { itemEstoqueId: id, tipo: movimento as 'ENTRADA' | 'SAIDA', motivo, quantidade: q, por: s.nome },
         });
@@ -113,6 +118,7 @@ export async function salvarOperacao(modulo: Operacao, form: FormData): Promise<
       acao: 'cadastro manual · ' + modulo,
       entidade,
       entidadeId,
+      ip: null,
       antes: null,
       depois: { origem: 'CEAK Gestão', modulo },
     });
