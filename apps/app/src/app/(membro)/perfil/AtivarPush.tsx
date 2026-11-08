@@ -25,7 +25,7 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
         setEstado('desligado');
         return;
       }
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
         setEstado('indisponivel');
         return;
       }
@@ -64,6 +64,11 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
         return;
       }
       if (ligar) {
+        if (!('Notification' in window)) {
+          setEstado('indisponivel');
+          setAviso('Este dispositivo não oferece a permissão de notificações web.');
+          return;
+        }
         const permissao = await Notification.requestPermission();
         if (permissao !== 'granted') {
           setEstado(permissao === 'denied' ? 'bloqueado' : 'inativo');
