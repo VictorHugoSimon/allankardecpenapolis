@@ -12,19 +12,42 @@ function validarTexto(form: FormData, chave: string, minimo: number, maximo: num
   return valor;
 }
 
+const segmentos = ['TODOS', 'MEMBROS', 'VOLUNTARIOS', 'INSTRUTORES'] as const;
+type Segmento = (typeof segmentos)[number];
+
+function validarLink(form: FormData): string | null {
+  const valor = String(form.get('url') ?? '').trim();
+  if (!valor) return null;
+  if (valor.length > 1500) throw new Error('O link é muito longo.');
+  if (valor.startsWith('/') && !valor.startsWith('//') && !valor.startsWith('/\\')) {
+    return valor;
+  }
+  try {
+    const url = new URL(valor);
+    if (url.protocol !== 'https:' || url.username || url.password) throw new Error();
+    return url.toString();
+  } catch {
+    throw new Error('Use um link HTTPS ou um caminho interno do CEAK (começando com /).');
+  }
+}
+
 export async function criarAvisoInterno(form: FormData): Promise<void> {
   const sessao = await exigirModulo('comunicacao');
   if (sessao.perfil !== 'ADMINISTRADOR')
     throw new Error('Apenas administradores podem criar avisos gerais.');
   const titulo = validarTexto(form, 'titulo', 4, 160);
   const mensagem = validarTexto(form, 'mensagem', 10, 2000);
+  const segmento = String(form.get('segmento') ?? 'TODOS');
+  if (!segmentos.includes(segmento as Segmento)) throw new Error('Público inválido.');
+  const url = validarLink(form);
   await comRls(contextoRls(sessao), async (tx) => {
     const comunicado = await tx.comunicacao.create({
       data: {
         canal: 'APP',
         titulo,
         mensagem,
-        publico: 'Membros do aplicativo com consentimento',
+        publico: ({ TODOS: 'Todos os membros elegíveis', MEMBROS: 'Membros', VOLUNTARIOS: 'Voluntários', INSTRUTORES: 'Instrutores' } as Record<Segmento, string>)[segmento as Segmento],
+        filtro: { segmento, url },
         status: 'RASCUNHO',
       },
     });
@@ -34,7 +57,7 @@ export async function criarAvisoInterno(form: FormData): Promise<void> {
       entidade: 'Comunicacao',
       entidadeId: comunicado.id,
       antes: null,
-      depois: { titulo, canal: 'APP', status: 'RASCUNHO' },
+      depois: { titulo, canal: 'APP', segmento, link: Boolean(url), status: 'RASCUNHO' },
       ip: null,
     });
   });
@@ -54,18 +77,32 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
   await comRls(contextoRls(sessao), async (tx) => {
     const aviso = await tx.comunicacao.findUnique({
       where: { id },
-      select: { id: true, canal: true, titulo: true, mensagem: true, status: true },
+      select: { id: true, canal: true, titulo: true, mensagem: true, status: true, filtro: true },
     });
     if (!aviso || aviso.canal !== 'APP' || aviso.status !== 'RASCUNHO') {
       throw new Error('O aviso não está em rascunho ou já foi publicado.');
     }
+    const filtro = aviso.filtro && typeof aviso.filtro === 'object' && !Array.isArray(aviso.filtro)
+      ? aviso.filtro as Record<string, unknown> : {};
+    const segmento = String(filtro.segmento ?? 'TODOS');
+    if (!segmentos.includes(segmento as Segmento)) throw new Error('Segmentação inválida.');
+    const url = typeof filtro.url === 'string' ? filtro.url : null;
+    if (url) {
+      const check = new FormData();
+      check.set('url', url);
+      validarLink(check);
+    }
+    const perfis = segmento === 'MEMBROS' ? ['MEMBRO'] :
+      segmento === 'VOLUNTARIOS' ? ['VOLUNTARIO'] :
+      segmento === 'INSTRUTORES' ? ['INSTRUTOR'] :
+      ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'];
     const pessoas = await tx.pessoa.findMany({
       where: {
         usuario: { is: { ativo: true } },
         consentimentoEm: { not: null },
         exclusaoSolicitadaEm: null,
         anonimizadaEm: null,
-        perfil: { in: ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'] },
+        perfil: { in: perfis as ('MEMBRO' | 'VISITANTE' | 'VOLUNTARIO' | 'INSTRUTOR')[] },
       },
       select: { id: true },
       take: 5001,
@@ -85,6 +122,7 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
         categoria: 'Comunicado',
         titulo: aviso.titulo,
         corpo: aviso.mensagem,
+        url,
       })),
     });
     await registrarAuditoria(tx, {
