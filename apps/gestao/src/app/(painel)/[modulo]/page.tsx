@@ -412,6 +412,13 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
             >
               Relatórios mensais
             </Link>
+          ) : modulo === 'comunicacao' ? (
+            <Link
+              href="/comunicacao/avisos"
+              className="border-line rounded-input border bg-white px-4 py-2 text-sm"
+            >
+              Avisos para o aplicativo
+            </Link>
           ) : undefined
         }
       >
