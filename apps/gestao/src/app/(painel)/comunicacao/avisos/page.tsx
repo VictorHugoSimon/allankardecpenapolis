@@ -94,8 +94,9 @@ export default async function AvisosInternosPage() {
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium">Link para compartilhar (opcional)</span>
-              <input name="url" type="text" maxLength={1500} placeholder="https://... ou /agenda" className={input} />
-              <span className="text-muted-2 text-xs">O link será apresentado junto com a mensagem no aplicativo. Aceita HTTPS ou uma página interna.</span>
+              <input name="url" type="text" list="ceak-links-oficiais" maxLength={1500} placeholder="https://... ou /agenda" className={input} />
+              <datalist id="ceak-links-oficiais"><option value="https://www.facebook.com/CEAKDEPENAPOLIS" /><option value="/agenda" /><option value="/estudos" /><option value="/notificacoes" /></datalist>
+              <span className="text-muted-2 text-xs">Selecione o Facebook oficial do CEAK, uma página interna ou informe outro endereço HTTPS.</span>
             </label>
             <button
               type="submit"
