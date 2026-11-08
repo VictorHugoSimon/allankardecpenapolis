@@ -18,6 +18,16 @@ export async function processarFilaPush() {
   if (push.nome !== 'webpush') throw new Error('Web Push indisponível.');
 
   const itens = await prisma.$transaction(async tx => {
+    // Um worker pode ter sido interrompido após retirar a quinta tentativa.
+    // Encerrar esse claim em vez de criar uma sexta tentativa indefinidamente.
+    await tx.$executeRaw`
+      UPDATE ceak_v2.entrega_push
+      SET status = 'FALHA', bloqueado_ate = NULL,
+          ultimo_erro = 'Limite de tentativas após interrupção'
+      WHERE status = 'PROCESSANDO'
+        AND bloqueado_ate < now()
+        AND tentativas >= 5
+    `;
     // Recupera claims interrompidos após cinco minutos.
     return tx.$queryRaw<Array<{ id: string; comunicacao_id: string; dispositivo_id: string; tentativas: number }>>`
       UPDATE ceak_v2.entrega_push AS fila SET status = 'PROCESSANDO',
@@ -27,7 +37,7 @@ export async function processarFilaPush() {
         SELECT id FROM ceak_v2.entrega_push
         WHERE (
           (status = 'PENDENTE' AND proxima_em <= now())
-          OR (status = 'PROCESSANDO' AND bloqueado_ate < now())
+          OR (status = 'PROCESSANDO' AND bloqueado_ate < now() AND tentativas < 5)
         )
         ORDER BY proxima_em, criado_em
         LIMIT 50 FOR UPDATE SKIP LOCKED
