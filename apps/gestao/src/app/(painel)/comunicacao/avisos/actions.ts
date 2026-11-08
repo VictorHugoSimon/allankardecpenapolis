@@ -14,7 +14,8 @@ function validarTexto(form: FormData, chave: string, minimo: number, maximo: num
 
 export async function criarAvisoInterno(form: FormData): Promise<void> {
   const sessao = await exigirModulo('comunicacao');
-  if (sessao.perfil !== 'ADMINISTRADOR') throw new Error('Apenas administradores podem criar avisos gerais.');
+  if (sessao.perfil !== 'ADMINISTRADOR')
+    throw new Error('Apenas administradores podem criar avisos gerais.');
   const titulo = validarTexto(form, 'titulo', 4, 160);
   const mensagem = validarTexto(form, 'mensagem', 10, 2000);
   await comRls(contextoRls(sessao), async (tx) => {
@@ -28,9 +29,13 @@ export async function criarAvisoInterno(form: FormData): Promise<void> {
       },
     });
     await registrarAuditoria(tx, {
-      usuarioId: sessao.usuarioId, acao: 'comunicacao.app.rascunho',
-      entidade: 'Comunicacao', entidadeId: comunicado.id,
-      antes: null, depois: { titulo, canal: 'APP', status: 'RASCUNHO' }, ip: null,
+      usuarioId: sessao.usuarioId,
+      acao: 'comunicacao.app.rascunho',
+      entidade: 'Comunicacao',
+      entidadeId: comunicado.id,
+      antes: null,
+      depois: { titulo, canal: 'APP', status: 'RASCUNHO' },
+      ip: null,
     });
   });
   revalidatePath('/comunicacao/avisos');
@@ -42,7 +47,8 @@ export async function criarAvisoInterno(form: FormData): Promise<void> {
  */
 export async function publicarAvisoInterno(form: FormData): Promise<void> {
   const sessao = await exigirModulo('comunicacao');
-  if (sessao.perfil !== 'ADMINISTRADOR') throw new Error('Apenas administradores podem publicar avisos gerais.');
+  if (sessao.perfil !== 'ADMINISTRADOR')
+    throw new Error('Apenas administradores podem publicar avisos gerais.');
   const id = String(form.get('id') ?? '');
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error('Aviso inválido.');
   await comRls(contextoRls(sessao), async (tx) => {
@@ -64,8 +70,10 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       select: { id: true },
       take: 5001,
     });
-    if (!pessoas.length) throw new Error('Ainda não há membros cadastrados com consentimento para receber avisos.');
-    if (pessoas.length > 5000) throw new Error('Envio acima do limite de segurança. Use segmentação de público.');
+    if (!pessoas.length)
+      throw new Error('Ainda não há membros cadastrados com consentimento para receber avisos.');
+    if (pessoas.length > 5000)
+      throw new Error('Envio acima do limite de segurança. Use segmentação de público.');
     const atualizado = await tx.comunicacao.updateMany({
       where: { id, canal: 'APP', status: 'RASCUNHO' },
       data: { status: 'ENVIADO', enviadoEm: new Date(), enviados: pessoas.length },
@@ -80,9 +88,12 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       })),
     });
     await registrarAuditoria(tx, {
-      usuarioId: sessao.usuarioId, acao: 'comunicacao.app.publicada',
-      entidade: 'Comunicacao', entidadeId: aviso.id,
-      antes: { status: 'RASCUNHO' }, depois: { status: 'ENVIADO', destinatarios: pessoas.length, canal: 'APP' },
+      usuarioId: sessao.usuarioId,
+      acao: 'comunicacao.app.publicada',
+      entidade: 'Comunicacao',
+      entidadeId: aviso.id,
+      antes: { status: 'RASCUNHO' },
+      depois: { status: 'ENVIADO', destinatarios: pessoas.length, canal: 'APP' },
       ip: null,
     });
   });
