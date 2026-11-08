@@ -2,12 +2,14 @@
 
 import { useActionState, useState } from 'react';
 import { Button, Input } from '@ceak/ui';
+import { Eye, EyeOff } from 'lucide-react';
 import { entrar, recuperarSenha, type EstadoLogin } from './actions';
 
 export function LoginForm({ next }: { next?: string }) {
   const [estado, acaoEntrar, entrando] = useActionState<EstadoLogin, FormData>(entrar, {});
   const [rec, acaoRecuperar] = useActionState<EstadoLogin, FormData>(recuperarSenha, {});
   const [email, setEmail] = useState(estado.campos?.email ?? '');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   return (
     <form action={acaoEntrar} className="flex w-full max-w-[380px] flex-col gap-3.5" noValidate>
@@ -22,7 +24,19 @@ export function LoginForm({ next }: { next?: string }) {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      <Input label="Senha" name="senha" type="password" autoComplete="current-password" required />
+      <div className="relative">
+        <Input label="Senha" name="senha" type={mostrarSenha ? 'text' : 'password'} autoComplete="current-password" required />
+        <button
+          type="button"
+          aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+          aria-pressed={mostrarSenha}
+          onClick={() => setMostrarSenha(v => !v)}
+          className="text-muted-2 absolute bottom-1 right-1 flex size-10 items-center justify-center rounded-lg bg-white hover:text-green"
+          title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+        >
+          {mostrarSenha ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
+        </button>
+      </div>
       {estado.erro ? (
         <p
           role="alert"
