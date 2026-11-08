@@ -60,8 +60,10 @@ export async function processarFilaPush() {
           : null;
         // O usuário pode revogar autorização ou excluir a conta depois da publicação.
         if (!comunicado || comunicado.status !== 'ENVIADO' || !dispositivo || !pessoaAutorizada) {
-          await prisma.entregaPush.update({ where: { id: item.id },
-            data: { status: 'EXPIRADO', bloqueadoAte: null, ultimoErro: 'Destino indisponível' } });
+          await prisma.entregaPush.updateMany({
+            where: { id: item.id, status: 'PROCESSANDO', tentativas: item.tentativas },
+            data: { status: 'EXPIRADO', bloqueadoAte: null, ultimoErro: 'Destino indisponível' },
+          });
           return;
         }
         const filtro = comunicado.filtro && typeof comunicado.filtro === 'object' && !Array.isArray(comunicado.filtro)
@@ -73,21 +75,27 @@ export async function processarFilaPush() {
           endpoint: dispositivo.endpoint,
           keys: { p256dh: dispositivo.p256dh, auth: dispositivo.auth },
         }), comunicado.titulo, comunicado.mensagem, url);
-        await prisma.entregaPush.update({ where: { id: item.id }, data: {
-          status: 'ENVIADO', enviadoEm: new Date(), bloqueadoAte: null, ultimoErro: null,
-        } });
-        enviados++;
+        // Atualiza somente o claim desta tentativa. Uma execução antiga nunca
+        // deve sobrescrever o estado de uma tentativa mais recente.
+        const confirmado = await prisma.entregaPush.updateMany({
+          where: { id: item.id, status: 'PROCESSANDO', tentativas: item.tentativas },
+          data: { status: 'ENVIADO', enviadoEm: new Date(), bloqueadoAte: null, ultimoErro: null },
+        });
+        if (confirmado.count === 1) enviados++;
       } catch (erro) {
         falhas++;
         const expirou = erro instanceof InscricaoPushExpirada;
         // Falhas transitórias: 1, 2, 4, 8 e 16 minutos, no máximo cinco tentativas.
         const definitivo = expirou || item.tentativas >= 5;
-        await prisma.entregaPush.update({ where: { id: item.id }, data: {
-          status: definitivo ? 'FALHA' : 'PENDENTE',
-          bloqueadoAte: null,
-          proximaEm: new Date(Date.now() + Math.min(16, 2 ** (item.tentativas - 1)) * 60_000),
-          ultimoErro: expirou ? 'Inscrição expirada' : 'Falha no provedor push',
-        } }).catch(() => undefined);
+        await prisma.entregaPush.updateMany({
+          where: { id: item.id, status: 'PROCESSANDO', tentativas: item.tentativas },
+          data: {
+            status: definitivo ? 'FALHA' : 'PENDENTE',
+            bloqueadoAte: null,
+            proximaEm: new Date(Date.now() + Math.min(16, 2 ** (item.tentativas - 1)) * 60_000),
+            ultimoErro: expirou ? 'Inscrição expirada' : 'Falha no provedor push',
+          },
+        }).catch(() => undefined);
         if (expirou) {
           await prisma.dispositivoPush.deleteMany({
             where: { id: item.dispositivo_id },
