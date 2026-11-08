@@ -70,7 +70,7 @@ export default async function InicioPage() {
           </Link>
         </div>
 
-        <PreferenciaNotificacoes chavePublica={process.env.VAPID_PUBLIC_KEY ?? null} />
+        <PreferenciaNotificacoes chavePublica={process.env.VAPID_PUBLIC_KEY ?? null} pessoaId={s.pessoaId} />
 
         {hoje || proxima ? (
           <section
