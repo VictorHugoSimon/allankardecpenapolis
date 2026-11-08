@@ -34,6 +34,8 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 - A nova fila persistente suporta **mais de 1.000 aparelhos inscritos**; cada comunicado e aparelho tem uma entrada única no PostgreSQL.
 - A publicação cria os avisos internos e a fila de push na mesma transação. O processamento é tentado automaticamente após a resposta, em lotes de 50, com até 10 envios simultâneos.
 - O processamento automático pós-resposta depende do tempo disponível na hospedagem; se for interrompido, o restante permanece na fila.
+- Foi adicionado um cron nativo diário em `apps/gestao/vercel.json` (`0 9 * * *`, UTC), compatível com a frequência máxima do plano Hobby; ele processa lotes consecutivos durante o orçamento de execução. O cron diário não substitui um serviço de filas em tempo quase real.
+- O painel agora mostra pendências, aceites e falhas para cada comunicado, além dos totais globais.
 - Para retomada imediata existe o botão **Processar próximo lote (até 50)** no CEAK Gestão. A rota protegida `GET /api/cron/notificacoes` aceita `Authorization: Bearer <CRON_SECRET>` de agendador autorizado. O agendamento periódico externo ainda precisa ser ativado.
 - Falhas transitórias são retentadas até cinco vezes, com espera progressiva. O serviço registra aceites e falhas, sem prometer que o sistema operacional exibiu o alerta.
 - O plano Vercel **Hobby** não foi assumido como agendador de alta frequência; a publicação não deve ser chamada de totalmente automatizada até testar recuperação dos lotes interrompidos.
@@ -46,7 +48,9 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 
 - [ ] Aplicar antes do deploy a migração `20261108193000_entrega_push_fila` ao banco `ceak_v2` com `pnpm db:deploy` e gerar o Prisma Client.
 - [ ] Fazer novo deploy dos dois aplicativos após liberação do limite da Vercel.
-- [ ] Conectar agendador recorrente autenticado à rota `/api/cron/notificacoes`; configurar horário adequado e testar retomada de fila interrompida.
+- [x] Adicionar cron diário autenticado à rota `/api/cron/notificacoes` no código do CEAK Gestão.
+- [ ] Publicar e testar o cron real no ambiente Vercel, validando retomada de fila interrompida e limites de execução.
+- [ ] Para maior frequência, contratar plano adequado ou integrar agendador externo com credencial protegida.
 - [ ] Verificar 1.000 aparelhos inscritos em ambiente de teste com métricas de aceites/falhas sem envio acidental para usuários reais.
 - [ ] Executar build, lint e TypeScript na versão publicada.
 - [ ] Testar primeiro consentimento e o botão push no Android Chrome.
@@ -54,5 +58,5 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 - [ ] Conferir rascunho, destinatário, link, publicação e contadores no Gestão.
 - [ ] Testar envio com app fechado e permissão concedida.
 - [ ] Testar recusa de permissão, saída da conta e opção **Não**.
-- [ ] Implementar fila durável com retentativas para públicos acima de 100 dispositivos.
+- [x] Implementar fila durável com retentativas para públicos acima de 100 dispositivos (validada estruturalmente no Neon de homologação).
 - [ ] Definir política de retenção de comunicados e revisão LGPD.
