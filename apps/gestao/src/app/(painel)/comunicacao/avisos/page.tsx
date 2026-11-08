@@ -7,6 +7,8 @@ import { criarAvisoInterno, processarLotePush, publicarAvisoInterno } from './ac
 
 export const metadata: Metadata = { title: 'Central de notificações do CEAK' };
 export const dynamic = 'force-dynamic';
+// Mantém o processamento pós-resposta da fila dentro do limite do runtime configurado.
+export const maxDuration = 300;
 
 const input = 'border-line rounded-input min-h-11 w-full border bg-white px-3 py-2 text-sm';
 const formatoData = (d: Date) => d.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
