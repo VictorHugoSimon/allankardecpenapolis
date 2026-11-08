@@ -156,3 +156,49 @@ export async function salvarOperacao(modulo: Operacao, form: FormData): Promise<
   });
   revalidatePath('/' + modulo);
 }
+
+/** Publicar ou retirar um produto do catálogo público com auditoria e sem alterar pagamentos. */
+export async function alterarPublicacaoProduto(form: FormData): Promise<void> {
+  const sessao = await exigirModulo('loja');
+  if (sessao.perfil !== 'ADMINISTRADOR') throw new Error('Acesso restrito.');
+  const id = String(form.get('id') ?? '');
+  const status = String(form.get('status') ?? '');
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !['ATIVO', 'INATIVO'].includes(status)) {
+    throw new Error('Produto ou situação inválida.');
+  }
+  await comRls(contextoRls(sessao), async (tx) => {
+    const produto = await tx.produto.findUnique({ where: { id }, select: { id: true, nome: true, status: true, precoCentavos: true } });
+    if (!produto) throw new Error('Produto não encontrado.');
+    if (status === 'ATIVO' && produto.precoCentavos <= 0) throw new Error('Defina o preço antes de publicar.');
+    if (produto.status === status) return;
+    await tx.produto.update({ where: { id }, data: { status: status as 'ATIVO' | 'INATIVO' } });
+    await registrarAuditoria(tx, {
+      usuarioId: sessao.usuarioId, acao: 'publicação de produto', entidade: 'Produto',
+      entidadeId: id, antes: { status: produto.status }, depois: { status }, ip: null,
+    });
+  });
+  revalidatePath('/loja');
+  revalidatePath('/loja', 'layout');
+}
+
+/** Define o estoque mínimo para alerta sem alterar a quantidade física. */
+export async function alterarEstoqueMinimo(form: FormData): Promise<void> {
+  const sessao = await exigirModulo('estoque');
+  if (sessao.perfil !== 'ADMINISTRADOR') throw new Error('Acesso restrito.');
+  const id = String(form.get('id') ?? '');
+  const valor = String(form.get('minimo') ?? '').trim().replace(',', '.');
+  const minimo = Number(valor);
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !valor || !Number.isFinite(minimo) || minimo < 0 || minimo > 1000000) {
+    throw new Error('Estoque mínimo inválido.');
+  }
+  await comRls(contextoRls(sessao), async (tx) => {
+    const item = await tx.itemEstoque.findUnique({ where: { id }, select: { id: true, minimo: true } });
+    if (!item) throw new Error('Item não encontrado.');
+    await tx.itemEstoque.update({ where: { id }, data: { minimo } });
+    await registrarAuditoria(tx, {
+      usuarioId: sessao.usuarioId, acao: 'estoque mínimo atualizado', entidade: 'ItemEstoque',
+      entidadeId: id, antes: { minimo: item.minimo?.toString() ?? null }, depois: { minimo }, ip: null,
+    });
+  });
+  revalidatePath('/estoque');
+}
