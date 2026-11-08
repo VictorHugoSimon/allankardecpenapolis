@@ -17,7 +17,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:totp": "tsx prisma/totp.ts"
+    "db:totp": "tsx prisma/totp.ts",
+    "db:diagnostico-acesso": "tsx prisma/diagnostico-acesso.ts"
   },
   "dependencies": {
     "@ceak/core": "workspace:*",
