@@ -1,0 +1,38 @@
+name: CEAK - Auditoria das URLs e PWA publicados
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/new-session-n6t9kx
+    paths:
+      - 'scripts/verificar-urls-publicas.mjs'
+      - 'scripts/verificar-pwa-publico.mjs'
+      - '.github/workflows/verificar-publicacao-ceak.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verificacao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar sintaxe dos scripts
+        run: |
+          node --check scripts/verificar-urls-publicas.mjs
+          node --check scripts/verificar-pwa-publico.mjs
+      - name: Verificar as três plataformas
+        env:
+          CEAK_SITE_URL: ${{ vars.CEAK_SITE_URL }}
+          CEAK_APP_URL: ${{ vars.CEAK_APP_URL }}
+          CEAK_GESTAO_URL: ${{ vars.CEAK_GESTAO_URL }}
+        run: node scripts/verificar-urls-publicas.mjs
+      - name: Verificar manifesto, ícones e service worker do PWA
+        env:
+          CEAK_APP_URL: ${{ vars.CEAK_APP_URL }}
+        run: node scripts/verificar-pwa-publico.mjs
