@@ -2,6 +2,7 @@ import 'server-only';
 import { prisma } from '@ceak/db';
 import { InscricaoPushExpirada } from '@ceak/core/adapters';
 import { adapters } from '@/lib/servidor';
+import { atrasoRetentativaMs, destinoInternoPush } from './regrasFilaPush';
 
 /**
  * Processa até 50 destinos por chamada. Um claim SQL com SKIP LOCKED
@@ -68,9 +69,7 @@ export async function processarFilaPush() {
         }
         const filtro = comunicado.filtro && typeof comunicado.filtro === 'object' && !Array.isArray(comunicado.filtro)
           ? comunicado.filtro as Record<string, unknown> : {};
-        const url = typeof filtro.url === 'string' && filtro.url.startsWith('/') &&
-          !filtro.url.startsWith('//') && !filtro.url.startsWith('/\\')
-          ? filtro.url : '/notificacoes';
+        const url = destinoInternoPush(filtro.url);
         await push.enviar(JSON.stringify({
           endpoint: dispositivo.endpoint,
           keys: { p256dh: dispositivo.p256dh, auth: dispositivo.auth },
@@ -92,7 +91,7 @@ export async function processarFilaPush() {
           data: {
             status: definitivo ? 'FALHA' : 'PENDENTE',
             bloqueadoAte: null,
-            proximaEm: new Date(Date.now() + Math.min(16, 2 ** (item.tentativas - 1)) * 60_000),
+            proximaEm: new Date(Date.now() + atrasoRetentativaMs(item.tentativas)),
             ultimoErro: expirou ? 'Inscrição expirada' : 'Falha no provedor push',
           },
         }).catch(() => undefined);
