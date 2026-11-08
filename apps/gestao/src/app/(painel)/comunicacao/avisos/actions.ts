@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { after } from 'next/server';
 import { comRls, prisma, registrarAuditoria } from '@ceak/db';
 import { log } from '@/lib/servidor';
 import { contextoRls, exigirModulo } from '@/lib/auth';
@@ -152,6 +153,22 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     return { id: aviso.id, totalDispositivos: dispositivos.length };
   });
 
+  // Inicia o processamento após a resposta, sem prender o formulário.
+  // Se o runtime encerrar antes do fim, a fila restante continua gravada no banco
+  // e pode ser retomada pela rota de agendamento ou pelo painel.
+  if (resultado.totalDispositivos > 0) {
+    after(async () => {
+      const { processarFilaPush } = await import('@/lib/processarFilaPush');
+      for (let lote = 0; lote < 30; lote++) {
+        try {
+          const r = await processarFilaPush();
+          if (r.indisponivel || r.processados === 0) break;
+        } catch {
+          break;
+        }
+      }
+    });
+  }
   log.info('NOTIFICACOES', 'comunicado publicado e aparelhos enfileirados', {
     rota: '/comunicacao/avisos', status: 200,
     contexto: { comunicadoId: resultado.id, inscritos: resultado.totalDispositivos },
