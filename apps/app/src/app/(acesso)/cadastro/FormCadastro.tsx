@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, type InputHTMLAttributes } from 'react';
+import { useActionState, useState, type InputHTMLAttributes } from 'react';
 import { botaoPrimario, campo, textoErro } from '@/lib/estilos';
 import { cadastrar } from '../actions';
 
@@ -18,19 +18,35 @@ function Campo({
   dica?: string;
 }) {
   const desc = [dica ? `${id}-dica` : null, erro ? `${id}-erro` : null].filter(Boolean).join(' ');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const ehSenha = props.type === 'password';
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={id} className="text-[13px] font-medium">
         {rotulo}
       </label>
-      <input
-        id={id}
-        name={id}
-        aria-invalid={erro ? true : undefined}
-        aria-describedby={desc || undefined}
-        className={campo}
-        {...props}
-      />
+      <div className={ehSenha ? 'relative' : ''}>
+        <input
+          id={id}
+          name={id}
+          aria-invalid={erro ? true : undefined}
+          aria-describedby={desc || undefined}
+          {...props}
+          type={ehSenha && mostrarSenha ? 'text' : props.type}
+          className={ehSenha ? `${campo} pr-14` : campo}
+        />
+        {ehSenha ? (
+          <button type="button" aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+            aria-pressed={mostrarSenha} onClick={() => setMostrarSenha(v => !v)}
+            className="text-green absolute inset-y-0 right-0 flex w-12 items-center justify-center"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22" aria-hidden="true">
+              {mostrarSenha ? <><path d="M3 3l18 18M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /></> :
+                <><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3.5" /></>}
+            </svg>
+          </button>
+        ) : null}
+      </div>
       {dica && !erro ? (
         <p id={`${id}-dica`} className="text-muted-2 m-0 text-xs">
           {dica}
