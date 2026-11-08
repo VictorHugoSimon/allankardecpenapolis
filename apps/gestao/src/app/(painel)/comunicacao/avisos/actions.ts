@@ -1,7 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { comRls, registrarAuditoria } from '@ceak/db';
+import { comRls, prisma, registrarAuditoria } from '@ceak/db';
+import { InscricaoPushExpirada } from '@ceak/core/adapters';
+import { adapters, log } from '@/lib/servidor';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 
 function validarTexto(form: FormData, chave: string, minimo: number, maximo: number) {
@@ -65,8 +67,9 @@ export async function criarAvisoInterno(form: FormData): Promise<void> {
 }
 
 /**
- * Cria notificações somente na caixa interna do PWA, sem disparar push,
- * WhatsApp ou e-mail. Nunca alcança quem não tem conta ativa e consentimento.
+ * Cria notificações na caixa interna do PWA e, quando configurado,
+ * envia Web Push aos dispositivos inscritos dos destinatários elegíveis.
+ * Nunca envia WhatsApp ou e-mail, nem alcança contas sem consentimento.
  */
 export async function publicarAvisoInterno(form: FormData): Promise<void> {
   const sessao = await exigirModulo('comunicacao');
@@ -74,7 +77,7 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     throw new Error('Apenas administradores podem publicar avisos gerais.');
   const id = String(form.get('id') ?? '');
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error('Aviso inválido.');
-  await comRls(contextoRls(sessao), async (tx) => {
+  const resultado = await comRls(contextoRls(sessao), async (tx) => {
     const aviso = await tx.comunicacao.findUnique({
       where: { id },
       select: { id: true, canal: true, titulo: true, mensagem: true, status: true, filtro: true },
@@ -134,6 +137,62 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       depois: { status: 'ENVIADO', destinatarios: pessoas.length, canal: 'APP' },
       ip: null,
     });
+    return { id: aviso.id, titulo: aviso.titulo, mensagem: aviso.mensagem, url, pessoaIds: pessoas.map(p => p.id) };
+  });
+
+  // A caixa interna é a fonte de verdade. Web Push é um canal adicional,
+  // somente para quem autorizou o dispositivo no navegador.
+  // Evitar envio simulado, vazamento de endpoint e tempestade em uma função serverless.
+  const provedor = process.env.PUSH_PROVIDER === 'webpush' &&
+    process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY
+      ? adapters().push : null;
+  let enviadosPush = 0;
+  let falhasPush = 0;
+  let avisoPush = 'Web Push não configurado; avisos disponíveis dentro do aplicativo.';
+  if (provedor && provedor.nome === 'webpush') {
+    const destinos = await prisma.dispositivoPush.findMany({
+      where: { pessoaId: { in: resultado.pessoaIds } },
+      select: { id: true, endpoint: true, p256dh: true, auth: true },
+      take: 101,
+    });
+    if (destinos.length > 100) {
+      avisoPush = 'Mais de 100 aparelhos: envio externo não iniciado. É necessário processamento em lotes.';
+    } else {
+      const urlPush = resultado.url?.startsWith('/') && !resultado.url.startsWith('//')
+        ? resultado.url : '/notificacoes';
+      // Lotes de até 10 aparelhos para limitar pressão no serviço e latência.
+      for (let i = 0; i < destinos.length; i += 10) {
+        await Promise.all(destinos.slice(i, i + 10).map(async d => {
+          try {
+            await provedor.enviar(JSON.stringify({
+              endpoint: d.endpoint, keys: { p256dh: d.p256dh, auth: d.auth },
+            }), resultado.titulo, resultado.mensagem, urlPush);
+            enviadosPush++;
+          } catch (erro) {
+            falhasPush++;
+            if (erro instanceof InscricaoPushExpirada) {
+              await prisma.dispositivoPush.deleteMany({ where: { id: d.id, endpoint: d.endpoint } });
+            }
+          }
+        }));
+      }
+      avisoPush = `Web Push: ${enviadosPush} envios aceitos, ${falhasPush} falhas.`;
+    }
+  }
+  await comRls(contextoRls(sessao), async tx => {
+    const atual = await tx.comunicacao.findUnique({
+      where: { id: resultado.id }, select: { filtro: true },
+    });
+    const filtro = atual?.filtro && typeof atual.filtro === 'object' && !Array.isArray(atual.filtro)
+      ? atual.filtro as Record<string, unknown> : {};
+    await tx.comunicacao.update({
+      where: { id: resultado.id },
+      data: { filtro: { ...filtro, resumoPush: avisoPush, enviadosPush, falhasPush } },
+    });
+  });
+  log.info('NOTIFICACOES', 'publicação de comunicado interno e tentativas de Web Push', {
+    rota: '/comunicacao/avisos', status: 200,
+    contexto: { comunicadoId: resultado.id, enviadosPush, falhasPush },
   });
   revalidatePath('/comunicacao/avisos');
 }
