@@ -2,8 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { comRls, prisma, registrarAuditoria } from '@ceak/db';
-import { InscricaoPushExpirada } from '@ceak/core/adapters';
-import { adapters, log } from '@/lib/servidor';
+import { log } from '@/lib/servidor';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 
 function validarTexto(form: FormData, chave: string, minimo: number, maximo: number) {
@@ -140,62 +139,25 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     return { id: aviso.id, titulo: aviso.titulo, mensagem: aviso.mensagem, url, pessoaIds: pessoas.map(p => p.id) };
   });
 
-  // A caixa interna é a fonte de verdade. Web Push é um canal adicional,
-  // somente para quem autorizou o dispositivo no navegador.
-  // Evitar envio simulado, vazamento de endpoint e tempestade em uma função serverless.
-  const provedor = process.env.PUSH_PROVIDER === 'webpush' &&
-    process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY
-      ? adapters().push : null;
-  let enviadosPush = 0;
-  let falhasPush = 0;
-  let avisoPush = 'Web Push não configurado; avisos disponíveis dentro do aplicativo.';
-  if (provedor && provedor.nome === 'webpush') {
-    const destinos = await prisma.dispositivoPush.findMany({
-      where: { pessoaId: { in: resultado.pessoaIds } },
-      select: { id: true, endpoint: true, p256dh: true, auth: true },
-      take: 101,
-    });
-    if (destinos.length > 100) {
-      avisoPush = 'Mais de 100 aparelhos: envio externo não iniciado. É necessário processamento em lotes.';
-    } else {
-      const urlPush = resultado.url?.startsWith('/') && !resultado.url.startsWith('//')
-        ? resultado.url : '/notificacoes';
-      // Lotes de até 10 aparelhos para limitar pressão no serviço e latência.
-      for (let i = 0; i < destinos.length; i += 10) {
-        await Promise.all(destinos.slice(i, i + 10).map(async d => {
-          try {
-            await provedor.enviar(JSON.stringify({
-              endpoint: d.endpoint, keys: { p256dh: d.p256dh, auth: d.auth },
-            }), resultado.titulo, resultado.mensagem, urlPush);
-            enviadosPush++;
-          } catch (erro) {
-            falhasPush++;
-            if (erro instanceof InscricaoPushExpirada) {
-              await prisma.dispositivoPush.deleteMany({ where: { id: d.id, endpoint: d.endpoint } })
-                .catch(() => undefined);
-            }
-          }
-        }));
-      }
-      avisoPush = `Web Push: ${enviadosPush} envios aceitos, ${falhasPush} falhas.`;
-    }
-  }
-  await comRls(contextoRls(sessao), async tx => {
-    const atual = await tx.comunicacao.findUnique({
-      where: { id: resultado.id }, select: { filtro: true },
-    });
-    const filtro = atual?.filtro && typeof atual.filtro === 'object' && !Array.isArray(atual.filtro)
-      ? atual.filtro as Record<string, unknown> : {};
-    await tx.comunicacao.update({
-      where: { id: resultado.id },
-      data: { filtro: { ...filtro, resumoPush: avisoPush, enviadosPush, falhasPush } },
-    });
-  }).catch(() => {
-    // A publicação na caixa interna já foi confirmada; falha no resumo não a desfaz.
+  // Enfileiramento idempotente: cada aparelho recebe no máximo uma entrega
+  // registrada por comunicado. A fila fica no PostgreSQL, não na memória do servidor.
+  // Não guarda chaves de dispositivos na fila; são consultadas apenas no processamento.
+  const inscritos = await prisma.dispositivoPush.findMany({
+    where: { pessoaId: { in: resultado.pessoaIds } },
+    select: { id: true },
   });
-  log.info('NOTIFICACOES', 'publicação de comunicado interno e tentativas de Web Push', {
+  if (inscritos.length) {
+    await prisma.entregaPush.createMany({
+      data: inscritos.map((d) => ({
+        comunicacaoId: resultado.id,
+        dispositivoId: d.id,
+      })),
+      skipDuplicates: true,
+    });
+  }
+  log.info('NOTIFICACOES', 'comunicado publicado e aparelhos enfileirados', {
     rota: '/comunicacao/avisos', status: 200,
-    contexto: { comunicadoId: resultado.id, enviadosPush, falhasPush },
+    contexto: { comunicadoId: resultado.id, inscritos: inscritos.length },
   });
   revalidatePath('/comunicacao/avisos');
 }
