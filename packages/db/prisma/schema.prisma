@@ -118,6 +118,7 @@ enum Canal {
   GOOGLE_BUSINESS
   YOUTUBE
   PUSH
+  APP
   EMAIL
   WHATSAPP
 }
