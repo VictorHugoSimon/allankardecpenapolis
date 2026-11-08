@@ -22,7 +22,24 @@ export function PreferenciaNotificacoes({ chavePublica }: { chavePublica: string
     setMontado(true);
   }, []);
 
-  function escolher(valor: 'sim' | 'nao') {
+  async function escolher(valor: 'sim' | 'nao') {
+    if (valor === 'nao' && 'serviceWorker' in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        const inscricao = await reg?.pushManager?.getSubscription();
+        if (inscricao) {
+          const resposta = await fetch('/api/push', {
+            method: 'DELETE',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ endpoint: inscricao.endpoint }),
+          });
+          if (!resposta.ok || !(await inscricao.unsubscribe())) throw new Error('falha');
+        }
+      } catch {
+        window.alert('Não foi possível desativar o envio neste aparelho. Verifique sua conexão e tente novamente.');
+        return;
+      }
+    }
     setPreferencia(valor);
     try {
       window.localStorage.setItem('ceak-preferencia-push', valor);
@@ -41,11 +58,11 @@ export function PreferenciaNotificacoes({ chavePublica }: { chavePublica: string
       <fieldset className="flex gap-5 border-0 p-0">
         <legend className="sr-only">Deseja receber notificações?</legend>
         <label className="flex items-center gap-2 text-sm">
-          <input type="radio" name="preferenciaPush" checked={preferencia === 'sim'} onChange={() => escolher('sim')} />
+          <input type="radio" name="preferenciaPush" checked={preferencia === 'sim'} onChange={() => void escolher('sim')} />
           Sim
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input type="radio" name="preferenciaPush" checked={preferencia === 'nao'} onChange={() => escolher('nao')} />
+          <input type="radio" name="preferenciaPush" checked={preferencia === 'nao'} onChange={() => void escolher('nao')} />
           Não
         </label>
       </fieldset>
@@ -58,8 +75,7 @@ export function PreferenciaNotificacoes({ chavePublica }: { chavePublica: string
         </div>
       ) : (
         <p className="text-muted-2 mt-3 text-xs">
-          Você ainda poderá consultar mensagens na caixa de avisos do aplicativo.
-          Se já autorizou push anteriormente, desligue também o botão em Perfil para parar o envio ao aparelho.
+          Notificações externas desativadas neste aparelho. Você continua podendo consultar os avisos dentro do aplicativo.
         </p>
       )}
     </section>
