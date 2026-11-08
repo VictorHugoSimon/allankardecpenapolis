@@ -4,7 +4,7 @@ import { comRls } from '@ceak/db';
 import { MODULO_LABEL, type Modulo } from '@ceak/core/rbac';
 import { TituloPagina } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
-import { salvarOperacao } from './actions';
+import { alterarEstoqueMinimo, alterarPublicacaoProduto, salvarOperacao } from './actions';
 
 type Operacao = 'doacoes' | 'loja' | 'estoque' | 'automacoes' | 'comunicacao';
 type Linha = { id: string; principal: string; detalhe: string; status: string; quando?: string };
@@ -417,7 +417,50 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
                 <tr key={i.id} className="border-line border-t">
                   <td className="p-3 font-medium">{i.principal}</td>
                   <td className="p-3">{i.detalhe}</td>
-                  <td className="p-3">{i.status}</td>
+                  <td className="p-3">
+                    <span>{i.status}</span>
+                    {editavel &&
+                    modulo === 'loja' &&
+                    ['RASCUNHO', 'INATIVO', 'ATIVO'].includes(i.status) ? (
+                      <form action={alterarPublicacaoProduto} className="mt-2">
+                        <input type="hidden" name="id" value={i.id} />
+                        <input
+                          type="hidden"
+                          name="status"
+                          value={i.status === 'ATIVO' ? 'INATIVO' : 'ATIVO'}
+                        />
+                        <button
+                          type="submit"
+                          className="border-line rounded-input min-h-10 border bg-white px-3 py-1 text-xs font-medium"
+                        >
+                          {i.status === 'ATIVO' ? 'Retirar do site' : 'Publicar no site'}
+                        </button>
+                      </form>
+                    ) : null}
+                    {editavel && modulo === 'estoque' ? (
+                      <form action={alterarEstoqueMinimo} className="mt-2 flex flex-wrap gap-2">
+                        <input type="hidden" name="id" value={i.id} />
+                        <label className="flex items-center gap-2 text-xs">
+                          Mínimo
+                          <input
+                            type="number"
+                            step="0.001"
+                            min="0"
+                            name="minimo"
+                            required
+                            aria-label={`Estoque mínimo de ${i.principal}`}
+                            className="border-line rounded-input w-20 border p-2"
+                          />
+                        </label>
+                        <button
+                          type="submit"
+                          className="border-line rounded-input border bg-white px-3 py-1 text-xs"
+                        >
+                          Salvar
+                        </button>
+                      </form>
+                    ) : null}
+                  </td>
                   <td className="p-3">{i.quando ?? '—'}</td>
                 </tr>
               ))}
