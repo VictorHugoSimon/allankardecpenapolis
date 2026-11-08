@@ -3,7 +3,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { processarFilaPush } from '@/lib/processarFilaPush';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 /** Rota exclusiva de automação. Não aceita cookies de usuário como credencial. */
 export async function GET(req: Request) {
@@ -16,8 +16,32 @@ export async function GET(req: Request) {
     return NextResponse.json({ erro: 'Acesso não autorizado.' }, { status: 401 });
   }
   try {
-    const resultado = await processarFilaPush();
-    return NextResponse.json(resultado, { headers: { 'Cache-Control': 'no-store' } });
+    // Cron do plano Hobby pode executar somente uma vez ao dia. Processar
+    // vários lotes num único chamado, respeitando o orçamento do runtime.
+    const inicio = Date.now();
+    let lotes = 0;
+    let enviados = 0;
+    let falhas = 0;
+    let processados = 0;
+    let pendentes = 0;
+    let indisponivel = false;
+    while (lotes < 30 && Date.now() - inicio < 90_000) {
+      const resultado = await processarFilaPush();
+      if (resultado.indisponivel) {
+        indisponivel = true;
+        break;
+      }
+      processados += resultado.processados;
+      enviados += resultado.enviados;
+      falhas += resultado.falhas;
+      pendentes = resultado.pendentes;
+      if (resultado.processados === 0) break;
+      lotes++;
+    }
+    return NextResponse.json(
+      { lotes, processados, enviados, falhas, pendentes, indisponivel },
+      { headers: { 'Cache-Control': 'no-store' } },
+    );
   } catch {
     return NextResponse.json({ erro: 'Falha no processamento da fila.' }, { status: 500 });
   }
