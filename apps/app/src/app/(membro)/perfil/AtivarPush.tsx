@@ -33,8 +33,9 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
         setEstado('bloqueado');
         return;
       }
-      const reg = await navigator.serviceWorker.getRegistration();
-      const sub = await reg?.pushManager.getSubscription();
+      const reg = (await navigator.serviceWorker.getRegistration()) ??
+        (await navigator.serviceWorker.register('/sw.js', { scope: '/' }));
+      const sub = await reg.pushManager.getSubscription();
       if (!sub) {
         setEstado('inativo');
         return;
@@ -57,12 +58,22 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
     setOcupado(true);
     setAviso('');
     try {
-      const reg = await navigator.serviceWorker.ready;
+      if (!chavePublica) {
+        setEstado('desligado');
+        setAviso('A chave de envio de notificações precisa ser configurada no servidor.');
+        return;
+      }
       if (ligar) {
-        if ((await Notification.requestPermission()) !== 'granted') {
-          setEstado('bloqueado');
+        const permissao = await Notification.requestPermission();
+        if (permissao !== 'granted') {
+          setEstado(permissao === 'denied' ? 'bloqueado' : 'inativo');
+          setAviso('Autorize notificações nas configurações do aplicativo para ativar os avisos.');
           return;
         }
+      }
+      const reg = (await navigator.serviceWorker.getRegistration()) ??
+        (await navigator.serviceWorker.register('/sw.js', { scope: '/' }));
+      if (ligar) {
         // Um navegador pode manter a inscrição anterior após a troca de conta.
         // Nesse caso, revogue-a no próprio dispositivo e gere novo endpoint.
         const anterior = await reg.pushManager.getSubscription();
@@ -107,7 +118,7 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
         setAviso('Notificações desativadas neste aparelho.');
       }
     } catch {
-      setAviso('Não foi possível alterar agora. Tente novamente.');
+      setAviso('Não foi possível ativar o push. Confira a permissão do sistema, a instalação do PWA e a configuração VAPID.');
     } finally {
       setOcupado(false);
     }
