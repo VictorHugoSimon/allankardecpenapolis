@@ -5,7 +5,7 @@ import { TituloPagina } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { criarAvisoInterno, publicarAvisoInterno } from './actions';
 
-export const metadata: Metadata = { title: 'Avisos internos do aplicativo' };
+export const metadata: Metadata = { title: 'Central de notificações do CEAK' };
 export const dynamic = 'force-dynamic';
 
 const input = 'border-line rounded-input min-h-11 w-full border bg-white px-3 py-2 text-sm';
@@ -24,6 +24,7 @@ export default async function AvisosInternosPage() {
         titulo: true,
         mensagem: true,
         publico: true,
+        filtro: true,
         status: true,
         enviados: true,
         criadoEm: true,
@@ -34,7 +35,7 @@ export default async function AvisosInternosPage() {
   return (
     <div className="flex flex-col gap-5">
       <TituloPagina
-        sub="Mensagens na caixa de avisos do aplicativo · dados reais"
+        sub="Mensagens, links e comunicados para os usuários do aplicativo"
         acoes={
           <Link
             href="/comunicacao"
@@ -44,7 +45,7 @@ export default async function AvisosInternosPage() {
           </Link>
         }
       >
-        Avisos internos
+        Central de notificações
       </TituloPagina>
       <div className="border-line rounded-card border bg-white p-4 text-sm">
         Este módulo distribui comunicados somente na caixa de avisos do CEAK App, para contas ativas
@@ -65,7 +66,7 @@ export default async function AvisosInternosPage() {
       </section>
       {administra && (
         <section className="border-line rounded-card border bg-white p-5">
-          <h2 className="mt-0 text-lg font-semibold">Criar comunicado</h2>
+          <h2 className="mt-0 text-lg font-semibold">Nova mensagem para o aplicativo</h2>
           <form action={criarAvisoInterno} className="flex flex-col gap-3">
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium">Título</span>
@@ -81,6 +82,20 @@ export default async function AvisosInternosPage() {
                 required
                 className={input}
               />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">Destinatários</span>
+              <select name="segmento" defaultValue="TODOS" className={input}>
+                <option value="TODOS">Todos os membros elegíveis</option>
+                <option value="MEMBROS">Somente membros</option>
+                <option value="VOLUNTARIOS">Somente voluntários</option>
+                <option value="INSTRUTORES">Somente instrutores</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">Link para compartilhar (opcional)</span>
+              <input name="url" type="text" maxLength={1500} placeholder="https://... ou /agenda" className={input} />
+              <span className="text-muted-2 text-xs">O link será apresentado junto com a mensagem no aplicativo. Aceita HTTPS ou uma página interna.</span>
             </label>
             <button
               type="submit"
@@ -113,6 +128,11 @@ export default async function AvisosInternosPage() {
                   <td className="p-3">
                     <strong className="block">{a.titulo}</strong>
                     <p className="my-1 max-w-md text-sm whitespace-pre-wrap">{a.mensagem}</p>
+                    {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) && typeof (a.filtro as Record<string, unknown>).url === 'string' ? (
+                      <p className="my-2 max-w-md break-all text-xs text-green">
+                        Link: {String((a.filtro as Record<string, unknown>).url)}
+                      </p>
+                    ) : null}
                     <span className="text-muted-2 block text-xs">
                       Criado: {formatoData(a.criadoEm)}
                     </span>
