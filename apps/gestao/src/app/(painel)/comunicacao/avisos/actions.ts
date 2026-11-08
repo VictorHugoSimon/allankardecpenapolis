@@ -76,6 +76,11 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     throw new Error('Apenas administradores podem publicar avisos gerais.');
   const id = String(form.get('id') ?? '');
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error('Aviso inválido.');
+  // Obtém somente IDs, sem endpoints/chaves. A inserção da fila ocorrerá
+  // na MESMA transação da publicação, para não perder envios em caso de falha.
+  const dispositivosCandidatos = await prisma.dispositivoPush.findMany({
+    select: { id: true, pessoaId: true },
+  });
   const resultado = await comRls(contextoRls(sessao), async (tx) => {
     const aviso = await tx.comunicacao.findUnique({
       where: { id },
@@ -127,6 +132,14 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
         url,
       })),
     });
+    const pessoasElegiveis = new Set(pessoas.map(p => p.id));
+    const dispositivos = dispositivosCandidatos.filter(d => d.pessoaId && pessoasElegiveis.has(d.pessoaId));
+    if (dispositivos.length) {
+      await tx.entregaPush.createMany({
+        data: dispositivos.map(d => ({ comunicacaoId: aviso.id, dispositivoId: d.id })),
+        skipDuplicates: true,
+      });
+    }
     await registrarAuditoria(tx, {
       usuarioId: sessao.usuarioId,
       acao: 'comunicacao.app.publicada',
@@ -136,28 +149,12 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       depois: { status: 'ENVIADO', destinatarios: pessoas.length, canal: 'APP' },
       ip: null,
     });
-    return { id: aviso.id, titulo: aviso.titulo, mensagem: aviso.mensagem, url, pessoaIds: pessoas.map(p => p.id) };
+    return { id: aviso.id, totalDispositivos: dispositivos.length };
   });
 
-  // Enfileiramento idempotente: cada aparelho recebe no máximo uma entrega
-  // registrada por comunicado. A fila fica no PostgreSQL, não na memória do servidor.
-  // Não guarda chaves de dispositivos na fila; são consultadas apenas no processamento.
-  const inscritos = await prisma.dispositivoPush.findMany({
-    where: { pessoaId: { in: resultado.pessoaIds } },
-    select: { id: true },
-  });
-  if (inscritos.length) {
-    await prisma.entregaPush.createMany({
-      data: inscritos.map((d) => ({
-        comunicacaoId: resultado.id,
-        dispositivoId: d.id,
-      })),
-      skipDuplicates: true,
-    });
-  }
   log.info('NOTIFICACOES', 'comunicado publicado e aparelhos enfileirados', {
     rota: '/comunicacao/avisos', status: 200,
-    contexto: { comunicadoId: resultado.id, inscritos: inscritos.length },
+    contexto: { comunicadoId: resultado.id, inscritos: resultado.totalDispositivos },
   });
   revalidatePath('/comunicacao/avisos');
 }
