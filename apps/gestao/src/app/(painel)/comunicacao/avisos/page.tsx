@@ -16,9 +16,18 @@ const formatoData = (d: Date) => d.toLocaleString('pt-BR', { timeZone: 'America/
 export default async function AvisosInternosPage() {
   const sessao = await exigirModulo('comunicacao');
   const administra = sessao.perfil === 'ADMINISTRADOR';
-  const fila = administra ? await prisma.entregaPush.groupBy({ by: ['status'], _count: { _all: true } }) : [];
+  // Versões antigas da produção ainda podem estar sem a migração da fila.
+  // Não derrubar a central de comunicação por causa dessa dependência.
+  const tabelaFilaExiste = administra
+    ? (await prisma.$queryRaw<Array<{ existe: boolean }>>`
+        SELECT to_regclass('ceak_v2.entrega_push') IS NOT NULL AS existe
+      `)[0]?.existe ?? false
+    : false;
+  const fila = tabelaFilaExiste
+    ? await prisma.entregaPush.groupBy({ by: ['status'], _count: { _all: true } })
+    : [];
   const contagem = (status: string) => fila.find(x => x.status === status)?._count._all ?? 0;
-  const porComunicado = administra
+  const porComunicado = tabelaFilaExiste
     ? await prisma.entregaPush.groupBy({
         by: ['comunicacaoId', 'status'],
         _count: { _all: true },
@@ -80,7 +89,13 @@ export default async function AvisosInternosPage() {
           </div>
         ))}
       </section>
-      {administra && (
+      {administra && !tabelaFilaExiste ? (
+        <section role="status" className="border-line rounded-card border bg-white p-4 text-sm">
+          A fila de notificações externas aguarda a atualização do banco. Os avisos internos
+          continuam disponíveis; não publique disparos para celular até finalizar a migração.
+        </section>
+      ) : null}
+      {administra && tabelaFilaExiste && (
         <section className="border-line rounded-card border bg-white p-5">
           <h2 className="mt-0 text-lg font-semibold">Fila de notificações do celular</h2>
           <div className="grid gap-2 sm:grid-cols-3 text-sm">
