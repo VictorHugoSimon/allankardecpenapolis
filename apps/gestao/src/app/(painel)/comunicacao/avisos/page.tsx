@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { comRls } from '@ceak/db';
+import { comRls, prisma } from '@ceak/db';
 import { TituloPagina } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
-import { criarAvisoInterno, publicarAvisoInterno } from './actions';
+import { criarAvisoInterno, processarLotePush, publicarAvisoInterno } from './actions';
 
 export const metadata: Metadata = { title: 'Central de notificações do CEAK' };
 export const dynamic = 'force-dynamic';
@@ -14,6 +14,8 @@ const formatoData = (d: Date) => d.toLocaleString('pt-BR', { timeZone: 'America/
 export default async function AvisosInternosPage() {
   const sessao = await exigirModulo('comunicacao');
   const administra = sessao.perfil === 'ADMINISTRADOR';
+  const fila = administra ? await prisma.entregaPush.groupBy({ by: ['status'], _count: { _all: true } }) : [];
+  const contagem = (status: string) => fila.find(x => x.status === status)?._count._all ?? 0;
   const avisos = await comRls(contextoRls(sessao), (tx) =>
     tx.comunicacao.findMany({
       where: { canal: 'APP' },
@@ -62,6 +64,24 @@ export default async function AvisosInternosPage() {
           </div>
         ))}
       </section>
+      {administra && (
+        <section className="border-line rounded-card border bg-white p-5">
+          <h2 className="mt-0 text-lg font-semibold">Fila de notificações do celular</h2>
+          <div className="grid gap-2 sm:grid-cols-3 text-sm">
+            <p>Na fila: <strong>{contagem('PENDENTE') + contagem('PROCESSANDO')}</strong></p>
+            <p>Envios aceitos: <strong>{contagem('ENVIADO')}</strong></p>
+            <p>Falhas finais: <strong>{contagem('FALHA') + contagem('EXPIRADO')}</strong></p>
+          </div>
+          <p className="text-muted-2 text-xs">
+            O processamento é feito em lotes de até 50 aparelhos. Envio aceito pelo provedor não garante exibição pelo sistema operacional.
+          </p>
+          <form action={processarLotePush}>
+            <button type="submit" className="bg-green rounded-input min-h-11 px-4 py-2 text-sm font-semibold text-white">
+              Processar próximo lote (até 50)
+            </button>
+          </form>
+        </section>
+      )}
       {administra && (
         <section className="border-line rounded-card border bg-white p-5">
           <h2 className="mt-0 text-lg font-semibold">Nova mensagem para o aplicativo</h2>
