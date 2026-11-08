@@ -12,6 +12,7 @@ import { Tela } from '@/components/Tela';
 import { agenda, diaRelativo } from '@/lib/dados';
 import { cartao } from '@/lib/estilos';
 import { exigirSessao } from '@/lib/servidor';
+import { PreferenciaNotificacoes } from './perfil/PreferenciaNotificacoes';
 
 export const dynamic = 'force-dynamic';
 
@@ -68,6 +69,8 @@ export default async function InicioPage() {
             )}
           </Link>
         </div>
+
+        <PreferenciaNotificacoes chavePublica={process.env.VAPID_PUBLIC_KEY ?? null} />
 
         {hoje || proxima ? (
           <section
