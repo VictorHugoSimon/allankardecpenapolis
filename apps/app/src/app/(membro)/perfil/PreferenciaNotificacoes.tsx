@@ -8,19 +8,20 @@ import { AtivarPush } from './AtivarPush';
  * A inscrição push só ocorre após o gesto explícito no botão e consentimento
  * concedido pelo Android/iOS/navegador.
  */
-export function PreferenciaNotificacoes({ chavePublica }: { chavePublica: string | null }) {
+export function PreferenciaNotificacoes({ chavePublica, pessoaId }: { chavePublica: string | null; pessoaId: string }) {
   const [preferencia, setPreferencia] = useState<'sim' | 'nao'>('sim');
   const [montado, setMontado] = useState(false);
+  const chavePreferencia = `ceak-preferencia-push:${pessoaId}`;
 
   useEffect(() => {
     try {
-      const armazenado = window.localStorage.getItem('ceak-preferencia-push');
+      const armazenado = window.localStorage.getItem(chavePreferencia);
       if (armazenado === 'nao') setPreferencia('nao');
     } catch {
       // A escolha continua disponível mesmo sem armazenamento local.
     }
     setMontado(true);
-  }, []);
+  }, [chavePreferencia]);
 
   async function escolher(valor: 'sim' | 'nao') {
     if (valor === 'nao' && 'serviceWorker' in navigator) {
@@ -42,7 +43,7 @@ export function PreferenciaNotificacoes({ chavePublica }: { chavePublica: string
     }
     setPreferencia(valor);
     try {
-      window.localStorage.setItem('ceak-preferencia-push', valor);
+      window.localStorage.setItem(chavePreferencia, valor);
     } catch {
       // O navegador pode bloquear armazenamento; não altera o consentimento push.
     }
