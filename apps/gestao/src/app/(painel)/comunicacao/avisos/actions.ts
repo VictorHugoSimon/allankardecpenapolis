@@ -171,7 +171,8 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
           } catch (erro) {
             falhasPush++;
             if (erro instanceof InscricaoPushExpirada) {
-              await prisma.dispositivoPush.deleteMany({ where: { id: d.id, endpoint: d.endpoint } });
+              await prisma.dispositivoPush.deleteMany({ where: { id: d.id, endpoint: d.endpoint } })
+                .catch(() => undefined);
             }
           }
         }));
@@ -189,6 +190,8 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       where: { id: resultado.id },
       data: { filtro: { ...filtro, resumoPush: avisoPush, enviadosPush, falhasPush } },
     });
+  }).catch(() => {
+    // A publicação na caixa interna já foi confirmada; falha no resumo não a desfaz.
   });
   log.info('NOTIFICACOES', 'publicação de comunicado interno e tentativas de Web Push', {
     rota: '/comunicacao/avisos', status: 200,
