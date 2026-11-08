@@ -785,8 +785,8 @@ model EntregaPush {
   enviadoEm       DateTime? @map("enviado_em")
   criadoEm        DateTime  @default(now()) @map("criado_em")
 
-  @@unique([comunicacaoId, dispositivoId])
-  @@index([status, proximaEm])
+  @@unique([comunicacaoId, dispositivoId], map: "entrega_push_unica")
+  @@index([status, proximaEm], map: "entrega_push_fila_idx")
   @@map("entrega_push")
 }
 
