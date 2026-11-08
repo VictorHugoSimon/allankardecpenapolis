@@ -132,7 +132,21 @@ jobs:
                   p.segredo_exposto || !p.turma_rls) {
                 throw new Error('Falha no RLS e nas permissões de acesso do CEAK v2.');
               }
-              console.log('RLS operacional ativo e credenciais sem exposição.');
+              // Nova fila Web Push deve existir e ser acessível só por funções autorizadas.
+              const fila = await db.query(`
+                SELECT
+                  to_regclass('ceak_v2.entrega_push') IS NOT NULL AS tabela_ok,
+                  (SELECT relrowsecurity FROM pg_class WHERE oid='ceak_v2.entrega_push'::regclass) AS rls_ativo,
+                  has_table_privilege('ceak_app', 'ceak_v2.entrega_push', 'SELECT') AS select_ok,
+                  has_table_privilege('ceak_app', 'ceak_v2.entrega_push', 'INSERT') AS insert_ok,
+                  has_table_privilege('ceak_app', 'ceak_v2.entrega_push', 'UPDATE') AS update_indevido
+              `);
+              const q = fila.rows[0];
+              if (!q.tabela_ok || !q.rls_ativo || !q.select_ok || !q.insert_ok || q.update_indevido) {
+                throw new Error('Fila de notificações sem isolamento de permissões.');
+              }
+              console.log('RLS da fila de notificações verificado.');
+                            console.log('RLS operacional ativo e credenciais sem exposição.');
             } finally {
               await db.end();
             }
