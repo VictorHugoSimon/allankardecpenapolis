@@ -7,6 +7,7 @@ Atualizado em 08/11/2026. Branch do projeto: `claude/new-session-n6t9kx`.
 Os projetos `ceak-app-git-preview` e `ceak-gestao-git-preview` possuem as variáveis:
 - `VAPID_PUBLIC_KEY` (chave pública);
 - `VAPID_PRIVATE_KEY` (segredo criptografado, nunca copiar ao repositório);
+- As duas chaves VAPID foram regeneradas a partir do mesmo par P-256 e aplicadas no CEAK App e no CEAK Gestão. Como a produção ainda não tem aparelhos inscritos, isso não exige migração de assinaturas existentes.
 - `VAPID_SUBJECT`;
 - `PUSH_PROVIDER=webpush`.
 
@@ -28,6 +29,7 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 ## Critérios e limites
 
 - O usuário pode desativar o Web Push em **Não**; o sistema remove a inscrição do aparelho antes de salvar a preferência local.
+- A preferência local **Sim/Não** é armazenada separadamente para cada pessoa autenticada, evitando herdar a escolha de outro usuário no mesmo dispositivo.
 - **Sim** é a preferência inicial, mas não substitui o consentimento exigido por Android, iOS e navegadores.
 - A caixa interna funciona independentemente de permissão push.
 - Envio externo é tentado apenas com VAPID configurado e provedor `webpush`, sem simulação.
