@@ -29,7 +29,7 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 ## Critérios e limites
 
 - O usuário pode desativar o Web Push em **Não**; o sistema remove a inscrição do aparelho antes de salvar a preferência local.
-- A preferência local **Sim/Não** é armazenada separadamente para cada pessoa autenticada, evitando herdar a escolha de outro usuário no mesmo dispositivo.
+- A preferência local **Sim/Não** é armazenada separadamente para cada pessoa autenticada, evitando herdar a escolha de outro usuário no mesmo dispositivo. A troca de conta reinicializa a preferência para Sim quando não houver escolha salva naquela conta.
 - **Sim** é a preferência inicial, mas não substitui o consentimento exigido por Android, iOS e navegadores.
 - A caixa interna funciona independentemente de permissão push.
 - Envio externo é tentado apenas com VAPID configurado e provedor `webpush`, sem simulação.
@@ -39,7 +39,7 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 - Foi adicionado um cron nativo diário em `apps/gestao/vercel.json` (`0 9 * * *`, UTC), compatível com a frequência máxima do plano Hobby; ele processa lotes consecutivos durante o orçamento de execução. O cron diário não substitui um serviço de filas em tempo quase real.
 - O painel agora mostra pendências, aceites e falhas para cada comunicado, além dos totais globais.
 - Para retomada imediata existe o botão **Processar próximo lote (até 50)** no CEAK Gestão. A rota protegida `GET /api/cron/notificacoes` aceita `Authorization: Bearer <CRON_SECRET>` de agendador autorizado. O agendamento periódico externo ainda precisa ser ativado.
-- Falhas transitórias são retentadas até cinco vezes, com espera progressiva. O serviço registra aceites e falhas, sem prometer que o sistema operacional exibiu o alerta.
+- Falhas transitórias são retentadas até cinco vezes, com espera progressiva. Claims abandonados na quinta tentativa são encerrados em FALHA (evita novas tentativas infinitas), e atualizações de workers antigos não sobrescrevem tentativas recentes. O serviço registra aceites e falhas, sem prometer que o sistema operacional exibiu o alerta.
 - O plano Vercel **Hobby** não foi assumido como agendador de alta frequência; a publicação não deve ser chamada de totalmente automatizada até testar recuperação dos lotes interrompidos.
 - O painel separa quantidade de avisos internos e tentativas Web Push aceitas/falhas.
 - A notificação push abre o CEAK App em `/notificacoes`, onde o usuário pode tocar no link externo compartilhado.
@@ -54,6 +54,8 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 - [ ] Publicar e testar o cron real no ambiente Vercel, validando retomada de fila interrompida e limites de execução.
 - [ ] Para maior frequência, contratar plano adequado ou integrar agendador externo com credencial protegida.
 - [ ] Verificar 1.000 aparelhos inscritos em ambiente de teste com métricas de aceites/falhas sem envio acidental para usuários reais.
+- [x] Validar `EXPLAIN` da consulta de seleção concorrente de 50 registros no Neon de homologação.
+- [ ] Homologar recuperação de workers interrompidos, com testes de concorrência e ausência de duplicação funcional.
 - [ ] Executar build, lint e TypeScript na versão publicada.
 - [ ] Testar primeiro consentimento e o botão push no Android Chrome.
 - [ ] Testar no iPhone com PWA instalado pela Tela de Início.
