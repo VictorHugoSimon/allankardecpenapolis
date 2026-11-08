@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { comRls } from '@ceak/db';
 import { MODULO_LABEL, type Modulo } from '@ceak/core/rbac';
@@ -387,7 +388,10 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
   const editavel = s.perfil === 'ADMINISTRADOR' && operacoes.some((o) => o === modulo);
   return (
     <div className="flex flex-col gap-5">
-      <TituloPagina sub="Dados reais · CEAK Gestão">{MODULO_LABEL[modulo as Modulo]}</TituloPagina>
+      <TituloPagina
+        sub="Dados reais · CEAK Gestão"
+        acoes={modulo === 'loja' ? <Link href="/loja/pedidos" className="border-line rounded-input border bg-white px-4 py-2 text-sm">Gerenciar pedidos e retiradas</Link> : undefined}
+      >{MODULO_LABEL[modulo as Modulo]}</TituloPagina>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {visao.indicadores.map((k) => (
           <div key={k.titulo} className="border-line rounded-card border bg-white p-4">
