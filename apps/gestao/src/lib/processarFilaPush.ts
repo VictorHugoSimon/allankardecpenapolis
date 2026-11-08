@@ -29,7 +29,7 @@ export async function processarFilaPush() {
           OR (status = 'PROCESSANDO' AND bloqueado_ate < now())
         )
         ORDER BY proxima_em, criado_em
-        FOR UPDATE SKIP LOCKED LIMIT 50
+        LIMIT 50 FOR UPDATE SKIP LOCKED
       )
       RETURNING fila.id, fila.comunicacao_id, fila.dispositivo_id, fila.tentativas
     `;
