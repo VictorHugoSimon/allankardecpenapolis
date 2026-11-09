@@ -5,11 +5,11 @@ import { comRls } from '@ceak/db';
 import { MODULO_LABEL, type Modulo } from '@ceak/core/rbac';
 import { TituloPagina } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
-import { alterarEstoqueMinimo, alterarPublicacaoProduto, salvarOperacao } from './actions';
+import { alterarEstoqueMinimo, alterarPublicacaoProduto, executarDiagnosticoEstoque, salvarOperacao } from './actions';
 
 type Operacao = 'doacoes' | 'loja' | 'estoque' | 'automacoes' | 'comunicacao';
 type Linha = { id: string; principal: string; detalhe: string; status: string; quando?: string };
-type Visao = { indicadores: { titulo: string; valor: string }[]; linhas: Linha[]; aviso: string };
+type Visao = { indicadores: { titulo: string; valor: string }[]; linhas: Linha[]; aviso: string; historicoAutomacoes?: { id: string; nome: string; status: string; quando: string; resultado: string }[] };
 const ROTAS = [
   'comunicacao',
   'doacoes',
@@ -149,7 +149,25 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
         orderBy: { criadoEm: 'desc' },
         include: { _count: { select: { execucoes: true } } },
       });
+      const execucoes = await tx.execucao.findMany({
+        take: 20,
+        orderBy: { iniciadaEm: 'desc' },
+        include: { automacao: { select: { nome: true } } },
+      });
       return {
+        historicoAutomacoes: execucoes.map(e => {
+          const saida = e.saida && typeof e.saida === 'object' && !Array.isArray(e.saida)
+            ? e.saida as Record<string, unknown> : {};
+          return {
+            id: e.id,
+            nome: e.automacao.nome,
+            status: e.status,
+            quando: dataBR(e.iniciadaEm),
+            resultado: typeof saida.abaixoDoMinimo === 'number'
+              ? `${saida.abaixoDoMinimo} abaixo do mínimo entre ${saida.itensAnalisados} itens analisados`
+              : e.erro ?? 'Execução registrada',
+          };
+        }),
         indicadores: [
           stat('Automações', registros.length),
           stat('Ativas', registros.filter((a) => a.ativa).length),
@@ -168,7 +186,7 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
           ),
         ),
         aviso:
-          'Novas regras são registradas desativadas e exigem aprovação humana. Cadastrar uma automação não significa executar ou disparar mensagens.',
+          'As regras são cadastradas desativadas. Somente o diagnóstico manual de estoque pode ser executado nesta etapa, após comando explícito de administrador. Nenhuma mensagem externa é disparada.',
       };
     }
     if (modulo === 'integracoes') {
@@ -336,8 +354,22 @@ function Formulario({ modulo, itens }: { modulo: Operacao; itens: Linha[] }) {
         {modulo === 'automacoes' && (
           <>
             <Campo nome="nome" rotulo="Nome da regra" />
-            <Campo nome="gatilho" rotulo="Gatilho pretendido" />
-            <Campo nome="acao" rotulo="Ação pretendida" />
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">Gatilho</span>
+              <select name="gatilho" defaultValue="MANUAL" className={input}>
+                <option value="MANUAL">Execução manual pelo administrador</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="font-medium">Ação</span>
+              <select name="acao" defaultValue="DIAGNOSTICO_ESTOQUE" className={input}>
+                <option value="DIAGNOSTICO_ESTOQUE">Diagnóstico do estoque (sem alterações)</option>
+              </select>
+            </label>
+            <p className="text-muted-2 text-xs sm:col-span-2">
+              Novas regras começam desativadas. O diagnóstico pode ser executado manualmente,
+              com auditoria e sem disparar notificações nem modificar produtos.
+            </p>
           </>
         )}
         <div className="sm:col-span-2">
@@ -436,7 +468,22 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
         <p className="m-0">{visao.aviso}</p>
       </section>
       {editavel && <Formulario modulo={modulo as Operacao} itens={visao.linhas} />}
-      {visao.linhas.length > 0 ? (
+      {modulo === 'automacoes' && visao.historicoAutomacoes && (
+        <section className="border-line rounded-card border bg-white p-4">
+          <h2 className="m-0 mb-3 text-lg font-semibold">Histórico de execuções</h2>
+          {visao.historicoAutomacoes.length === 0
+            ? <p className="text-muted-2 text-sm">Nenhuma automação executada ainda.</p>
+            : <ul className="m-0 list-none divide-y p-0">
+                {visao.historicoAutomacoes.map(e => (
+                  <li key={e.id} className="py-3 text-sm">
+                    <strong>{e.nome}</strong> · {e.status} · {e.quando}
+                    <p className="text-muted-2 mb-0">{e.resultado}</p>
+                  </li>
+                ))}
+              </ul>}
+        </section>
+      )}
+            {visao.linhas.length > 0 ? (
         <section className="border-line rounded-card overflow-x-auto border bg-white">
           <h2 className="m-0 p-4 text-lg font-semibold">Registros</h2>
           <table className="w-full min-w-[540px] text-left text-sm">
@@ -470,6 +517,16 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
                           className="border-line rounded-input min-h-10 border bg-white px-3 py-1 text-xs font-medium"
                         >
                           {i.status === 'ATIVO' ? 'Retirar do site' : 'Publicar no site'}
+                        </button>
+                      </form>
+                    ) : null}
+                    {editavel && modulo === 'automacoes' &&
+                    i.detalhe === 'MANUAL → DIAGNOSTICO_ESTOQUE' ? (
+                      <form action={executarDiagnosticoEstoque} className="mt-2">
+                        <input type="hidden" name="id" value={i.id} />
+                        <button type="submit"
+                          className="border-line rounded-input min-h-10 border bg-white px-3 py-1 text-xs font-medium">
+                          Executar diagnóstico
                         </button>
                       </form>
                     ) : null}
