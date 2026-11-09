@@ -60,3 +60,23 @@ Status: **implementado no código, homologação operacional ainda pendente**.
 6. Desativar a regra e confirmar que o cron não cria novas execuções.
 7. Confirmar que nenhuma alteração de saldo, transação financeira ou comunicação foi criada.
 8. Conferir os eventos de deploy e logs da Vercel; não declarar homologação sem testar esta sequência.
+
+
+## Lembretes de palestras e estudos — preparação de rascunhos
+- Novo gatilho `DIARIO` com ação `RASCUNHO_LEMBRETE_EVENTO`, criado **desativado**.
+- Somente administrador pode habilitar a regra, mediante confirmação e auditoria. O cron já existente a executa após os diagnósticos.
+- Busca **palestras e estudos públicos confirmados**, com início nas próximas **48 horas**, no máximo **20 eventos** por regra/dia.
+- Cria `Comunicacao` com canal `APP`, status `RASCUNHO`, link para `/agenda/{slug}` e referência ao evento no filtro. Não notifica nem envia push, e-mail ou WhatsApp.
+- A chave `chaveLembrete` identifica regra+evento e é verificada antes de criar rascunhos. A transação possui advisory lock, e o histórico `Execucao` evita executar a mesma regra duas vezes no dia UTC.
+- Os rascunhos ficam na central de notificações para revisão **humana**. Apenas a ação existente de publicação envia avisos, aplicando consentimento e segmentação. Não usar disparo geral para testes.
+- Uma alteração posterior na agenda não edita automaticamente rascunhos já criados. O administrador deve revisar o conteúdo imediatamente antes de publicar.
+
+### Aceite do gatilho de eventos
+1. Sem regra ativa: cron não deve gerar rascunhos.
+2. Com regra ativa e agenda vazia: registra execução com zero eventos.
+3. Com evento CONFIRMADO e público nas próximas 48 h: gera um rascunho APP com link correto.
+4. Evento em RASCUNHO, CANCELADO ou privado: nenhum rascunho.
+5. Duas execuções no mesmo dia: nenhum rascunho duplicado.
+6. Dia seguinte: evento já preparado não deve gerar novo rascunho.
+7. Ao desativar regra: novos rascunhos deixam de ser preparados.
+8. Validar que a quantidade de notificações enviadas permanece inalterada até a publicação manual.
