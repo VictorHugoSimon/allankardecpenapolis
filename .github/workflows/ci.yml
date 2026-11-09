@@ -152,6 +152,39 @@ jobs:
             }
           })().catch(err => { console.error(err); process.exitCode = 1; });
           NODE
+      - name: Validar isolamento das preferencias de comunicacao no banco
+        run: |
+          node - <<'NODE'
+          const { Client } = require('pg');
+          (async () => {
+            const db = new Client({ connectionString: process.env.DATABASE_URL });
+            await db.connect();
+            try {
+              const q = await db.query(`
+                SELECT
+                  to_regclass('ceak_v2.preferencia_comunicacao') IS NOT NULL AS existe,
+                  (SELECT relrowsecurity FROM pg_class WHERE oid='ceak_v2.preferencia_comunicacao'::regclass) AS rls_ativo,
+                  (SELECT relforcerowsecurity FROM pg_class WHERE oid='ceak_v2.preferencia_comunicacao'::regclass) AS rls_obrigatorio,
+                  has_table_privilege('ceak_app', 'ceak_v2.preferencia_comunicacao', 'SELECT') AS leitura,
+                  has_table_privilege('ceak_app', 'ceak_v2.preferencia_comunicacao', 'INSERT') AS insercao,
+                  has_table_privilege('ceak_app', 'ceak_v2.preferencia_comunicacao', 'UPDATE') AS atualizacao,
+                  has_table_privilege('ceak_app', 'ceak_v2.preferencia_comunicacao', 'DELETE') AS exclusao,
+                  (SELECT count(*)::int FROM pg_policies
+                   WHERE schemaname='ceak_v2' AND tablename='preferencia_comunicacao'
+                     AND policyname IN ('preferencia_leitura_propria', 'preferencia_insercao_propria', 'preferencia_atualizacao_propria')) AS politicas
+              `);
+              const x = q.rows[0];
+              if (!x.existe || !x.rls_ativo || !x.rls_obrigatorio ||
+                  !x.leitura || !x.insercao || !x.atualizacao || x.exclusao ||
+                  x.politicas !== 3) {
+                throw new Error('Preferencias sem isolamento RLS seguro: ' + JSON.stringify(x));
+              }
+              console.log('Preferencias isoladas por usuario e sem permissao de DELETE.');
+            } finally {
+              await db.end();
+            }
+          })().catch(e => { console.error(e); process.exitCode = 1; });
+          NODE
       - name: Primeiro acesso sem dados de demonstração
         env:
           CEAK_BOOTSTRAP_CONFIRM: CRIAR_PRIMEIRO_ADMIN_REAL
