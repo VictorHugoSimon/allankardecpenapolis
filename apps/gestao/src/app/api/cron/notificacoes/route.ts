@@ -3,6 +3,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { processarFilaPush } from '@/lib/processarFilaPush';
 import { executarDiagnosticosDiarios } from '@/lib/automacoesAgendadas';
 import { prepararRascunhosDeEventos } from '@/lib/rascunhosEventosAgendados';
+import { prepararRascunhosDeAulas } from '@/lib/rascunhosAulasAgendados';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -51,8 +52,9 @@ export async function GET(req: Request) {
     // Nenhuma ação externa ou escrita de estoque é disparada.
     const automacoes = await executarDiagnosticosDiarios();
     const lembretes = await prepararRascunhosDeEventos();
+    const aulas = await prepararRascunhosDeAulas();
     return NextResponse.json(
-      { lotes, processados, enviados, falhas, pendentes, indisponivel, automacoes, lembretes },
+      { lotes, processados, enviados, falhas, pendentes, indisponivel, automacoes, lembretes, aulas },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch {
