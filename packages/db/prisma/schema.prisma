@@ -322,6 +322,7 @@ model Pessoa {
   atualizadoEm         DateTime     @updatedAt @map("atualizado_em")
 
   usuario            Usuario?
+  preferenciasComunicacao PreferenciaComunicacao[]
   inscricoes         Inscricao[]
   checkins           Checkin[]
   avaliacoes         Avaliacao[]
@@ -339,6 +340,26 @@ model Pessoa {
 
   @@index([perfil])
   @@map("pessoa")
+}
+
+/** Aceite específico de comunicação, independente do consentimento geral LGPD. */
+model PreferenciaComunicacao {
+  id          String   @id @default(uuid()) @db.Uuid
+  pessoaId    String   @map("pessoa_id") @db.Uuid
+  canal       String
+  finalidade  String   @default("AGRADECIMENTO_DOACAO")
+  autorizado  Boolean  @default(false)
+  versao      String
+  origem      String
+  atualizadoEm DateTime @default(now()) @updatedAt @map("atualizado_em")
+  consentidoEm DateTime? @map("consentido_em")
+  revogadoEm   DateTime? @map("revogado_em")
+
+  pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
+
+  @@unique([pessoaId, canal, finalidade])
+  @@index([pessoaId, autorizado])
+  @@map("preferencia_comunicacao")
 }
 
 /// Conta de acesso (App e/ou Gestão).
