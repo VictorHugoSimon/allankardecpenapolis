@@ -17,6 +17,7 @@ const LINKS = [
   ['Notificações', '/notificacoes'],
   ['Biblioteca', '/biblioteca'],
   ['Dados pessoais', '/perfil/dados'],
+  ['Preferências de comunicação', '/perfil/comunicacao'],
   ['Minhas contribuições', '/perfil/contribuicoes'],
 ] as const;
 
