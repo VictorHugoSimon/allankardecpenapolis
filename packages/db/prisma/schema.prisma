@@ -357,8 +357,8 @@ model PreferenciaComunicacao {
 
   pessoa Pessoa @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
 
-  @@unique([pessoaId, canal, finalidade])
-  @@index([pessoaId, autorizado])
+  @@unique([pessoaId, canal, finalidade], map: "preferencia_unica")
+  @@index([pessoaId, autorizado], map: "preferencia_comunicacao_pessoa_autorizado_idx")
   @@map("preferencia_comunicacao")
 }
 
