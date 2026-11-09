@@ -5,7 +5,7 @@ import { comRls } from '@ceak/db';
 import { MODULO_LABEL, type Modulo } from '@ceak/core/rbac';
 import { TituloPagina } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
-import { alterarEstoqueMinimo, alterarPublicacaoProduto, executarDiagnosticoEstoque, salvarOperacao } from './actions';
+import { alterarAtivacaoAutomacao, alterarEstoqueMinimo, alterarPublicacaoProduto, executarDiagnosticoEstoque, salvarOperacao } from './actions';
 
 type Operacao = 'doacoes' | 'loja' | 'estoque' | 'automacoes' | 'comunicacao';
 type Linha = { id: string; principal: string; detalhe: string; status: string; quando?: string };
@@ -181,12 +181,12 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
             a.id,
             a.nome,
             a.gatilho + ' → ' + a.acao,
-            a.ativa ? 'ATIVA' : 'DESATIVADA',
+            a.ativa ? 'HABILITADA MANUAL' : 'DESATIVADA',
             a.criadoEm,
           ),
         ),
         aviso:
-          'As regras são cadastradas desativadas. Somente o diagnóstico manual de estoque pode ser executado nesta etapa, após comando explícito de administrador. Nenhuma mensagem externa é disparada.',
+          'As regras começam desativadas. Apenas o diagnóstico manual de estoque pode ser habilitado e executado por administradores. Habilitar não agenda execuções nem envia mensagens externas.',
       };
     }
     if (modulo === 'integracoes') {
@@ -367,8 +367,9 @@ function Formulario({ modulo, itens }: { modulo: Operacao; itens: Linha[] }) {
               </select>
             </label>
             <p className="text-muted-2 text-xs sm:col-span-2">
-              Novas regras começam desativadas. O diagnóstico pode ser executado manualmente,
-              com auditoria e sem disparar notificações nem modificar produtos.
+              Novas regras começam desativadas. Para executar, habilite a regra com confirmação
+              administrativa e depois clique em Executar diagnóstico. Isso não agenda tarefas
+              nem dispara notificações ou modifica produtos.
             </p>
           </>
         )}
@@ -483,7 +484,7 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
               </ul>}
         </section>
       )}
-            {visao.linhas.length > 0 ? (
+          {visao.linhas.length > 0 ? (
         <section className="border-line rounded-card overflow-x-auto border bg-white">
           <h2 className="m-0 p-4 text-lg font-semibold">Registros</h2>
           <table className="w-full min-w-[540px] text-left text-sm">
@@ -520,8 +521,26 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
                         </button>
                       </form>
                     ) : null}
+                    {editavel && modulo === 'automacoes' && (
+                      <form action={alterarAtivacaoAutomacao} className="mt-2 flex flex-col gap-2">
+                        <input type="hidden" name="id" value={i.id} />
+                        <input type="hidden" name="ativa"
+                          value={i.status === 'DESATIVADA' ? 'sim' : 'nao'} />
+                        <label className="flex items-center gap-2 text-xs">
+                          <input type="checkbox" name="confirmacao" value="CONFIRMO" required />
+                          Confirmo a alteração manual desta regra
+                        </label>
+                        <button type="submit"
+                          disabled={i.status === 'DESATIVADA' &&
+                            i.detalhe !== 'MANUAL → DIAGNOSTICO_ESTOQUE'}
+                          className="border-line rounded-input min-h-10 self-start border bg-white px-3 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50">
+                          {i.status === 'DESATIVADA' ? 'Habilitar regra manual' : 'Desativar regra'}
+                        </button>
+                      </form>
+                    )}
                     {editavel && modulo === 'automacoes' &&
-                    i.detalhe === 'MANUAL → DIAGNOSTICO_ESTOQUE' ? (
+                    i.detalhe === 'MANUAL → DIAGNOSTICO_ESTOQUE' &&
+                    i.status === 'HABILITADA MANUAL' ? (
                       <form action={executarDiagnosticoEstoque} className="mt-2">
                         <input type="hidden" name="id" value={i.id} />
                         <button type="submit"
