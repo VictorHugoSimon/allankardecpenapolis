@@ -227,3 +227,16 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 6. Confirmar que nenhuma preferência existente é criada automaticamente e que não houve mensagens enviadas.
 7. Integrar a mesma experiência no PWA dos membros antes de considerar autoatendimento geral concluído.
 8. Provedores externos, opt-out por canal e verificação de destino continuam bloqueados até homologação.
+
+
+## Preferências no PWA — homologação técnica da infraestrutura
+- Criada rota autenticada `/perfil/comunicacao` no aplicativo dos membros e adicionado acesso em `/perfil`.
+- Os formulários de EMAIL e WHATSAPP exibem escolhas independentes, sem consentimento presumido, com confirmação explícita e possibilidade de revogação.
+- A gravação usa sessão própria do aplicativo, `comRls` com `ceak_app`, identidade `sessao.pessoaId`, atualização transacional e `registrarAuditoria`.
+- Uma autorização nova requer consentimento geral e cadastro sem solicitação de exclusão ou anonimização. A revogação continua disponível para autorização preexistente, mesmo que novas autorizações estejam bloqueadas.
+- O middleware do PWA já exige autenticação para todas as rotas de membro, inclusive essa página.
+- **Homologação no Neon**: a migração DDL foi aplicada manualmente à branch de homologação `br-blue-shape-b6q4xm7w`, sem alterações em produção. Consulta confirmou RLS ligado, FORCE ROW LEVEL SECURITY e três policies.
+- A aplicação manual da DDL não marca automaticamente a migração no histórico Prisma. Validar novamente com `prisma migrate deploy` no pipeline do ambiente antes de liberar a aplicação, pois a migração é idempotente.
+- No banco de produção `br-dry-heart-b615yh3f`, `ceak_v2.preferencia_comunicacao` ainda não existe. **A nova versão não deve ser considerada pronta para uso em produção.**
+- CI reforçado com verificação de RLS, grants e ausência de DELETE para `ceak_app` depois de `pnpm db:deploy`.
+- **Ainda pendente**: testes da tela com duas contas reais de homologação, build do commit atual e migração de produção após aceite.
