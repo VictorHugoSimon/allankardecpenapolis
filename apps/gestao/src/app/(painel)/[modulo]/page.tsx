@@ -181,12 +181,12 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
             a.id,
             a.nome,
             a.gatilho + ' → ' + a.acao,
-            a.ativa ? 'HABILITADA MANUAL' : 'DESATIVADA',
+            a.ativa ? (a.gatilho === 'DIARIO' ? 'ATIVA DIÁRIA' : 'HABILITADA MANUAL') : 'DESATIVADA',
             a.criadoEm,
           ),
         ),
         aviso:
-          'As regras começam desativadas. Apenas o diagnóstico manual de estoque pode ser habilitado e executado por administradores. Habilitar não agenda execuções nem envia mensagens externas.',
+          'Diagnósticos de estoque manuais ou diários são cadastrados desativados. O administrador habilita cada regra com confirmação explícita. Apenas a opção diária executa pelo cron (09:00 UTC), sem movimentar estoque ou enviar mensagens.',
       };
     }
     if (modulo === 'integracoes') {
@@ -358,6 +358,7 @@ function Formulario({ modulo, itens }: { modulo: Operacao; itens: Linha[] }) {
               <span className="font-medium">Gatilho</span>
               <select name="gatilho" defaultValue="MANUAL" className={input}>
                 <option value="MANUAL">Execução manual pelo administrador</option>
+                <option value="DIARIO">Diagnóstico diário automático (09:00 UTC)</option>
               </select>
             </label>
             <label className="flex flex-col gap-1 text-sm">
@@ -368,8 +369,9 @@ function Formulario({ modulo, itens }: { modulo: Operacao; itens: Linha[] }) {
             </label>
             <p className="text-muted-2 text-xs sm:col-span-2">
               Novas regras começam desativadas. Para executar, habilite a regra com confirmação
-              administrativa e depois clique em Executar diagnóstico. Isso não agenda tarefas
-              nem dispara notificações ou modifica produtos.
+              administrativa. Regras manuais exibem Executar diagnóstico; regras diárias
+              são processadas pelo cron, no máximo uma vez por dia UTC.
+              Nenhuma delas dispara notificações ou modifica produtos.
             </p>
           </>
         )}
@@ -532,7 +534,7 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
                         </label>
                         <button type="submit"
                           disabled={i.status === 'DESATIVADA' &&
-                            i.detalhe !== 'MANUAL → DIAGNOSTICO_ESTOQUE'}
+                            !['MANUAL → DIAGNOSTICO_ESTOQUE', 'DIARIO → DIAGNOSTICO_ESTOQUE'].includes(i.detalhe)}
                           className="border-line rounded-input min-h-10 self-start border bg-white px-3 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50">
                           {i.status === 'DESATIVADA' ? 'Habilitar regra manual' : 'Desativar regra'}
                         </button>
