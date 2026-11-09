@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { comRls, registrarAuditoria } from '@ceak/db';
+import { comRls, registrarAuditoria, preferenciasComunicacaoDisponiveis } from '@ceak/db';
 import { exigirSessao } from '@/lib/servidor';
 
 const VERSAO = 'agradecimento-doacao-v1';
@@ -16,6 +16,9 @@ export async function salvarPreferenciaComunicacao(form: FormData): Promise<void
       !['AUTORIZAR', 'REVOGAR'].includes(decisao) ||
       form.get('confirmacao') !== 'CONFIRMO') {
     throw new Error('Escolha inválida. Confirme a sua decisão.');
+  }
+  if (!(await preferenciasComunicacaoDisponiveis())) {
+    throw new Error('Preferências indisponíveis até a migração do banco.');
   }
   const autorizar = decisao === 'AUTORIZAR';
   const agora = new Date();
