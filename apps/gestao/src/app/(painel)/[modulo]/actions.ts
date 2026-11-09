@@ -128,7 +128,10 @@ export async function salvarOperacao(modulo: Operacao, form: FormData): Promise<
       const nome = campo(form, 'nome', 120);
       const gatilho = campo(form, 'gatilho', 150);
       const acao = campo(form, 'acao', 150);
-      if (!nome || !gatilho || !acao) throw new Error('Informe nome, gatilho e ação.');
+      if (!nome || !['MANUAL', 'DIARIO'].includes(gatilho) ||
+          acao !== 'DIAGNOSTICO_ESTOQUE') {
+        throw new Error('Apenas diagnósticos de estoque manuais ou diários podem ser cadastrados.');
+      }
       const registro = await tx.automacao.create({
         data: {
           chave: 'manual-' + crypto.randomUUID(),
@@ -251,7 +254,8 @@ export async function alterarAtivacaoAutomacao(form: FormData): Promise<void> {
     });
     if (!regra) throw new Error('Automação não encontrada.');
     const ativar = ativa === 'sim';
-    if (ativar && (regra.gatilho !== 'MANUAL' || regra.acao !== 'DIAGNOSTICO_ESTOQUE' ||
+    if (ativar && (!['MANUAL', 'DIARIO'].includes(regra.gatilho) ||
+        regra.acao !== 'DIAGNOSTICO_ESTOQUE' ||
         !regra.exigeAprovacao)) {
       throw new Error('A ativação desta regra exige homologação de gatilho e ação.');
     }
@@ -263,12 +267,13 @@ export async function alterarAtivacaoAutomacao(form: FormData): Promise<void> {
     if (alterada.count !== 1) throw new Error('A automação foi alterada em outra sessão.');
     await registrarAuditoria(tx, {
       usuarioId: sessao.usuarioId,
-      acao: ativar ? 'automacao.ativada_manual' : 'automacao.desativada',
+      acao: ativar ? (regra.gatilho === 'DIARIO'
+        ? 'automacao.ativada_diaria' : 'automacao.ativada_manual') : 'automacao.desativada',
       entidade: 'Automacao',
       entidadeId: id,
       antes: { ativa: regra.ativa },
       depois: { ativa: ativar, acao: regra.acao, gatilho: regra.gatilho,
-        executaSozinha: false },
+        executaSozinha: ativar && regra.gatilho === 'DIARIO' },
       ip: null,
     });
   });
