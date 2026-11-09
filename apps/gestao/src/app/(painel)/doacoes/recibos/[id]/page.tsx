@@ -105,6 +105,10 @@ export default async function PreviaAgradecimentoPage({
           Consentimento de cadastro não autoriza, por si só, envio de agradecimentos por e-mail ou WhatsApp.
           É necessária autorização específica do canal, aprovação do administrador e integração homologada.
         </p>
+        <p className="text-muted-2 text-xs">
+          As preferências são declaradas pelo próprio titular. A tela de autoatendimento
+          exige login no Gestão e só estará disponível após a migração do banco.
+        </p>
         <ul className="text-sm">
           <li><strong>E-mail:</strong> {canais.EMAIL.motivo}</li>
           <li><strong>WhatsApp:</strong> {canais.WHATSAPP.motivo}</li>
