@@ -42,7 +42,7 @@ export default async function ComunicacaoMembroPage() {
         </section>
         {(['EMAIL', 'WHATSAPP'] as const).map(canal => {
           const preferencia = preferencias.find(p => p.canal === canal);
-          const autorizado = cadastroValido && preferencia?.autorizado === true;
+          const autorizado = preferencia?.autorizado === true;
           const ultima = preferencia?.atualizadoEm;
           return (
             <section key={canal} className="border-line rounded-[18px] border bg-white p-4">
