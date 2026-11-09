@@ -5,6 +5,8 @@ import { comRls } from '@ceak/db';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { emitirReciboInterno } from './actions';
 import { ImprimirRecibo } from './ImprimirRecibo';
+import { CopiarAgradecimento } from './CopiarAgradecimento';
+import { agradecimentoElegivel, mensagemAgradecimento } from '@/lib/agradecimentoDoacoes';
 
 export const metadata: Metadata = { title: 'Recibo interno de doação' };
 export const dynamic = 'force-dynamic';
@@ -24,7 +26,7 @@ export default async function PreviaAgradecimentoPage({
     tx.doacao.findFirst({
       where: { id, statusPagamento: 'PAGO', pagoEm: { not: null } },
       select: {
-        id: true, doadorNome: true, pessoaId: true, pessoa: { select: { nome: true } },
+        id: true, doadorNome: true, pessoaId: true, pessoa: { select: { nome: true, consentimentoEm: true, exclusaoSolicitadaEm: true, anonimizadaEm: true, usuario: { select: { ativo: true } } } },
         forma: true, valorCentavos: true, itemDescricao: true, destino: true,
         pagoEm: true, reciboEmitidoEm: true, campanha: { select: { titulo: true } },
       },
@@ -34,6 +36,13 @@ export default async function PreviaAgradecimentoPage({
   const nome = doacao.doadorNome || doacao.pessoa?.nome || 'Apoiador(a) do CEAK';
   const emitido = Boolean(doacao.reciboEmitidoEm);
   const referencia = `CEAK-${doacao.pagoEm.getUTCFullYear()}-${doacao.id.toUpperCase()}`;
+  const podePreparar = agradecimentoElegivel({
+    statusPagamento: 'PAGO', pagoEm: doacao.pagoEm, reciboEmitidoEm: doacao.reciboEmitidoEm,
+    pessoaId: doacao.pessoaId, consentimentoEm: doacao.pessoa?.consentimentoEm ?? null,
+    exclusaoSolicitadaEm: doacao.pessoa?.exclusaoSolicitadaEm ?? null,
+    anonimizadaEm: doacao.pessoa?.anonimizadaEm ?? null,
+    usuarioAtivo: doacao.pessoa?.usuario?.ativo === true,
+  });
   const descricao = doacao.valorCentavos != null
     ? `contribuição de ${dinheiroBR(doacao.valorCentavos)}`
     : `doação de itens: ${doacao.itemDescricao || 'itens recebidos'}`;
@@ -79,6 +88,15 @@ export default async function PreviaAgradecimentoPage({
           Recibo emitido no sistema: {doacao.reciboEmitidoEm ? dataBR(doacao.reciboEmitidoEm) : 'não registrado'}.
         </p>
       </section>
+      {podePreparar ? (
+        <CopiarAgradecimento mensagem={mensagemAgradecimento(nome, doacao.destino)} />
+      ) : (
+        <p className="border-line rounded-card border bg-white p-4 text-sm print:hidden">
+          Agradecimento individual indisponível: é necessário recibo interno emitido,
+          cadastro ativo do doador e consentimento registrado, sem solicitação de exclusão.
+          Nenhuma mensagem foi preparada ou enviada.
+        </p>
+      )}
       <p className="text-muted-2 text-sm print:hidden">
         A consulta e a impressão não alteram pagamentos e não enviam mensagens.
         A emissão é um ato administrativo auditado que registra uma única data para o recibo.
