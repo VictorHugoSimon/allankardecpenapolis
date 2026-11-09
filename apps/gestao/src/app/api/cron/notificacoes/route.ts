@@ -26,8 +26,14 @@ export async function GET(req: Request) {
     let processados = 0;
     let pendentes = 0;
     let indisponivel = false;
-    while (lotes < 30 && Date.now() - inicio < 90_000) {
-      const resultado = await processarFilaPush();
+    while (lotes < 30 && Date.now() - inicio < 45_000) {
+      let resultado: Awaited<ReturnType<typeof processarFilaPush>>;
+      try {
+        resultado = await processarFilaPush();
+      } catch {
+        falhas++;
+        break;
+      }
       if (resultado.indisponivel) {
         indisponivel = true;
         break;
@@ -40,6 +46,7 @@ export async function GET(req: Request) {
       lotes++;
     }
     // O mesmo cron diário do plano Hobby executa diagnósticos aprovados.
+    // Reserva parte da execução para a automação mesmo após falha do push.
     // Nenhuma ação externa ou escrita de estoque é disparada.
     const automacoes = await executarDiagnosticosDiarios();
     return NextResponse.json(
