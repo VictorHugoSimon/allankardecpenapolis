@@ -240,3 +240,12 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 - No banco de produção `br-dry-heart-b615yh3f`, `ceak_v2.preferencia_comunicacao` ainda não existe. **A nova versão não deve ser considerada pronta para uso em produção.**
 - CI reforçado com verificação de RLS, grants e ausência de DELETE para `ceak_app` depois de `pnpm db:deploy`.
 - **Ainda pendente**: testes da tela com duas contas reais de homologação, build do commit atual e migração de produção após aceite.
+
+
+## Teste RLS de isolamento entre dois titulares — 09/11/2026
+- Script `scripts/testar-rls-preferencias.cjs` inserido no CI após migrações e seed do PostgreSQL isolado.
+- Cria dois titulares exclusivamente no PostgreSQL **local** e dentro de transação revertida por `ROLLBACK`, sem persistir cadastros.
+- Sob `SET LOCAL ROLE ceak_app` e identidade do titular A, exige acesso apenas à própria preferência; bloqueia SELECT e UPDATE do titular B, rejeita INSERT de consentimento em nome do titular B e permite revogação do titular A.
+- O script recusa execução quando `NEXT_PUBLIC_CEAK_E2E` não é `sim` ou a URL do banco não aponta para `localhost`/`127.0.0.1`.
+- Nomes do índice e da restrição UNIQUE no Prisma foram alinhados aos nomes da migração SQL; evita diferenças artificiais entre esquema e banco.
+- **A execução do teste ainda não está confirmada**: sua integração ao CI é uma implementação, e não aprovação do teste. O teste não cria usuários na produção nem altera consentimentos reais.
