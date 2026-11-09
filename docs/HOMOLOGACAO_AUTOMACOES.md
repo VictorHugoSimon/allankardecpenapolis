@@ -133,3 +133,23 @@ Status: código implementado; **teste funcional de ponta a ponta e aceite ainda 
 8. Executar testes do repositório e revisar build da versão com os novos módulos.
 
 **Status:** código e documentação preparados, execução ponta a ponta pendente de aceite.
+
+
+## Conferência de doações e prévia de agradecimento
+- Rota administrativa `/doacoes/recibos`, para ADMINISTRADOR e TESOURARIA, exibe até 100 doações com `statusPagamento=PAGO` **e** `pagoEm` preenchido, sob contexto RLS.
+- Rota `/doacoes/recibos/[id]` mostra uma prévia de agradecimento individual, acessível somente por perfis autorizados e apenas enquanto a doação estiver registrada como paga.
+- A prévia usa valor ou descrição dos itens, destinação e data do próprio registro. Não consulta pagamento externo nem gera documento fiscal.
+- A leitura **não** modifica `reciboEmitidoEm`, `statusPagamento`, saldo, campanha, `pagoEm` ou dados do doador, e não envia mensagens.
+- Página deve ser descrita como **registro interno**; jamais afirmar que a prévia constitui nota fiscal, comprovante bancário ou certificado de dedução fiscal.
+- Falta implementar a emissão administrativa oficial, trilha de auditoria específica, download de documento aprovado e integração autorizada de e-mail/WhatsApp.
+
+### Critérios de aceite
+1. Acessar a listagem com ADMINISTRADOR e TESOURARIA; outros perfis não podem consultar informações individuais.
+2. Para doação PAGO com data de confirmação, abrir prévia e conferir texto com dados do cadastro.
+3. Tentar abrir IDs de doação AGUARDANDO, CANCELADO, ESTORNADO ou sem `pagoEm`; a rota deve retornar 404.
+4. Tentar acessar ID inválido ou inexistente; retornar 404 sem revelar dados pessoais.
+5. Confirmar que ler a prévia não altera `reciboEmitidoEm` e não dispara avisos.
+6. Confirmar que é possível usar a plataforma vazia, com lista em branco sem dados fictícios.
+7. Testar fluxo com dados de homologação, sem simular quitação financeira em produção.
+
+Status: páginas implementadas no repositório. Publicação e aceite operacional precisam de confirmação.
