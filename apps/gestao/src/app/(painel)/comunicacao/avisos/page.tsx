@@ -201,7 +201,13 @@ export default async function AvisosInternosPage() {
                   <td className="p-3">{a.publico}</td>
                   <td className="p-3">
                     <strong className="block">{a.status}</strong>
-                    {administra && a.status === 'RASCUNHO' ? (
+                    {administra && a.status === 'RASCUNHO' &&
+                    a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) &&
+                    (a.filtro as Record<string, unknown>).exigeSegmentacaoTurma === true ? (
+                      <p className="mt-2 text-xs font-semibold text-amber-700">
+                        Publicação bloqueada: precisa selecionar somente os matriculados desta turma.
+                      </p>
+                    ) : administra && a.status === 'RASCUNHO' ? (
                       <form action={publicarAvisoInterno} className="mt-2">
                         <input type="hidden" name="id" value={a.id} />
                         <button
