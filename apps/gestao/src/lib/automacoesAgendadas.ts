@@ -15,10 +15,10 @@ export async function executarDiagnosticosDiarios() {
       acao: 'DIAGNOSTICO_ESTOQUE',
     },
     select: { id: true },
-    take: 101,
+    take: 11,
   });
-  if (regras.length > 100) {
-    throw new Error('Há mais de 100 regras diárias; revise a configuração antes de executar.');
+  if (regras.length > 10) {
+    throw new Error('Há mais de 10 regras diárias; revise a configuração antes de executar.');
   }
 
   const referencia = new Date();
@@ -83,7 +83,7 @@ export async function executarDiagnosticosDiarios() {
           },
         });
         return true;
-      }, { timeout: 15_000 });
+      }, { timeout: 5_000 });
       if (realizada) realizadas++;
       else ignoradas++;
     } catch {
