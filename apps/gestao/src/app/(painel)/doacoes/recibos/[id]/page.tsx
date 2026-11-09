@@ -7,6 +7,7 @@ import { emitirReciboInterno } from './actions';
 import { ImprimirRecibo } from './ImprimirRecibo';
 import { CopiarAgradecimento } from './CopiarAgradecimento';
 import { agradecimentoElegivel, mensagemAgradecimento } from '@/lib/agradecimentoDoacoes';
+import { estadoAtualDosCanais } from '@/lib/politicaEnvioAgradecimentos';
 
 export const metadata: Metadata = { title: 'Recibo interno de doação' };
 export const dynamic = 'force-dynamic';
@@ -43,6 +44,7 @@ export default async function PreviaAgradecimentoPage({
     anonimizadaEm: doacao.pessoa?.anonimizadaEm ?? null,
     usuarioAtivo: doacao.pessoa?.usuario?.ativo === true,
   });
+  const canais = estadoAtualDosCanais();
   const descricao = doacao.valorCentavos != null
     ? `contribuição de ${dinheiroBR(doacao.valorCentavos)}`
     : `doação de itens: ${doacao.itemDescricao || 'itens recebidos'}`;
@@ -97,6 +99,17 @@ export default async function PreviaAgradecimentoPage({
           Nenhuma mensagem foi preparada ou enviada.
         </p>
       )}
+      <section className="border-line rounded-card border bg-white p-4 print:hidden" aria-label="Situação dos canais externos">
+        <h2 className="mt-0 text-lg font-semibold">Canais externos — não habilitados</h2>
+        <p className="text-muted-2 text-sm">
+          Consentimento de cadastro não autoriza, por si só, envio de agradecimentos por e-mail ou WhatsApp.
+          É necessária autorização específica do canal, aprovação do administrador e integração homologada.
+        </p>
+        <ul className="text-sm">
+          <li><strong>E-mail:</strong> {canais.EMAIL.motivo}</li>
+          <li><strong>WhatsApp:</strong> {canais.WHATSAPP.motivo}</li>
+        </ul>
+      </section>
       <p className="text-muted-2 text-sm print:hidden">
         A consulta e a impressão não alteram pagamentos e não enviam mensagens.
         A emissão é um ato administrativo auditado que registra uma única data para o recibo.
