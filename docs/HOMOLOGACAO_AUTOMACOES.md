@@ -80,3 +80,27 @@ Status: **implementado no código, homologação operacional ainda pendente**.
 6. Dia seguinte: evento já preparado não deve gerar novo rascunho.
 7. Ao desativar regra: novos rascunhos deixam de ser preparados.
 8. Validar que a quantidade de notificações enviadas permanece inalterada até a publicação manual.
+
+
+## Lembretes de aulas para alunos matriculados
+- Nova regra `DIARIO` + `RASCUNHO_LEMBRETE_AULA`, sempre criada desativada.
+- A execução diária identifica aulas nas próximas 48 horas, de turmas ativas e cursos ativos que tenham matrículas ativas.
+- Cria um rascunho no canal APP com `segmento=MATRICULADOS_TURMA`, `turmaId` e `aulaId`. Não inclui dados pessoais nos rascunhos.
+- Ao publicar, o servidor confirma que a aula ainda não ocorreu, turma/curso continuam ativos e busca somente matrículas ativas daquela turma.
+- Os destinatários finais ainda precisam ter conta ativa, consentimento registrado e não ter solicitado exclusão. Nenhum disparo é feito para alunos de outras turmas.
+- A publicação e a criação da caixa interna / fila de push acontecem dentro da mesma transação.
+- O botão administrativo informa explicitamente que a publicação será **somente para matriculados da turma**.
+- A execução é protegida por trava PostgreSQL, histórico diário e deduplicação por regra/aula.
+- O envio automático de mensagens permanece desabilitado; apenas o rascunho é preparado automaticamente.
+
+### Homologação obrigatória da segmentação
+1. Cadastrar uma turma ativa com curso ativo, aula futura e duas matrículas ativas em ambiente de teste.
+2. Cadastrar um aluno em outra turma, uma matrícula trancada e uma conta sem consentimento.
+3. Ativar a regra de rascunhos; executar o cron em homologação.
+4. Confirmar que só há um rascunho por aula e que duas execuções no dia não criam cópias.
+5. Publicar explicitamente pelo painel de comunicação e validar apenas destinatários elegíveis da turma.
+6. Confirmar que nenhuma pessoa de outra turma, matrícula trancada ou conta sem consentimento recebeu notificação.
+7. Cancelar/inativar turma ou expirar a data da aula e confirmar que a publicação é rejeitada.
+8. Verificar auditoria, fila de push e a ausência de alteração em matrícula, presenças ou financeiro.
+
+Status: código implementado; **teste funcional de ponta a ponta e aceite ainda pendentes**.
