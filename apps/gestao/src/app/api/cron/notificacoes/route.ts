@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { processarFilaPush } from '@/lib/processarFilaPush';
 import { executarDiagnosticosDiarios } from '@/lib/automacoesAgendadas';
+import { prepararRascunhosDeEventos } from '@/lib/rascunhosEventosAgendados';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -49,8 +50,9 @@ export async function GET(req: Request) {
     // Reserva parte da execução para a automação mesmo após falha do push.
     // Nenhuma ação externa ou escrita de estoque é disparada.
     const automacoes = await executarDiagnosticosDiarios();
+    const lembretes = await prepararRascunhosDeEventos();
     return NextResponse.json(
-      { lotes, processados, enviados, falhas, pendentes, indisponivel, automacoes },
+      { lotes, processados, enviados, falhas, pendentes, indisponivel, automacoes, lembretes },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch {
