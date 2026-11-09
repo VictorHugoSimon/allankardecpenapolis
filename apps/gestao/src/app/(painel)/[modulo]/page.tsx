@@ -168,7 +168,9 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
             quando: dataBR(e.iniciadaEm),
             resultado: typeof saida.abaixoDoMinimo === 'number'
               ? `${saida.abaixoDoMinimo} abaixo do mínimo entre ${saida.itensAnalisados} itens analisados`
-              : e.erro ?? 'Execução registrada',
+              : typeof saida.rascunhosCriados === 'number'
+                ? `${saida.rascunhosCriados} rascunho(s) preparados entre ${saida.eventosEncontrados} eventos analisados — revisão pendente`
+                : e.erro ?? 'Execução registrada',
           };
         }),
         indicadores: [
@@ -475,6 +477,12 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
         <p className="m-0">{visao.aviso}</p>
       </section>
       {editavel && <Formulario modulo={modulo as Operacao} itens={visao.linhas} />}
+      {modulo === 'automacoes' && (
+        <p className="text-muted-2 text-sm">
+          Os lembretes de eventos são salvos como rascunhos. Confira o conteúdo antes de publicar:
+          {' '}<Link href="/comunicacao/avisos">Revisar avisos do aplicativo</Link>.
+        </p>
+      )}
       {modulo === 'automacoes' && visao.historicoAutomacoes && (
         <section className="border-line rounded-card border bg-white p-4">
           <h2 className="m-0 mb-3 text-lg font-semibold">Histórico de execuções</h2>
