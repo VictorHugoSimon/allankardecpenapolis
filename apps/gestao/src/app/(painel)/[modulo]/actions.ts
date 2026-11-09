@@ -230,6 +230,52 @@ export async function alterarEstoqueMinimo(form: FormData): Promise<void> {
 
 
 /**
+ * Ativação controlada, sem iniciar execução por agendamento.
+ * Apenas o diagnóstico MANUAL de estoque está aprovado nesta etapa.
+ * A confirmação explícita e a auditoria são gravadas com a mudança.
+ */
+export async function alterarAtivacaoAutomacao(form: FormData): Promise<void> {
+  const sessao = await exigirModulo('automacoes');
+  if (sessao.perfil !== 'ADMINISTRADOR') throw new Error('Acesso restrito.');
+  const id = String(form.get('id') ?? '');
+  const ativa = String(form.get('ativa') ?? '');
+  const confirmacao = String(form.get('confirmacao') ?? '');
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !['sim', 'nao'].includes(ativa) ||
+      confirmacao !== 'CONFIRMO') {
+    throw new Error('Confirme a alteração da automação.');
+  }
+  await comRls(contextoRls(sessao), async tx => {
+    const regra = await tx.automacao.findUnique({
+      where: { id },
+      select: { id: true, gatilho: true, acao: true, ativa: true, exigeAprovacao: true },
+    });
+    if (!regra) throw new Error('Automação não encontrada.');
+    const ativar = ativa === 'sim';
+    if (ativar && (regra.gatilho !== 'MANUAL' || regra.acao !== 'DIAGNOSTICO_ESTOQUE' ||
+        !regra.exigeAprovacao)) {
+      throw new Error('A ativação desta regra exige homologação de gatilho e ação.');
+    }
+    if (regra.ativa === ativar) return;
+    const alterada = await tx.automacao.updateMany({
+      where: { id, ativa: !ativar },
+      data: { ativa: ativar },
+    });
+    if (alterada.count !== 1) throw new Error('A automação foi alterada em outra sessão.');
+    await registrarAuditoria(tx, {
+      usuarioId: sessao.usuarioId,
+      acao: ativar ? 'automacao.ativada_manual' : 'automacao.desativada',
+      entidade: 'Automacao',
+      entidadeId: id,
+      antes: { ativa: regra.ativa },
+      depois: { ativa: ativar, acao: regra.acao, gatilho: regra.gatilho,
+        executaSozinha: false },
+      ip: null,
+    });
+  });
+  revalidatePath('/automacoes');
+}
+
+/**
  * Primeiro executor seguro do CEAK: diagnóstico manual de estoque.
  * Não publica mensagens, não movimenta itens e não aciona serviços externos.
  * Regras genéricas permanecem desativadas e não são interpretadas como código.
@@ -245,11 +291,11 @@ export async function executarDiagnosticoEstoque(form: FormData): Promise<void> 
       where: { id },
       select: { id: true, nome: true, gatilho: true, acao: true, ativa: true, exigeAprovacao: true },
     });
-    if (!regra || regra.gatilho !== 'MANUAL' || regra.acao !== 'DIAGNOSTICO_ESTOQUE') {
+    if (!regra || !regra.ativa || regra.gatilho !== 'MANUAL' || regra.acao !== 'DIAGNOSTICO_ESTOQUE') {
       throw new Error('Regra não homologada para execução. Cadastre o diagnóstico manual de estoque.');
     }
     // O administrador iniciar este diagnóstico é a confirmação humana da operação.
-    // Regras desativadas também podem ser diagnosticadas, sem enviar nada.
+    // Somente regras aprovadas e ativadas podem ser executadas, sem enviar nada.
     const registros = await tx.itemEstoque.findMany({
       select: { id: true, nome: true, saldo: true, minimo: true },
       take: 5001,
