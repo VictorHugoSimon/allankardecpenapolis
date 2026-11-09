@@ -28,8 +28,8 @@ export async function salvarPreferenciaComunicacao(form: FormData): Promise<void
       select: { id: true, consentimentoEm: true,
         exclusaoSolicitadaEm: true, anonimizadaEm: true },
     });
-    if (!pessoa || pessoa.exclusaoSolicitadaEm || pessoa.anonimizadaEm ||
-        (autorizar && !pessoa.consentimentoEm)) {
+    if (!pessoa || (autorizar && (!pessoa.consentimentoEm ||
+        pessoa.exclusaoSolicitadaEm || pessoa.anonimizadaEm))) {
       throw new Error('Cadastro indisponível para esta autorização.');
     }
     const chave = {
