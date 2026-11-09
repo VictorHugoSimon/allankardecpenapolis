@@ -5,6 +5,7 @@ import { after } from 'next/server';
 import { comRls, prisma, registrarAuditoria } from '@ceak/db';
 import { log } from '@/lib/servidor';
 import { contextoRls, exigirModulo } from '@/lib/auth';
+import { ehAvisoRestritoTurma, validarFiltroTurma } from '@/lib/segmentacaoAulas';
 
 function validarTexto(form: FormData, chave: string, minimo: number, maximo: number) {
   const valor = String(form.get(chave) ?? '').trim();
@@ -99,19 +100,9 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     const filtro = aviso.filtro && typeof aviso.filtro === 'object' && !Array.isArray(aviso.filtro)
       ? aviso.filtro as Record<string, unknown> : {};
     const segmento = String(filtro.segmento ?? 'TODOS');
-    const restritoTurma = filtro.exigeSegmentacaoTurma === true ||
-      filtro.origem === 'AUTOMACAO_LEMBRETE_AULA';
-    if (restritoTurma) {
-      if (filtro.origem !== 'AUTOMACAO_LEMBRETE_AULA' ||
-          filtro.exigeSegmentacaoTurma !== true ||
-          segmento !== 'MATRICULADOS_TURMA' ||
-          typeof filtro.turmaId !== 'string' ||
-          typeof filtro.aulaId !== 'string' ||
-          !/^[0-9a-f-]{36}$/i.test(filtro.turmaId) ||
-          !/^[0-9a-f-]{36}$/i.test(filtro.aulaId)) {
-        throw new Error('Lembrete de aula sem segmentação válida de turma.');
-      }
-    } else if (!segmentos.includes(segmento as Segmento)) {
+    const restritoTurma = ehAvisoRestritoTurma(filtro);
+    const filtroTurma = restritoTurma ? validarFiltroTurma(filtro) : null;
+    if (!restritoTurma && !segmentos.includes(segmento as Segmento)) {
       throw new Error('Segmentação inválida.');
     }
     const url = typeof filtro.url === 'string' ? filtro.url : null;
@@ -130,8 +121,8 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     if (restritoTurma) {
       const aula = await tx.aula.findFirst({
         where: {
-          id: filtro.aulaId as string,
-          turmaId: filtro.turmaId as string,
+          id: filtroTurma!.aulaId,
+          turmaId: filtroTurma!.turmaId,
           data: { gt: new Date() },
           turma: { status: 'ATIVA', curso: { ativo: true } },
         },
@@ -141,7 +132,7 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
         throw new Error('Aula indisponível, já realizada ou turma encerrada. Revise a programação.');
       }
       const vinculos = await tx.matricula.findMany({
-        where: { turmaId: filtro.turmaId as string, status: 'ATIVA' },
+        where: { turmaId: filtroTurma!.turmaId, status: 'ATIVA' },
         select: { pessoaId: true },
         take: 5001,
       });
