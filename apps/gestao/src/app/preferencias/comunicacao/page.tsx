@@ -40,7 +40,7 @@ export default async function MinhasPreferenciasPage() {
       </section>
       {(['EMAIL', 'WHATSAPP'] as const).map(canal => {
         const p = status[canal];
-        const autorizado = cadastroValido && p?.autorizado === true;
+        const autorizado = p?.autorizado === true;
         return (
           <section key={canal} className="border-line rounded-card border bg-white p-5">
             <h2 className="mt-0 text-lg font-semibold">{canal === 'EMAIL' ? 'E-mail' : 'WhatsApp'}</h2>
