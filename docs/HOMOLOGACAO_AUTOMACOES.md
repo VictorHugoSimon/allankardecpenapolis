@@ -112,3 +112,24 @@ Status: código implementado; **teste funcional de ponta a ponta e aceite ainda 
 - Adicionados testes Vitest em `apps/gestao/src/lib/segmentacaoAulas.test.ts` com: UUID inválido, filtro TODOS (geral) incompatível, matrículas trancadas, contas inativas, ausência de consentimento, exclusão solicitada, pessoa anonimizada e pessoa de outra turma.
 - **Testes incluídos no código; execução automatizada ainda não confirmada.** O aceite funcional requer rodar a suíte e validar publicação numa base de homologação com perfis distintos.
 - Não foram criados usuários, matrículas ou mensagens fictícias no banco principal.
+
+
+## Campanhas e doações — rascunhos de divulgação (etapa seguinte)
+- Regra `DIARIO` + `RASCUNHO_CAMPANHA` começa desativada; apenas administrador pode habilitá-la sob confirmação.
+- O cron reaproveitado da Vercel seleciona até **20 campanhas ATIVAS** em seu período válido (datas civis de São Paulo), com meta positiva ainda não atingida. Campanhas em RASCUNHO, AGENDADA, ENCERRADA, expiradas ou com meta concluída não geram aviso.
+- Cria **somente rascunhos** no canal APP contendo o título, texto, progresso numérico, pontos de coleta (se houver) e link para a página institucional; não há PIX, cobrança, recibo ou solicitação automática de pagamento.
+- `chaveCampanha=regra:campanha` evita um segundo rascunho para a mesma campanha, mesmo em dias diferentes; trava PostgreSQL protege execuções simultâneas, e o registro em `Execucao` evita repetição da regra no mesmo dia.
+- O administrador deve conferir datas, metas, locais de coleta e texto antes de publicar. A publicação exige o fluxo existente de consentimento, conta ativa e segmentação por público.
+- Ainda **não há integração com adquirente/PSP**. Nunca atribuir a uma campanha dados financeiros não confirmados.
+
+### Testes necessários
+1. Com zero regras ativas, confirmar que o cron não cria nenhum comunicado.
+2. Habilitar uma regra em homologação e cadastrar campanha ATIVA, dentro das datas, com meta aberta; confirmar um rascunho APP.
+3. Tentar segunda execução no mesmo dia e no dia seguinte; não criar rascunho duplicado.
+4. Campanha com status RASCUNHO/ENCERRADA, fora das datas ou meta atingida não deve gerar rascunhos.
+5. Conferir que `Comunicacao.status=RASCUNHO` e `enviados=0`, sem novas cobranças, PIX ou doações registradas.
+6. Publicar somente com um administrador e contas de homologação consentidas; confirmar que os destinatários seguem o segmento escolhido.
+7. Confirmar que o procedimento funciona sem qualquer campanha cadastrada na produção.
+8. Executar testes do repositório e revisar build da versão com os novos módulos.
+
+**Status:** código e documentação preparados, execução ponta a ponta pendente de aceite.
