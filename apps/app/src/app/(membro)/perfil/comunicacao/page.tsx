@@ -64,7 +64,7 @@ export default async function ComunicacaoMembroPage() {
                     ? 'Confirmo que desejo revogar a autorização deste canal.'
                     : 'Autorizo o CEAK a enviar agradecimentos individuais de doações por este canal.'}</span>
                 </label>
-                <button type="submit" disabled={!cadastroValido}
+                <button type="submit" disabled={!cadastroValido && !autorizado}
                   className="rounded-pill bg-green min-h-11 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
                   {autorizado ? 'Revogar autorização' : 'Autorizar este canal'}
                 </button>
