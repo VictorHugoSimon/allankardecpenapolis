@@ -104,3 +104,11 @@ Status: **implementado no código, homologação operacional ainda pendente**.
 8. Verificar auditoria, fila de push e a ausência de alteração em matrícula, presenças ou financeiro.
 
 Status: código implementado; **teste funcional de ponta a ponta e aceite ainda pendentes**.
+
+
+## Revisão de segurança da segmentação — 09/11/2026
+- Extraídas regras puras em `apps/gestao/src/lib/segmentacaoAulas.ts` para reconhecer e validar filtros restritos. Se `turmaId`, `aulaId`, `origem`, `segmento` ou sinalização de restrição aparecerem isoladamente, o servidor não poderá convertê-los para o público geral; um filtro incompleto será rejeitado.
+- Os avisos de aula só podem ser publicados após validação de turma/aula e seleção no banco de matrículas ativas, contas ativas e consentimento. Retiradas/exclusões não participam.
+- Adicionados testes Vitest em `apps/gestao/src/lib/segmentacaoAulas.test.ts` com: UUID inválido, filtro TODOS (geral) incompatível, matrículas trancadas, contas inativas, ausência de consentimento, exclusão solicitada, pessoa anonimizada e pessoa de outra turma.
+- **Testes incluídos no código; execução automatizada ainda não confirmada.** O aceite funcional requer rodar a suíte e validar publicação numa base de homologação com perfis distintos.
+- Não foram criados usuários, matrículas ou mensagens fictícias no banco principal.
