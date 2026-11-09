@@ -130,7 +130,8 @@ export async function salvarOperacao(modulo: Operacao, form: FormData): Promise<
       const acao = campo(form, 'acao', 150);
       if (!nome ||
           !((gatilho === 'MANUAL' && acao === 'DIAGNOSTICO_ESTOQUE') ||
-            (gatilho === 'DIARIO' && ['DIAGNOSTICO_ESTOQUE', 'RASCUNHO_LEMBRETE_EVENTO'].includes(acao)))) {
+            (gatilho === 'DIARIO' && ['DIAGNOSTICO_ESTOQUE', 'RASCUNHO_LEMBRETE_EVENTO',
+              'RASCUNHO_LEMBRETE_AULA'].includes(acao)))) {
         throw new Error('Combinação de gatilho e ação não homologada.');
       }
       const registro = await tx.automacao.create({
@@ -258,7 +259,7 @@ export async function alterarAtivacaoAutomacao(form: FormData): Promise<void> {
     if (ativar && (!regra.exigeAprovacao ||
         !((regra.gatilho === 'MANUAL' && regra.acao === 'DIAGNOSTICO_ESTOQUE') ||
           (regra.gatilho === 'DIARIO' &&
-            ['DIAGNOSTICO_ESTOQUE', 'RASCUNHO_LEMBRETE_EVENTO'].includes(regra.acao))))) {
+            ['DIAGNOSTICO_ESTOQUE', 'RASCUNHO_LEMBRETE_EVENTO', 'RASCUNHO_LEMBRETE_AULA'].includes(regra.acao))))) {
       throw new Error('A ativação desta regra exige homologação de gatilho e ação.');
     }
     if (regra.ativa === ativar) return;
