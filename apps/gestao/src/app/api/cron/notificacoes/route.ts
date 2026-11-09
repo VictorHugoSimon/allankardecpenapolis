@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { timingSafeEqual } from 'node:crypto';
 import { processarFilaPush } from '@/lib/processarFilaPush';
+import { executarDiagnosticosDiarios } from '@/lib/automacoesAgendadas';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -38,8 +39,11 @@ export async function GET(req: Request) {
       if (resultado.processados === 0) break;
       lotes++;
     }
+    // O mesmo cron diário do plano Hobby executa diagnósticos aprovados.
+    // Nenhuma ação externa ou escrita de estoque é disparada.
+    const automacoes = await executarDiagnosticosDiarios();
     return NextResponse.json(
-      { lotes, processados, enviados, falhas, pendentes, indisponivel },
+      { lotes, processados, enviados, falhas, pendentes, indisponivel, automacoes },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch {
