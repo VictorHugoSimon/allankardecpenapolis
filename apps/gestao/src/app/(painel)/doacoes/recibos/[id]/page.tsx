@@ -3,8 +3,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { comRls } from '@ceak/db';
 import { contextoRls, exigirModulo } from '@/lib/auth';
+import { emitirReciboInterno } from './actions';
+import { ImprimirRecibo } from './ImprimirRecibo';
 
-export const metadata: Metadata = { title: 'Prévia de agradecimento de doação' };
+export const metadata: Metadata = { title: 'Recibo interno de doação' };
 export const dynamic = 'force-dynamic';
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const dataBR = (d: Date) => d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
@@ -30,17 +32,35 @@ export default async function PreviaAgradecimentoPage({
   );
   if (!doacao?.pagoEm) notFound();
   const nome = doacao.doadorNome || doacao.pessoa?.nome || 'Apoiador(a) do CEAK';
+  const emitido = Boolean(doacao.reciboEmitidoEm);
+  const referencia = `CEAK-${doacao.pagoEm.getUTCFullYear()}-${doacao.id.toUpperCase()}`;
   const descricao = doacao.valorCentavos != null
     ? `contribuição de ${dinheiroBR(doacao.valorCentavos)}`
     : `doação de itens: ${doacao.itemDescricao || 'itens recebidos'}`;
   return (
-    <div className="flex flex-col gap-5">
-      <Link href="/doacoes/recibos" className="text-sm underline">Voltar à conferência de doações</Link>
+    <div className="flex flex-col gap-5 print:block">
+      <Link href="/doacoes/recibos" className="text-sm underline print:hidden">Voltar à conferência de doações</Link>
+      <div className="flex flex-wrap items-center gap-3 print:hidden">
+        {emitido ? <ImprimirRecibo /> : sessao.perfil === 'ADMINISTRADOR' ? (
+          <form action={emitirReciboInterno} className="flex flex-wrap items-center gap-3">
+            <input type="hidden" name="id" value={doacao.id} />
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" name="confirmacao" value="EMITIR" required />
+              Confirmo que conferi o registro e desejo emitir o recibo interno não fiscal
+            </label>
+            <button type="submit" className="bg-green rounded-input px-4 py-2 font-semibold text-white">
+              Emitir recibo interno
+            </button>
+          </form>
+        ) : <p className="text-sm">A emissão é reservada ao administrador.</p>}
+      </div>
       <section className="border-line rounded-card border bg-white p-6">
         <p className="text-muted-2 text-xs font-semibold uppercase tracking-wide">
-          Prévia administrativa · não emitida · não enviada
+          {emitido ? 'Recibo administrativo interno · emitido · não fiscal' : 'Prévia administrativa · não emitida · não enviada'}
         </p>
-        <h1 className="mt-3 font-serif text-2xl">Agradecimento por contribuição solidária</h1>
+        <h1 className="mt-3 font-serif text-2xl">{emitido ? 'Recibo interno e agradecimento' : 'Agradecimento por contribuição solidária'}</h1>
+        <p className="text-sm"><strong>Referência única:</strong> {referencia}</p>
+        {doacao.reciboEmitidoEm && <p className="text-sm"><strong>Emitido em:</strong> {dataBR(doacao.reciboEmitidoEm)}</p>}
         <p>Olá, {nome}.</p>
         <p>
           O Centro Espírita Allan Kardec agradece sua contribuição. Consta em nossos
@@ -50,18 +70,18 @@ export default async function PreviaAgradecimentoPage({
         {doacao.campanha && <p>Campanha vinculada: {doacao.campanha.titulo}.</p>}
         <p>Sua colaboração fortalece as atividades solidárias do CEAK. Muito obrigado!</p>
         <p className="text-muted-2 text-xs">
-          Referência administrativa: {doacao.id}. Este texto é uma prévia de agradecimento,
-          não representa comprovante bancário, nota fiscal, recibo fiscal ou certificação
-          de dedutibilidade tributária. A confirmação decorre exclusivamente do registro
-          interno e deve ser conciliada com a documentação correspondente.
+          Este {emitido ? 'recibo interno' : 'rascunho'} não representa comprovante bancário,
+          nota fiscal ou certificação de dedutibilidade tributária. A confirmação decorre
+          exclusivamente do registro interno e deve ser conciliada com os documentos oficiais.
+          O identificador único não é uma numeração fiscal sequencial.
         </p>
         <p className="text-muted-2 text-xs">
           Recibo emitido no sistema: {doacao.reciboEmitidoEm ? dataBR(doacao.reciboEmitidoEm) : 'não registrado'}.
         </p>
       </section>
-      <p className="text-muted-2 text-sm">
-        A simples visualização não marca o recibo como emitido, não atualiza pagamento
-        e não envia e-mail, WhatsApp ou notificação.
+      <p className="text-muted-2 text-sm print:hidden">
+        A consulta e a impressão não alteram pagamentos e não enviam mensagens.
+        A emissão é um ato administrativo auditado que registra uma única data para o recibo.
       </p>
     </div>
   );
