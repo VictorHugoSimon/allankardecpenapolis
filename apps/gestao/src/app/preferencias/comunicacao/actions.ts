@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { comRls, registrarAuditoria } from '@ceak/db';
+import { comRls, registrarAuditoria, preferenciasComunicacaoDisponiveis } from '@ceak/db';
 import { exigirSessao, contextoRls } from '@/lib/auth';
 
 const canais = ['EMAIL', 'WHATSAPP'] as const;
@@ -18,6 +18,9 @@ export async function alterarMinhaPreferencia(form: FormData): Promise<void> {
   if (!canais.some(c => c === canal) || !['AUTORIZAR', 'REVOGAR'].includes(decisao) ||
       confirmacao !== 'CONFIRMO') {
     throw new Error('Canal, decisão ou confirmação inválidos.');
+  }
+  if (!(await preferenciasComunicacaoDisponiveis())) {
+    throw new Error('Preferências indisponíveis até a migração do banco.');
   }
   const autorizar = decisao === 'AUTORIZAR';
   const agora = new Date();
