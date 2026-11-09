@@ -190,3 +190,20 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 - O botão `Copiar texto para revisão` exige comando do operador; copiar **não significa envio nem consentimento para disparo externo**. A eventual utilização fora da plataforma deve seguir a política de comunicação do CEAK.
 - Testes automatizados foram adicionados em `apps/gestao/src/lib/agradecimentoDoacoes.test.ts` e incluídos no GitHub Actions.
 - Validação ainda pendente: execução do CI, build da página, teste com conta consentida em homologação e revisão da política de consentimento para canais externos.
+
+
+## Liberação de e-mail e WhatsApp — política de segurança
+- Implementado `apps/gestao/src/lib/politicaEnvioAgradecimentos.ts` como contrato estrito para futuras integrações de entrega. O envio **só será permitido** quando a doação estiver confirmada, recibo emitido, cadastro ativo, consentimento geral e **consentimento específico por canal** verificados, destino verificado, provedor homologado, aprovação administrativa e ausência de pedido de exclusão.
+- Ambos os canais, `EMAIL` e `WHATSAPP`, permanecem explicitamente **desabilitados** no estado atual. Cadastro com consentimento LGPD geral não é suficiente para habilitá-los.
+- A página individual do recibo exibe o motivo de bloqueio de cada canal, sem apresentar botões de disparo externos.
+- A política possui testes em `apps/gestao/src/lib/politicaEnvioAgradecimentos.test.ts`, adicionados como etapa específica de validação no pipeline GitHub Actions.
+- **Ainda não existe armazenamento homologado de preferência de canal, opt-in verificável, opt-out, fila de envio externo ou contrato com provedor para esses agradecimentos.** Esses componentes precisam ser implementados e validados antes de qualquer chamada real.
+- Esta política é uma preparação de segurança; por si só, não constitui integração de envio nem comprovação de execução dos testes.
+
+### Critérios de aceite dos canais externos
+1. Exigir aceite por e-mail e WhatsApp separadamente e registrar data, versão e origem do consentimento.
+2. Testar revogação e não envio após exclusão, anonimização ou cancelamento de consentimento.
+3. Validar canal/destinatário e aprovação administrativa antes de enfileirar qualquer entrega.
+4. Garantir idempotência de envios e auditoria de tentativas, erros e confirmações do provedor.
+5. Executar testes em ambiente isolado, nunca para destinatários de produção.
+6. Publicar apenas após aprovação do CI, revisão de privacidade e configuração dos provedores.
