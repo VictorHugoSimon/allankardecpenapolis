@@ -9,7 +9,7 @@ import { alterarAtivacaoAutomacao, alterarEstoqueMinimo, alterarPublicacaoProdut
 
 type Operacao = 'doacoes' | 'loja' | 'estoque' | 'automacoes' | 'comunicacao';
 type Linha = { id: string; principal: string; detalhe: string; status: string; quando?: string };
-type Visao = { indicadores: { titulo: string; valor: string }[]; linhas: Linha[]; aviso: string; historicoAutomacoes?: { id: string; nome: string; status: string; quando: string; resultado: string }[] };
+type Visao = { indicadores: { titulo: string; valor: string }[]; linhas: Linha[]; aviso: string; historicoAutomacoes?: { id: string; nome: string; status: string; modo: string; quando: string; resultado: string }[] };
 const ROTAS = [
   'comunicacao',
   'doacoes',
@@ -158,10 +158,13 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
         historicoAutomacoes: execucoes.map(e => {
           const saida = e.saida && typeof e.saida === 'object' && !Array.isArray(e.saida)
             ? e.saida as Record<string, unknown> : {};
+          const entrada = e.entrada && typeof e.entrada === 'object' && !Array.isArray(e.entrada)
+            ? e.entrada as Record<string, unknown> : {};
           return {
             id: e.id,
             nome: e.automacao.nome,
             status: e.status,
+            modo: entrada.modo === 'AGENDADO' ? 'Automática' : 'Manual',
             quando: dataBR(e.iniciadaEm),
             resultado: typeof saida.abaixoDoMinimo === 'number'
               ? `${saida.abaixoDoMinimo} abaixo do mínimo entre ${saida.itensAnalisados} itens analisados`
@@ -479,7 +482,7 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
             : <ul className="m-0 list-none divide-y p-0">
                 {visao.historicoAutomacoes.map(e => (
                   <li key={e.id} className="py-3 text-sm">
-                    <strong>{e.nome}</strong> · {e.status} · {e.quando}
+                    <strong>{e.nome}</strong> · {e.modo} · {e.status} · {e.quando}
                     <p className="text-muted-2 mb-0">{e.resultado}</p>
                   </li>
                 ))}
