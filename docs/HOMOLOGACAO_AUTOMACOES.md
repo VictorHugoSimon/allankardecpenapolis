@@ -249,3 +249,12 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 - O script recusa execução quando `NEXT_PUBLIC_CEAK_E2E` não é `sim` ou a URL do banco não aponta para `localhost`/`127.0.0.1`.
 - Nomes do índice e da restrição UNIQUE no Prisma foram alinhados aos nomes da migração SQL; evita diferenças artificiais entre esquema e banco.
 - **A execução do teste ainda não está confirmada**: sua integração ao CI é uma implementação, e não aprovação do teste. O teste não cria usuários na produção nem altera consentimentos reais.
+
+
+## Proteção de compatibilidade antes da migração — 09/11/2026
+- Nova função `preferenciasComunicacaoDisponiveis()` no pacote `@ceak/db` consulta a existência da tabela `ceak_v2.preferencia_comunicacao`, sem tratar consentimento ausente como permitido.
+- As páginas de preferências no CEAK Gestão (`/preferencias/comunicacao`) e no PWA (`/perfil/comunicacao`) consultam a presença da tabela antes de executar consultas ORM dependentes da migração.
+- Enquanto a tabela não existir, apresentam mensagem acessível **Preferências em implantação**; não leem/gravam preferências e não permitem autorizações.
+- As server actions de ambos os apps também validam a presença da tabela, impedindo chamadas diretas antes da migração, mesmo com um formulário anterior aberto.
+- **Smoke test**: simular app novo + banco sem tabela em ambiente isolado; tela deve mostrar manutenção e server action deve rejeitar gravação. Após migração, reabrir tela e confirmar preferências inicialmente desativadas.
+- O bloqueio de builds da Vercel permanece uma pendência independente. Nenhum serviço de envio externo deve ser ativado por esta alteração.
