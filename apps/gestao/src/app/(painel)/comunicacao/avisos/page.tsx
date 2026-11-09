@@ -201,20 +201,22 @@ export default async function AvisosInternosPage() {
                   <td className="p-3">{a.publico}</td>
                   <td className="p-3">
                     <strong className="block">{a.status}</strong>
-                    {administra && a.status === 'RASCUNHO' &&
-                    a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) &&
-                    (a.filtro as Record<string, unknown>).exigeSegmentacaoTurma === true ? (
-                      <p className="mt-2 text-xs font-semibold text-amber-700">
-                        Publicação bloqueada: precisa selecionar somente os matriculados desta turma.
-                      </p>
-                    ) : administra && a.status === 'RASCUNHO' ? (
+                    {administra && a.status === 'RASCUNHO' ? (
                       <form action={publicarAvisoInterno} className="mt-2">
+                        {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) &&
+                        (a.filtro as Record<string, unknown>).exigeSegmentacaoTurma === true ? (
+                          <p className="text-muted-2 my-2 text-xs">
+                            Público restrito: somente usuários com matrícula ativa nesta turma e consentimento.
+                          </p>
+                        ) : null}
                         <input type="hidden" name="id" value={a.id} />
                         <button
                           type="submit"
                           className="border-line rounded-input min-h-11 border bg-white px-3 text-sm font-medium"
                         >
-                          Publicar no aplicativo
+                          {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) &&
+                           (a.filtro as Record<string, unknown>).exigeSegmentacaoTurma === true
+                            ? 'Publicar aos matriculados da turma' : 'Publicar no aplicativo'}
                         </button>
                       </form>
                     ) : a.enviadoEm ? (
