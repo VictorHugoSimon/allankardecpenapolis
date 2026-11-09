@@ -227,3 +227,63 @@ export async function alterarEstoqueMinimo(form: FormData): Promise<void> {
   });
   revalidatePath('/estoque');
 }
+
+
+/**
+ * Primeiro executor seguro do CEAK: diagnóstico manual de estoque.
+ * Não publica mensagens, não movimenta itens e não aciona serviços externos.
+ * Regras genéricas permanecem desativadas e não são interpretadas como código.
+ */
+export async function executarDiagnosticoEstoque(form: FormData): Promise<void> {
+  const sessao = await exigirModulo('automacoes');
+  if (sessao.perfil !== 'ADMINISTRADOR') throw new Error('Somente administradores podem executar automações.');
+  const id = String(form.get('id') ?? '');
+  if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error('Automação inválida.');
+  const inicio = Date.now();
+  await comRls(contextoRls(sessao), async tx => {
+    const regra = await tx.automacao.findUnique({
+      where: { id },
+      select: { id: true, nome: true, gatilho: true, acao: true, ativa: true, exigeAprovacao: true },
+    });
+    if (!regra || regra.gatilho !== 'MANUAL' || regra.acao !== 'DIAGNOSTICO_ESTOQUE') {
+      throw new Error('Regra não homologada para execução. Cadastre o diagnóstico manual de estoque.');
+    }
+    // O administrador iniciar este diagnóstico é a confirmação humana da operação.
+    // Regras desativadas também podem ser diagnosticadas, sem enviar nada.
+    const registros = await tx.itemEstoque.findMany({
+      select: { id: true, nome: true, saldo: true, minimo: true },
+      take: 5001,
+    });
+    if (registros.length > 5000) throw new Error('Mais de 5.000 itens. O diagnóstico requer paginação.');
+    const abaixoMinimo = registros.filter(i => i.minimo !== null && Number(i.saldo) < Number(i.minimo));
+    const execucao = await tx.execucao.create({
+      data: {
+        automacaoId: regra.id,
+        status: 'SUCESSO',
+        entrada: { modo: 'MANUAL', acao: 'DIAGNOSTICO_ESTOQUE' },
+        saida: {
+          itensAnalisados: registros.length,
+          abaixoDoMinimo: abaixoMinimo.length,
+          amostra: abaixoMinimo.slice(0, 20).map(i => ({
+            itemId: i.id, nome: i.nome, saldo: String(i.saldo), minimo: String(i.minimo),
+          })),
+          somenteLeitura: true,
+          mensagemExternaEnviada: false,
+        },
+        duracaoMs: Math.max(0, Date.now() - inicio),
+        finalizadaEm: new Date(),
+      },
+    });
+    await registrarAuditoria(tx, {
+      usuarioId: sessao.usuarioId,
+      acao: 'automacao.diagnostico_estoque.executado',
+      entidade: 'Execucao',
+      entidadeId: execucao.id,
+      ip: null,
+      antes: null,
+      depois: { automacaoId: regra.id, itensAnalisados: registros.length,
+        abaixoDoMinimo: abaixoMinimo.length, somenteLeitura: true },
+    });
+  });
+  revalidatePath('/automacoes');
+}
