@@ -190,6 +190,8 @@ jobs:
           })().catch(err => { console.error(err); process.exitCode = 1; });
           NODE
       - run: pnpm db:seed
+      - name: Validar isolamento de matriculas e consentimento
+        run: pnpm --filter @ceak/gestao exec vitest run src/lib/segmentacaoAulas.test.ts
       - run: pnpm test
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
