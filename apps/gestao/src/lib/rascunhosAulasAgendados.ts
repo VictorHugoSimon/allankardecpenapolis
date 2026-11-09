@@ -3,7 +3,7 @@ import { prisma } from '@ceak/db';
 
 /**
  * Prepara rascunhos de avisos de aulas; não envia nada.
- * Os avisos ficam retidos até existir segmentação de matriculados na publicação.
+ * O envio aos matriculados é feito somente após publicação administrativa e revalidação de consentimento.
  * O processamento é serializado por regra e idempotente por turma/aula.
  */
 export async function prepararRascunhosDeAulas() {
@@ -88,7 +88,7 @@ export async function prepararRascunhosDeAulas() {
               canal: 'APP',
               titulo: `Aula: ${aula.titulo}`.slice(0, 160),
               mensagem: `Aula de ${aula.turma.curso.nome} — ${aula.turma.nome}, programada para ${aula.data.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}. Confirme a programação com a secretaria.`.slice(0, 2000),
-              publico: 'Somente alunos matriculados na turma — segmentação pendente',
+              publico: 'Somente matriculados ativos desta turma — validar antes da publicação',
               filtro: {
                 origem: 'AUTOMACAO_LEMBRETE_AULA',
                 chaveLembrete: chave,
@@ -111,7 +111,7 @@ export async function prepararRascunhosDeAulas() {
             saida: {
               aulasEncontradas: aulas.length,
               rascunhosCriados: criados,
-              segmentacaoPendente: true,
+              segmentacaoRestrita: 'MATRICULADOS_TURMA',
               mensagemExternaEnviada: false,
             },
             finalizadaEm: new Date(),
