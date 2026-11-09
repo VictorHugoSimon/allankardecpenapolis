@@ -26,8 +26,8 @@ export async function alterarMinhaPreferencia(form: FormData): Promise<void> {
       where: { id: sessao.pessoaId },
       select: { id: true, consentimentoEm: true, exclusaoSolicitadaEm: true, anonimizadaEm: true },
     });
-    if (!pessoa || pessoa.exclusaoSolicitadaEm || pessoa.anonimizadaEm ||
-        (autorizar && !pessoa.consentimentoEm)) {
+    if (!pessoa || (autorizar && (!pessoa.consentimentoEm ||
+        pessoa.exclusaoSolicitadaEm || pessoa.anonimizadaEm))) {
       throw new Error('Cadastro indisponível para autorizar esta comunicação.');
     }
     const chave = {
