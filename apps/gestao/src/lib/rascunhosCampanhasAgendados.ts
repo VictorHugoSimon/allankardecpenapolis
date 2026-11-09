@@ -12,6 +12,11 @@ export async function prepararRascunhosCampanhas() {
   });
   if (regras.length > 10) throw new Error('Limite de 10 regras diárias de campanhas excedido.');
   const agora = new Date();
+  // Campos inicio/fim são DATE (sem horário): usar a data civil do CEAK em São Paulo.
+  const diaLocal = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(agora);
+  const dataCivil = new Date(`${diaLocal}T00:00:00.000Z`);
   const diaUtc = agora.toISOString().slice(0, 10);
   const comecoDia = new Date(`${diaUtc}T00:00:00.000Z`);
   const proximoDia = new Date(comecoDia.getTime() + 86_400_000);
@@ -45,8 +50,8 @@ export async function prepararRascunhosCampanhas() {
 
         const campanhas = await tx.campanha.findMany({
           where: { status: 'ATIVA',
-            OR: [{ inicio: null }, { inicio: { lte: agora } }],
-            AND: [{ OR: [{ fim: null }, { fim: { gte: agora } }] }] },
+            OR: [{ inicio: null }, { inicio: { lte: dataCivil } }],
+            AND: [{ OR: [{ fim: null }, { fim: { gte: dataCivil } }] }] },
           select: { id: true, slug: true, titulo: true, descricao: true,
             meta: true, arrecadado: true, unidade: true, pontosColeta: true },
           take: 21, orderBy: { criadoEm: 'desc' },
