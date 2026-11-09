@@ -277,11 +277,11 @@ export async function executarDiagnosticoEstoque(form: FormData): Promise<void> 
     await registrarAuditoria(tx, {
       usuarioId: sessao.usuarioId,
       acao: 'automacao.diagnostico_estoque.executado',
-      entidade: 'Execucao',
-      entidadeId: execucao.id,
+      entidade: 'Automacao',
+      entidadeId: regra.id,
       ip: null,
       antes: null,
-      depois: { automacaoId: regra.id, itensAnalisados: registros.length,
+      depois: { execucaoId: execucao.id, automacaoId: regra.id, itensAnalisados: registros.length,
         abaixoDoMinimo: abaixoMinimo.length, somenteLeitura: true },
     });
   });
