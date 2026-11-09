@@ -196,6 +196,8 @@ jobs:
         run: pnpm --filter @ceak/gestao exec vitest run src/lib/recibosDoacoes.test.ts
       - name: Validar consentimento nos agradecimentos individuais
         run: pnpm --filter @ceak/gestao exec vitest run src/lib/agradecimentoDoacoes.test.ts
+      - name: Garantir que canais externos exijam consentimento especifico
+        run: pnpm --filter @ceak/gestao exec vitest run src/lib/politicaEnvioAgradecimentos.test.ts
       - run: pnpm test
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
