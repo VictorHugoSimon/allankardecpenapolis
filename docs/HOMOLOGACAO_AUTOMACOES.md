@@ -153,3 +153,22 @@ Status: código implementado; **teste funcional de ponta a ponta e aceite ainda 
 7. Testar fluxo com dados de homologação, sem simular quitação financeira em produção.
 
 Status: páginas implementadas no repositório. Publicação e aceite operacional precisam de confirmação.
+
+
+## Emissão de recibo administrativo interno — etapa adicional
+- A página `/doacoes/recibos/[id]` mantém uma prévia somente leitura até o administrador marcar a confirmação e acionar `Emitir recibo interno`.
+- A ação `emitirReciboInterno` exige sessão ADMINISTRADOR e identificador UUID válido.
+- A transação confirma `statusPagamento=PAGO`, `pagoEm` preenchido e `reciboEmitidoEm` vazio; a atualização condicional evita emissão simultânea duplicada.
+- A mesma transação insere auditoria com autor, data, referência e dados da doação. Em erro, a emissão e a auditoria são revertidas juntas.
+- O identificador do recibo é `CEAK-{ANO_DO_PAGAMENTO}-{UUID_DA_DOACAO}`, único e estável, **não sequencial e não fiscal**.
+- Após emissão, o administrador e a tesouraria podem imprimir ou salvar em PDF pelo navegador. Não há geração de nota fiscal, comprovação bancária nem envio por e-mail/WhatsApp.
+- A emissão não altera valores, estado de pagamento, arrecadação de campanha, estoque ou dados da pessoa.
+
+### Aceite
+1. Doação pendente/cancelada/estornada ou sem `pagoEm`: emissão rejeitada.
+2. TESOURARIA pode conferir e imprimir recibo emitido; somente ADMINISTRADOR emite.
+3. Duplo clique ou repetição do formulário: `reciboEmitidoEm` permanece o mesmo e somente um registro de auditoria de emissão é criado.
+4. Doação paga: emissão cria data e auditoria na mesma transação.
+5. A impressão omite controles administrativos e preserva o aviso não fiscal.
+6. Não envia mensagem ou cria cobrança.
+7. Verificar os comportamentos com dados isolados de homologação e conferir o build antes do aceite.
