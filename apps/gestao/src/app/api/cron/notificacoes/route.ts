@@ -4,6 +4,7 @@ import { processarFilaPush } from '@/lib/processarFilaPush';
 import { executarDiagnosticosDiarios } from '@/lib/automacoesAgendadas';
 import { prepararRascunhosDeEventos } from '@/lib/rascunhosEventosAgendados';
 import { prepararRascunhosDeAulas } from '@/lib/rascunhosAulasAgendados';
+import { prepararRascunhosCampanhas } from '@/lib/rascunhosCampanhasAgendados';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -53,8 +54,9 @@ export async function GET(req: Request) {
     const automacoes = await executarDiagnosticosDiarios();
     const lembretes = await prepararRascunhosDeEventos();
     const aulas = await prepararRascunhosDeAulas();
+    const campanhas = await prepararRascunhosCampanhas();
     return NextResponse.json(
-      { lotes, processados, enviados, falhas, pendentes, indisponivel, automacoes, lembretes, aulas },
+      { lotes, processados, enviados, falhas, pendentes, indisponivel, automacoes, lembretes, aulas, campanhas },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch {
