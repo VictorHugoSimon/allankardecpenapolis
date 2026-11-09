@@ -442,12 +442,16 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
               Gerenciar pedidos e retiradas
             </Link>
           ) : modulo === 'doacoes' ? (
-            <Link
-              href="/doacoes/campanhas"
-              className="border-line rounded-input border bg-white px-4 py-2 text-sm"
-            >
-              Gerenciar campanhas solidárias
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              <Link href="/doacoes/campanhas"
+                className="border-line rounded-input border bg-white px-4 py-2 text-sm">
+                Gerenciar campanhas solidárias
+              </Link>
+              <Link href="/doacoes/recibos"
+                className="border-line rounded-input border bg-white px-4 py-2 text-sm">
+                Conferir doações e agradecimentos
+              </Link>
+            </div>
           ) : modulo === 'bi' ? (
             <Link
               href="/bi/relatorios"
