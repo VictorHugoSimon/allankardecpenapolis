@@ -39,3 +39,24 @@ A rota existente `/automacoes` no painel CEAK Gestão inclui:
 5. Ações com efeito externo somente com conectores autorizados, autorização humana e controles anti-duplicidade.
 
 Status: **implementado no código, homologação operacional ainda pendente**.
+
+
+## Diagnóstico diário automático (etapa 2)
+- Gatilho novo `DIARIO` com ação fixa `DIAGNOSTICO_ESTOQUE`; começa **desativado**.
+- Administrador marca a confirmação explícita e habilita a regra no painel.
+- O cron nativo já existente `GET /api/cron/notificacoes`, programado para **09:00 UTC** (06:00 em Brasília, enquanto UTC-3), processa as regras habilitadas.
+- O worker só lê o estoque e grava `Execucao`; nunca envia mensagens, altera saldos nem acessa provedores de pagamento.
+- Trava transacional PostgreSQL + procura de execução agendada na data UTC impedem dois cron jobs simultâneos de gerar duplicação funcional.
+- Limite inicial por segurança: **10 regras por execução diária**, com limite transacional de 5 segundos por regra. A execução do cron reserva 45 segundos para os lotes push e a parcela restante para o diagnóstico.
+- Uma automação desativada, desconhecida, de ação diferente ou sem aprovação nunca é executada pelo worker. O histórico distingue execuções `MANUAL` e `AGENDADO` por `entrada.modo`.
+- Não existe reprocessamento automático de falhas do diagnóstico nesta etapa; erros são contabilizados na resposta protegida do cron e exigem supervisão.
+
+### Critérios de aceite adicionais
+1. Cadastrar regra `DIARIO` + `DIAGNOSTICO_ESTOQUE`, confirmar que inicia desativada.
+2. Habilitar pelo painel com checkbox de confirmação e confirmar trilha de auditoria.
+3. Executar a rota protegida em ambiente de homologação com o cron autorizado.
+4. Confirmar nova execução com `entrada.modo=AGENDADO`, `somenteLeitura=true`.
+5. Executar duas vezes no mesmo dia UTC e confirmar que a segunda execução é ignorada.
+6. Desativar a regra e confirmar que o cron não cria novas execuções.
+7. Confirmar que nenhuma alteração de saldo, transação financeira ou comunicação foi criada.
+8. Conferir os eventos de deploy e logs da Vercel; não declarar homologação sem testar esta sequência.
