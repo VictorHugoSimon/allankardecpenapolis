@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { comRls } from '@ceak/db';
+import { comRls, preferenciasComunicacaoDisponiveis } from '@ceak/db';
 import { exigirSessao, contextoRls } from '@/lib/auth';
 import { alterarMinhaPreferencia } from './actions';
 
@@ -9,6 +9,17 @@ export const dynamic = 'force-dynamic';
 
 export default async function MinhasPreferenciasPage() {
   const sessao = await exigirSessao();
+  if (!(await preferenciasComunicacaoDisponiveis())) {
+    return (
+      <main className="mx-auto max-w-3xl p-5">
+        <Link href="/" className="text-sm underline">Voltar ao painel</Link>
+        <section className="border-line rounded-card border bg-white p-5" role="status">
+          <h1 className="text-xl font-semibold">Preferências em implantação</h1>
+          <p>Aguardando migração de dados. Nenhuma autorização ou envio foi efetuado.</p>
+        </section>
+      </main>
+    );
+  }
   const [pessoa, preferencias] = await comRls(contextoRls(sessao), async tx => {
     return Promise.all([
       tx.pessoa.findUnique({
