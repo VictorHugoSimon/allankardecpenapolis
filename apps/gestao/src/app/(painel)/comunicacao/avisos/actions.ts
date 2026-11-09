@@ -98,6 +98,10 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     }
     const filtro = aviso.filtro && typeof aviso.filtro === 'object' && !Array.isArray(aviso.filtro)
       ? aviso.filtro as Record<string, unknown> : {};
+    if (filtro.exigeSegmentacaoTurma === true ||
+        filtro.origem === 'AUTOMACAO_LEMBRETE_AULA') {
+      throw new Error('Lembrete de aula reservado aos matriculados: a segmentação por turma deve ser homologada antes da publicação.');
+    }
     const segmento = String(filtro.segmento ?? 'TODOS');
     if (!segmentos.includes(segmento as Segmento)) throw new Error('Segmentação inválida.');
     const url = typeof filtro.url === 'string' ? filtro.url : null;
