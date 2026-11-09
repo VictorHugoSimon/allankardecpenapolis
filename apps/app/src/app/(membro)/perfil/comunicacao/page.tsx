@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { comRls } from '@ceak/db';
+import { comRls, preferenciasComunicacaoDisponiveis } from '@ceak/db';
 import { Tela } from '@/components/Tela';
 import { exigirSessao } from '@/lib/servidor';
 import { salvarPreferenciaComunicacao } from './actions';
@@ -9,6 +9,18 @@ export const dynamic = 'force-dynamic';
 
 export default async function ComunicacaoMembroPage() {
   const sessao = await exigirSessao();
+  if (!(await preferenciasComunicacaoDisponiveis())) {
+    return (
+      <Tela titulo="Comunicações" voltar="/perfil">
+        <section className="border-line rounded-[18px] border bg-white p-4" role="status">
+          <h2 className="mt-0 text-lg font-semibold">Preferências em implantação</h2>
+          <p className="text-sm">As opções de e-mail e WhatsApp estarão disponíveis
+            após a atualização segura do sistema. Nenhuma autorização foi criada
+            e nenhum envio externo está habilitado.</p>
+        </section>
+      </Tela>
+    );
+  }
   const [pessoa, preferencias] = await comRls({
     usuarioId: sessao.usuarioId, pessoaId: sessao.pessoaId,
     perfil: sessao.perfil, coordAssistencia: sessao.coordAssistencia,
