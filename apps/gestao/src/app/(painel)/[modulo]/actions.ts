@@ -128,9 +128,10 @@ export async function salvarOperacao(modulo: Operacao, form: FormData): Promise<
       const nome = campo(form, 'nome', 120);
       const gatilho = campo(form, 'gatilho', 150);
       const acao = campo(form, 'acao', 150);
-      if (!nome || !['MANUAL', 'DIARIO'].includes(gatilho) ||
-          acao !== 'DIAGNOSTICO_ESTOQUE') {
-        throw new Error('Apenas diagnósticos de estoque manuais ou diários podem ser cadastrados.');
+      if (!nome ||
+          !((gatilho === 'MANUAL' && acao === 'DIAGNOSTICO_ESTOQUE') ||
+            (gatilho === 'DIARIO' && ['DIAGNOSTICO_ESTOQUE', 'RASCUNHO_LEMBRETE_EVENTO'].includes(acao)))) {
+        throw new Error('Combinação de gatilho e ação não homologada.');
       }
       const registro = await tx.automacao.create({
         data: {
@@ -254,9 +255,10 @@ export async function alterarAtivacaoAutomacao(form: FormData): Promise<void> {
     });
     if (!regra) throw new Error('Automação não encontrada.');
     const ativar = ativa === 'sim';
-    if (ativar && (!['MANUAL', 'DIARIO'].includes(regra.gatilho) ||
-        regra.acao !== 'DIAGNOSTICO_ESTOQUE' ||
-        !regra.exigeAprovacao)) {
+    if (ativar && (!regra.exigeAprovacao ||
+        !((regra.gatilho === 'MANUAL' && regra.acao === 'DIAGNOSTICO_ESTOQUE') ||
+          (regra.gatilho === 'DIARIO' &&
+            ['DIAGNOSTICO_ESTOQUE', 'RASCUNHO_LEMBRETE_EVENTO'].includes(regra.acao))))) {
       throw new Error('A ativação desta regra exige homologação de gatilho e ação.');
     }
     if (regra.ativa === ativar) return;
