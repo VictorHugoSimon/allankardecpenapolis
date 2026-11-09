@@ -189,7 +189,7 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
           ),
         ),
         aviso:
-          'Diagnósticos de estoque manuais ou diários são cadastrados desativados. O administrador habilita cada regra com confirmação explícita. Apenas a opção diária executa pelo cron (09:00 UTC), sem movimentar estoque ou enviar mensagens.',
+          'Regras homologadas são cadastradas desativadas. O agendador diário (09:00 UTC) realiza diagnósticos de estoque ou prepara rascunhos de lembretes de eventos confirmados. Ninguém recebe mensagens até um administrador revisar e publicar o rascunho.',
       };
     }
     if (modulo === 'integracoes') {
@@ -368,13 +368,14 @@ function Formulario({ modulo, itens }: { modulo: Operacao; itens: Linha[] }) {
               <span className="font-medium">Ação</span>
               <select name="acao" defaultValue="DIAGNOSTICO_ESTOQUE" className={input}>
                 <option value="DIAGNOSTICO_ESTOQUE">Diagnóstico do estoque (sem alterações)</option>
+                <option value="RASCUNHO_LEMBRETE_EVENTO">Preparar rascunhos de palestras e estudos (somente diário)</option>
               </select>
             </label>
             <p className="text-muted-2 text-xs sm:col-span-2">
               Novas regras começam desativadas. Para executar, habilite a regra com confirmação
               administrativa. Regras manuais exibem Executar diagnóstico; regras diárias
               são processadas pelo cron, no máximo uma vez por dia UTC.
-              Nenhuma delas dispara notificações ou modifica produtos.
+              Os lembretes gerados são somente rascunhos para aprovação. Nenhuma ação altera produtos ou envia mensagens sem revisão humana.
             </p>
           </>
         )}
@@ -537,7 +538,8 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
                         </label>
                         <button type="submit"
                           disabled={i.status === 'DESATIVADA' &&
-                            !['MANUAL → DIAGNOSTICO_ESTOQUE', 'DIARIO → DIAGNOSTICO_ESTOQUE'].includes(i.detalhe)}
+                            !['MANUAL → DIAGNOSTICO_ESTOQUE', 'DIARIO → DIAGNOSTICO_ESTOQUE',
+                              'DIARIO → RASCUNHO_LEMBRETE_EVENTO'].includes(i.detalhe)}
                           className="border-line rounded-input min-h-10 self-start border bg-white px-3 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50">
                           {i.status === 'DESATIVADA'
                             ? (i.detalhe.startsWith('DIARIO') ? 'Habilitar agendamento diário' : 'Habilitar regra manual')
