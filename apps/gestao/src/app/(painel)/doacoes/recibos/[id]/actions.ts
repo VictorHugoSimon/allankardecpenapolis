@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { comRls, registrarAuditoria } from '@ceak/db';
 import { contextoRls, exigirModulo } from '@/lib/auth';
+import { podeEmitirRecibo, reciboJaEmitido, referenciaReciboInterno } from '@/lib/recibosDoacoes';
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -25,10 +26,11 @@ export async function emitirReciboInterno(form: FormData): Promise<void> {
         itemDescricao: true, destino: true,
       },
     });
-    if (!doacao || doacao.statusPagamento !== 'PAGO' || !doacao.pagoEm) {
+    if (reciboJaEmitido(doacao)) return; // Reenvio não duplica a emissão.
+    if (!podeEmitirRecibo(doacao)) {
       throw new Error('Só é permitido emitir recibo de contribuição já confirmada.');
     }
-    if (doacao.reciboEmitidoEm) return; // Reenvio de formulário não duplica a emissão.
+    if (!doacao?.pagoEm) throw new Error('Data da confirmação ausente.');
     const emitidoEm = new Date();
     const atualizado = await tx.doacao.updateMany({
       where: { id, statusPagamento: 'PAGO', pagoEm: { not: null }, reciboEmitidoEm: null },
@@ -46,7 +48,7 @@ export async function emitirReciboInterno(form: FormData): Promise<void> {
       antes: { reciboEmitidoEm: null },
       depois: {
         reciboEmitidoEm: emitidoEm.toISOString(),
-        referencia: `CEAK-${doacao.pagoEm.getUTCFullYear()}-${id.toUpperCase()}`,
+        referencia: referenciaReciboInterno(id, doacao.pagoEm),
         statusPagamento: 'PAGO',
         forma: doacao.forma,
         valorCentavos: doacao.valorCentavos,
