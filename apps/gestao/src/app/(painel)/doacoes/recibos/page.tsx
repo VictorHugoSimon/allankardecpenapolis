@@ -38,7 +38,7 @@ export default async function ConferenciaDoacoesPage() {
       </TituloPagina>
       <section className="border-line rounded-card border bg-white p-4 text-sm">
         São exibidas apenas doações registradas como PAGAS e com data de confirmação.
-        A prévia de agradecimento não emite recibo, não altera o status financeiro e não envia mensagens.
+        A consulta não altera pagamentos e não envia mensagens. A emissão de recibo interno não fiscal exige confirmação do administrador e é auditada.
         Para comprovação bancária ou fiscal, utilize os documentos oficiais adequados.
       </section>
       <div className="grid gap-3 sm:grid-cols-3">
@@ -72,7 +72,7 @@ export default async function ConferenciaDoacoesPage() {
                     <td className="p-3">{d.pagoEm ? dataBR(d.pagoEm) : '—'}</td>
                     <td className="p-3">{d.reciboEmitidoEm ? dataBR(d.reciboEmitidoEm) : 'Não registrado'}</td>
                     <td className="p-3">
-                      <Link href={`/doacoes/recibos/${d.id}`} className="underline">Conferir agradecimento</Link>
+                      <Link href={`/doacoes/recibos/${d.id}`} className="underline">{d.reciboEmitidoEm ? 'Ver recibo interno' : 'Conferir e emitir'}</Link>
                     </td>
                   </tr>
                 ))}
