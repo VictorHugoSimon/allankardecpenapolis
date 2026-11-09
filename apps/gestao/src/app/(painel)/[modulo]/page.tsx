@@ -164,12 +164,12 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
             id: e.id,
             nome: e.automacao.nome,
             status: e.status,
-            modo: entrada.modo === 'AGENDADO' ? 'Automática' : 'Manual',
+            modo: typeof entrada.modo === 'string' && entrada.modo.startsWith('AGENDADO') ? 'Automática' : 'Manual',
             quando: dataBR(e.iniciadaEm),
             resultado: typeof saida.abaixoDoMinimo === 'number'
               ? `${saida.abaixoDoMinimo} abaixo do mínimo entre ${saida.itensAnalisados} itens analisados`
               : typeof saida.rascunhosCriados === 'number'
-                ? `${saida.rascunhosCriados} rascunho(s) preparados entre ${saida.eventosEncontrados} eventos analisados — revisão pendente`
+                ? `${saida.rascunhosCriados} rascunho(s) preparados entre ${typeof saida.aulasEncontradas === 'number' ? saida.aulasEncontradas : saida.eventosEncontrados} registros analisados — revisão pendente`
                 : e.erro ?? 'Execução registrada',
           };
         }),
@@ -191,7 +191,7 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
           ),
         ),
         aviso:
-          'Regras homologadas são cadastradas desativadas. O agendador diário (09:00 UTC) realiza diagnósticos de estoque ou prepara rascunhos de lembretes de eventos confirmados. Ninguém recebe mensagens até um administrador revisar e publicar o rascunho.',
+          'Regras homologadas são cadastradas desativadas. O agendador diário (09:00 UTC) realiza diagnósticos de estoque ou prepara rascunhos de lembretes de eventos confirmados. Ninguém recebe mensagens até um administrador revisar e publicar o rascunho. Lembretes de aulas exigem segmentação por turma antes da publicação.',
       };
     }
     if (modulo === 'integracoes') {
@@ -371,6 +371,7 @@ function Formulario({ modulo, itens }: { modulo: Operacao; itens: Linha[] }) {
               <select name="acao" defaultValue="DIAGNOSTICO_ESTOQUE" className={input}>
                 <option value="DIAGNOSTICO_ESTOQUE">Diagnóstico do estoque (sem alterações)</option>
                 <option value="RASCUNHO_LEMBRETE_EVENTO">Preparar rascunhos de palestras e estudos (somente diário)</option>
+                <option value="RASCUNHO_LEMBRETE_AULA">Preparar rascunhos de aulas para turmas com matrículas (somente diário)</option>
               </select>
             </label>
             <p className="text-muted-2 text-xs sm:col-span-2">
@@ -547,7 +548,7 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
                         <button type="submit"
                           disabled={i.status === 'DESATIVADA' &&
                             !['MANUAL → DIAGNOSTICO_ESTOQUE', 'DIARIO → DIAGNOSTICO_ESTOQUE',
-                              'DIARIO → RASCUNHO_LEMBRETE_EVENTO'].includes(i.detalhe)}
+                              'DIARIO → RASCUNHO_LEMBRETE_EVENTO', 'DIARIO → RASCUNHO_LEMBRETE_AULA'].includes(i.detalhe)}
                           className="border-line rounded-input min-h-10 self-start border bg-white px-3 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50">
                           {i.status === 'DESATIVADA'
                             ? (i.detalhe.startsWith('DIARIO') ? 'Habilitar agendamento diário' : 'Habilitar regra manual')
