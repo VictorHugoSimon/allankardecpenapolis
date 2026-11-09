@@ -180,3 +180,13 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 - Pipeline CI atualizado para exigir a execução específica desta suíte antes do conjunto integral de testes.
 - **A inclusão dos testes não equivale à sua aprovação:** acompanhar execução GitHub Actions e deploy Vercel do commit mais recente.
 - O envio de agradecimentos por e-mail/WhatsApp permanece desligado até que provedor, consentimento e homologação estejam disponíveis. Não encaminhar dados financeiros por comunicados gerais.
+
+
+## Agradecimento individual com consentimento — 09/11/2026
+- Na página individual de recibo interno, o CEAK prepara um texto de agradecimento **somente para leitura e cópia**, sem enviar e-mail, WhatsApp, notificações ou registrar despacho.
+- A prévia só fica disponível quando a doação está `PAGO`, possui `pagoEm`, o recibo interno tem `reciboEmitidoEm` e a pessoa relacionada tem conta ativa, consentimento registrado e nenhum pedido de exclusão/anonimização.
+- Doações anônimas, sem identificação vinculada, ainda não dão origem a mensagens individuais.
+- O texto não contém valores, identificação bancária, ID interno nem forma de pagamento.
+- O botão `Copiar texto para revisão` exige comando do operador; copiar **não significa envio nem consentimento para disparo externo**. A eventual utilização fora da plataforma deve seguir a política de comunicação do CEAK.
+- Testes automatizados foram adicionados em `apps/gestao/src/lib/agradecimentoDoacoes.test.ts` e incluídos no GitHub Actions.
+- Validação ainda pendente: execução do CI, build da página, teste com conta consentida em homologação e revisão da política de consentimento para canais externos.
