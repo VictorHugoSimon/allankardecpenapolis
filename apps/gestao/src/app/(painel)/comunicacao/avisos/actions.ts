@@ -98,12 +98,22 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     }
     const filtro = aviso.filtro && typeof aviso.filtro === 'object' && !Array.isArray(aviso.filtro)
       ? aviso.filtro as Record<string, unknown> : {};
-    if (filtro.exigeSegmentacaoTurma === true ||
-        filtro.origem === 'AUTOMACAO_LEMBRETE_AULA') {
-      throw new Error('Lembrete de aula reservado aos matriculados: a segmentação por turma deve ser homologada antes da publicação.');
-    }
     const segmento = String(filtro.segmento ?? 'TODOS');
-    if (!segmentos.includes(segmento as Segmento)) throw new Error('Segmentação inválida.');
+    const restritoTurma = filtro.exigeSegmentacaoTurma === true ||
+      filtro.origem === 'AUTOMACAO_LEMBRETE_AULA';
+    if (restritoTurma) {
+      if (filtro.origem !== 'AUTOMACAO_LEMBRETE_AULA' ||
+          filtro.exigeSegmentacaoTurma !== true ||
+          segmento !== 'MATRICULADOS_TURMA' ||
+          typeof filtro.turmaId !== 'string' ||
+          typeof filtro.aulaId !== 'string' ||
+          !/^[0-9a-f-]{36}$/i.test(filtro.turmaId) ||
+          !/^[0-9a-f-]{36}$/i.test(filtro.aulaId)) {
+        throw new Error('Lembrete de aula sem segmentação válida de turma.');
+      }
+    } else if (!segmentos.includes(segmento as Segmento)) {
+      throw new Error('Segmentação inválida.');
+    }
     const url = typeof filtro.url === 'string' ? filtro.url : null;
     if (url) {
       const check = new FormData();
@@ -114,13 +124,39 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       segmento === 'VOLUNTARIOS' ? ['VOLUNTARIO'] :
       segmento === 'INSTRUTORES' ? ['INSTRUTOR'] :
       ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'];
+    // Um lembrete de turma nunca usa o segmento público. Revalida aula, curso,
+    // turma e matrículas ativas dentro da transação antes de calcular destinatários.
+    let matriculados: string[] | null = null;
+    if (restritoTurma) {
+      const aula = await tx.aula.findFirst({
+        where: {
+          id: filtro.aulaId as string,
+          turmaId: filtro.turmaId as string,
+          data: { gt: new Date() },
+          turma: { status: 'ATIVA', curso: { ativo: true } },
+        },
+        select: { id: true },
+      });
+      if (!aula) {
+        throw new Error('Aula indisponível, já realizada ou turma encerrada. Revise a programação.');
+      }
+      const vinculos = await tx.matricula.findMany({
+        where: { turmaId: filtro.turmaId as string, status: 'ATIVA' },
+        select: { pessoaId: true },
+        take: 5001,
+      });
+      if (vinculos.length > 5000) throw new Error('Turma acima do limite de segurança.');
+      matriculados = vinculos.map(v => v.pessoaId);
+    }
     const pessoas = await tx.pessoa.findMany({
       where: {
         usuario: { is: { ativo: true } },
         consentimentoEm: { not: null },
         exclusaoSolicitadaEm: null,
         anonimizadaEm: null,
-        perfil: { in: perfis as ('MEMBRO' | 'VISITANTE' | 'VOLUNTARIO' | 'INSTRUTOR')[] },
+        ...(matriculados !== null
+          ? { id: { in: matriculados } }
+          : { perfil: { in: perfis as ('MEMBRO' | 'VISITANTE' | 'VOLUNTARIO' | 'INSTRUTOR')[] } }),
       },
       select: { id: true },
       take: 5001,
@@ -137,7 +173,7 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     await tx.notificacao.createMany({
       data: pessoas.map((p) => ({
         pessoaId: p.id,
-        categoria: 'Comunicado',
+        categoria: restritoTurma ? 'Estudos' : 'Comunicado',
         titulo: aviso.titulo,
         corpo: aviso.mensagem,
         url,
@@ -157,7 +193,8 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       entidade: 'Comunicacao',
       entidadeId: aviso.id,
       antes: { status: 'RASCUNHO' },
-      depois: { status: 'ENVIADO', destinatarios: pessoas.length, canal: 'APP' },
+      depois: { status: 'ENVIADO', destinatarios: pessoas.length, canal: 'APP',
+        escopo: restritoTurma ? 'MATRICULADOS_TURMA' : segmento },
       ip: null,
     });
     return { id: aviso.id, totalDispositivos: dispositivos.length };
