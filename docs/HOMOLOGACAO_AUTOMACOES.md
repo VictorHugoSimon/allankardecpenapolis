@@ -207,3 +207,23 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 4. Garantir idempotência de envios e auditoria de tentativas, erros e confirmações do provedor.
 5. Executar testes em ambiente isolado, nunca para destinatários de produção.
 6. Publicar apenas após aprovação do CI, revisão de privacidade e configuração dos provedores.
+
+
+## Preferências de comunicação por pessoa — consentimento específico
+- Modelo Prisma `PreferenciaComunicacao` e migração `20261109170000_preferencias_comunicacao` adicionados, com um registro único por pessoa + canal + finalidade, sem converter consentimento geral em opt-in automático.
+- Cada canal (`EMAIL`/`WHATSAPP`) armazena decisão, data, versão do termo, origem e revogação. Não há consentimentos predefinidos como autorizados.
+- RLS no PostgreSQL permite à função `ceak_app` ler/inserir/atualizar **somente a própria pessoa autenticada**; a tabela nega acesso público. Não concede acesso de escrita a operadores para autorizar terceiros.
+- Página inicial de autoatendimento `/preferencias/comunicacao` no **Gestão**: a pessoa autenticada pode autorizar ou revogar cada canal separadamente. Esta rota inicial é restrita a usuários que possuam conta com acesso ao Gestão; extensão ao PWA público ainda é necessária.
+- A ação registra auditoria vinculada ao usuário e não envia mensagens externas; o registro de consentimento sozinho não configura/verifica provedor e não aprova disparos.
+- Utilitário `temConsentimentoCanal` considera a preferência ausente, revogada, sem data/versão ou de outro canal como **não autorizada**. Testes de separação por canal e revogação foram adicionados ao CI.
+- **Não habilitar a nova página antes da migração** da tabela ao banco de destino, revisão da autorização de cada canal e validação do CI. O deploy de commits recentes ainda não foi confirmado.
+
+### Aceite da migração e das preferências
+1. Executar migração exclusivamente em homologação primeiro; inspecionar tabelas, RLS e grants.
+2. Testar usuário autenticado A autorizando EMAIL, sem autorizar WHATSAPP.
+3. Testar usuário B sem conseguir ler/gravar preferências do usuário A.
+4. Revogar EMAIL; verificar data, estado e registro na auditoria. Repetir a operação sem duplicar autorizações.
+5. Testar ausência de consentimento geral, conta excluída/anonimizada e ausência de sessão.
+6. Confirmar que nenhuma preferência existente é criada automaticamente e que não houve mensagens enviadas.
+7. Integrar a mesma experiência no PWA dos membros antes de considerar autoatendimento geral concluído.
+8. Provedores externos, opt-out por canal e verificação de destino continuam bloqueados até homologação.
