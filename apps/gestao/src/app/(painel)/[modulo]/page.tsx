@@ -536,7 +536,9 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
                           disabled={i.status === 'DESATIVADA' &&
                             !['MANUAL → DIAGNOSTICO_ESTOQUE', 'DIARIO → DIAGNOSTICO_ESTOQUE'].includes(i.detalhe)}
                           className="border-line rounded-input min-h-10 self-start border bg-white px-3 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50">
-                          {i.status === 'DESATIVADA' ? 'Habilitar regra manual' : 'Desativar regra'}
+                          {i.status === 'DESATIVADA'
+                            ? (i.detalhe.startsWith('DIARIO') ? 'Habilitar agendamento diário' : 'Habilitar regra manual')
+                            : 'Desativar regra'}
                         </button>
                       </form>
                     )}
