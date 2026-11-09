@@ -172,3 +172,11 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 5. A impressão omite controles administrativos e preserva o aviso não fiscal.
 6. Não envia mensagem ou cria cobrança.
 7. Verificar os comportamentos com dados isolados de homologação e conferir o build antes do aceite.
+
+
+## Homologação complementar do recibo — 09/11/2026
+- Regras de elegibilidade centralizadas em `apps/gestao/src/lib/recibosDoacoes.ts` e reutilizadas na emissão administrativa.
+- Testes Vitest incluídos em `apps/gestao/src/lib/recibosDoacoes.test.ts` para pagamentos pendentes, expirados, cancelados e estornados, falta de data, repetição de emissão e referência única estável.
+- Pipeline CI atualizado para exigir a execução específica desta suíte antes do conjunto integral de testes.
+- **A inclusão dos testes não equivale à sua aprovação:** acompanhar execução GitHub Actions e deploy Vercel do commit mais recente.
+- O envio de agradecimentos por e-mail/WhatsApp permanece desligado até que provedor, consentimento e homologação estejam disponíveis. Não encaminhar dados financeiros por comunicados gerais.
