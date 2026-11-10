@@ -78,6 +78,31 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     await page.goto(`/doacoes/recibos/${doacaoId}`);
     await expect(page.getByText('APROVADO', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Analisar aprovação interna' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Cancelar aprovação interna' })).toHaveCount(0);
+
+    await page.context().clearCookies();
+    await entrar(page, USUARIOS.ADMINISTRADOR);
+    await page.goto(`/doacoes/recibos/${doacaoId}`);
+    const emailCancelamento = page.getByRole('heading', { name: 'E-mail', exact: true }).locator('..');
+    await emailCancelamento.getByLabel('Motivo do cancelamento').fill('Revogação administrativa para teste isolado.');
+    await emailCancelamento.getByRole('checkbox').check();
+    await emailCancelamento.getByRole('button', { name: 'Cancelar aprovação interna' }).click();
+    await expect(emailCancelamento.getByText('CANCELADO', { exact: true })).toBeVisible();
+    await expect(emailCancelamento.getByText('CANCELAMENTO_INTERNO')).toBeVisible();
+
+    const cancelado = await db.query(
+      `SELECT a.status, a.aprovado_em, a.aprovado_por_id,
+              (SELECT count(*)::int FROM ceak_v2.tentativa_agradecimento t
+               WHERE t.aprovacao_id=a.id AND t.resultado='CANCELAMENTO_INTERNO') AS cancelamentos
+         FROM ceak_v2.aprovacao_agradecimento a WHERE a.doacao_id=$1 AND a.canal='EMAIL'`,
+      [doacaoId],
+    );
+    expect(cancelado.rows[0]).toMatchObject({
+      status: 'CANCELADO',
+      aprovado_em: null,
+      aprovado_por_id: null,
+      cancelamentos: 1,
+    });
   } finally {
     if (doacaoId) {
       await db.query('DELETE FROM ceak_v2.aprovacao_agradecimento WHERE doacao_id=$1', [doacaoId]);
