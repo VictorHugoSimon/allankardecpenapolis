@@ -25,16 +25,19 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     pessoaId = r.rows[0]!.pessoa_id;
     doacaoId = r.rows[0]!.id;
     expect(
-      (await db.query(
-        'SELECT id FROM ceak_v2.preferencia_comunicacao WHERE pessoa_id=$1 AND canal=$2',
-        [pessoaId, 'EMAIL'],
-      )).rows,
+      (
+        await db.query(
+          'SELECT id FROM ceak_v2.preferencia_comunicacao WHERE pessoa_id=$1 AND canal=$2',
+          [pessoaId, 'EMAIL'],
+        )
+      ).rows,
     ).toHaveLength(0);
 
     await entrar(page, USUARIOS.ADMINISTRADOR);
     await page.goto(`/doacoes/recibos/${doacaoId}`);
-    await expect(page.getByRole('heading', { name: 'Aprovações internas de agradecimento' }))
-      .toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Aprovações internas de agradecimento' }),
+    ).toBeVisible();
     const email = page.getByRole('heading', { name: 'E-mail', exact: true }).locator('..');
     await email.getByRole('checkbox').check();
     await email.getByRole('button', { name: 'Criar solicitação' }).click();
@@ -66,8 +69,9 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     expect(estado.rows).toHaveLength(1);
     expect(estado.rows[0]).toMatchObject({ canal: 'EMAIL', status: 'APROVADO', analises: 2 });
     expect(estado.rows[0].aprovado_em).toBeTruthy();
-    await expect(page.getByRole('heading', { name: 'Canais externos — não habilitados' }))
-      .toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Canais externos — não habilitados' }),
+    ).toBeVisible();
 
     await page.context().clearCookies();
     await entrar(page, USUARIOS.TESOURARIA);
@@ -76,9 +80,7 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     await expect(page.getByRole('button', { name: 'Analisar aprovação interna' })).toHaveCount(0);
   } finally {
     if (doacaoId) {
-      await db.query('DELETE FROM ceak_v2.aprovacao_agradecimento WHERE doacao_id=$1', [
-        doacaoId,
-      ]);
+      await db.query('DELETE FROM ceak_v2.aprovacao_agradecimento WHERE doacao_id=$1', [doacaoId]);
     }
     if (pessoaId) {
       await db.query(
