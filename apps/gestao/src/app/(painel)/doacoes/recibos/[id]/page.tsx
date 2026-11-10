@@ -4,7 +4,11 @@ import { notFound } from 'next/navigation';
 import { aprovacoesAgradecimentoDisponiveis, comRls } from '@ceak/db';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { emitirReciboInterno } from './actions';
-import { analisarAgradecimento, cancelarAgradecimento, prepararAgradecimento } from './aprovacaoActions';
+import {
+  analisarAgradecimento,
+  cancelarAgradecimento,
+  prepararAgradecimento,
+} from './aprovacaoActions';
 import { ImprimirRecibo } from './ImprimirRecibo';
 import { CopiarAgradecimento } from './CopiarAgradecimento';
 import { agradecimentoElegivel, mensagemAgradecimento } from '@/lib/agradecimentoDoacoes';
