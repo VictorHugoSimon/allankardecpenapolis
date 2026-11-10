@@ -56,7 +56,7 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     );
     await email.getByRole('checkbox').check();
     await email.getByRole('button', { name: 'Analisar aprovação interna' }).click();
-    await expect(email.getByText('APROVADO')).toBeVisible();
+    await expect(email.getByText('APROVADO', { exact: true })).toBeVisible();
     await expect(email.getByText('APROVACAO_INTERNA')).toBeVisible();
 
     const estado = await db.query(
@@ -76,7 +76,7 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     await page.context().clearCookies();
     await entrar(page, USUARIOS.TESOURARIA);
     await page.goto(`/doacoes/recibos/${doacaoId}`);
-    await expect(page.getByText('APROVADO')).toBeVisible();
+    await expect(page.getByText('APROVADO', { exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Analisar aprovação interna' })).toHaveCount(0);
   } finally {
     if (doacaoId) {
