@@ -1,0 +1,38 @@
+name: Normalizacao unica de formatacao
+
+on:
+  push:
+    branches: ['claude/new-session-n6t9kx']
+    paths:
+      - '.github/workflows/normalizar-formatacao.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  normalizar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Formatar somente arquivos suportados pelo Prettier
+        run: pnpm exec prettier --write .
+      - name: Publicar alteracoes de formatacao na branch existente
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          if git diff --cached --quiet; then
+            echo "Nenhuma mudanca de formatacao."
+          else
+            git commit -m "style: normalizar formatacao Prettier no monorepo"
+            git push origin HEAD:claude/new-session-n6t9kx
+          fi
