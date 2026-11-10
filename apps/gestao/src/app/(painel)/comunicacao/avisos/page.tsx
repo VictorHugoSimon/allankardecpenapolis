@@ -19,14 +19,16 @@ export default async function AvisosInternosPage() {
   // Versões antigas da produção ainda podem estar sem a migração da fila.
   // Não derrubar a central de comunicação por causa dessa dependência.
   const tabelaFilaExiste = administra
-    ? (await prisma.$queryRaw<Array<{ existe: boolean }>>`
+    ? ((
+        await prisma.$queryRaw<Array<{ existe: boolean }>>`
         SELECT to_regclass('ceak_v2.entrega_push') IS NOT NULL AS existe
-      `)[0]?.existe ?? false
+      `
+      )[0]?.existe ?? false)
     : false;
   const fila = tabelaFilaExiste
     ? await prisma.entregaPush.groupBy({ by: ['status'], _count: { _all: true } })
     : [];
-  const contagem = (status: string) => fila.find(x => x.status === status)?._count._all ?? 0;
+  const contagem = (status: string) => fila.find((x) => x.status === status)?._count._all ?? 0;
   const porComunicado = tabelaFilaExiste
     ? await prisma.entregaPush.groupBy({
         by: ['comunicacaoId', 'status'],
@@ -34,11 +36,14 @@ export default async function AvisosInternosPage() {
       })
     : [];
   const metricasComunicado = (id: string) => ({
-    fila: porComunicado.filter(x => x.comunicacaoId === id && ['PENDENTE', 'PROCESSANDO'].includes(x.status))
+    fila: porComunicado
+      .filter((x) => x.comunicacaoId === id && ['PENDENTE', 'PROCESSANDO'].includes(x.status))
       .reduce((n, x) => n + x._count._all, 0),
-    aceitos: porComunicado.filter(x => x.comunicacaoId === id && x.status === 'ENVIADO')
+    aceitos: porComunicado
+      .filter((x) => x.comunicacaoId === id && x.status === 'ENVIADO')
       .reduce((n, x) => n + x._count._all, 0),
-    erros: porComunicado.filter(x => x.comunicacaoId === id && ['FALHA', 'EXPIRADO'].includes(x.status))
+    erros: porComunicado
+      .filter((x) => x.comunicacaoId === id && ['FALHA', 'EXPIRADO'].includes(x.status))
       .reduce((n, x) => n + x._count._all, 0),
   });
   const avisos = await comRls(contextoRls(sessao), (tx) =>
@@ -75,7 +80,9 @@ export default async function AvisosInternosPage() {
         Central de notificações
       </TituloPagina>
       <div className="border-line rounded-card border bg-white p-4 text-sm">
-        As mensagens são publicadas na caixa de avisos de usuários elegíveis. Quando o Web Push estiver configurado, também são enviadas aos aparelhos que autorizaram notificações. Não envia WhatsApp nem e-mail. O administrador revisa cada publicação.
+        As mensagens são publicadas na caixa de avisos de usuários elegíveis. Quando o Web Push
+        estiver configurado, também são enviadas aos aparelhos que autorizaram notificações. Não
+        envia WhatsApp nem e-mail. O administrador revisa cada publicação.
       </div>
       <section className="grid gap-3 sm:grid-cols-3" aria-label="Resumo dos avisos">
         {[
@@ -98,16 +105,26 @@ export default async function AvisosInternosPage() {
       {administra && tabelaFilaExiste && (
         <section className="border-line rounded-card border bg-white p-5">
           <h2 className="mt-0 text-lg font-semibold">Fila de notificações do celular</h2>
-          <div className="grid gap-2 sm:grid-cols-3 text-sm">
-            <p>Na fila: <strong>{contagem('PENDENTE') + contagem('PROCESSANDO')}</strong></p>
-            <p>Envios aceitos: <strong>{contagem('ENVIADO')}</strong></p>
-            <p>Falhas finais: <strong>{contagem('FALHA') + contagem('EXPIRADO')}</strong></p>
+          <div className="grid gap-2 text-sm sm:grid-cols-3">
+            <p>
+              Na fila: <strong>{contagem('PENDENTE') + contagem('PROCESSANDO')}</strong>
+            </p>
+            <p>
+              Envios aceitos: <strong>{contagem('ENVIADO')}</strong>
+            </p>
+            <p>
+              Falhas finais: <strong>{contagem('FALHA') + contagem('EXPIRADO')}</strong>
+            </p>
           </div>
           <p className="text-muted-2 text-xs">
-            O processamento é feito em lotes de até 50 aparelhos. Envio aceito pelo provedor não garante exibição pelo sistema operacional.
+            O processamento é feito em lotes de até 50 aparelhos. Envio aceito pelo provedor não
+            garante exibição pelo sistema operacional.
           </p>
           <form action={processarLotePush}>
-            <button type="submit" className="bg-green rounded-input min-h-11 px-4 py-2 text-sm font-semibold text-white">
+            <button
+              type="submit"
+              className="bg-green rounded-input min-h-11 px-4 py-2 text-sm font-semibold text-white"
+            >
               Processar próximo lote (até 50)
             </button>
           </form>
@@ -143,9 +160,24 @@ export default async function AvisosInternosPage() {
             </label>
             <label className="flex flex-col gap-1 text-sm">
               <span className="font-medium">Link para compartilhar (opcional)</span>
-              <input name="url" type="text" list="ceak-links-oficiais" maxLength={1500} placeholder="https://... ou /agenda" className={input} />
-              <datalist id="ceak-links-oficiais"><option value="https://www.facebook.com/CEAKDEPENAPOLIS" /><option value="/agenda" /><option value="/estudos" /><option value="/notificacoes" /></datalist>
-              <span className="text-muted-2 text-xs">Selecione o Facebook oficial do CEAK, uma página interna ou informe outro endereço HTTPS.</span>
+              <input
+                name="url"
+                type="text"
+                list="ceak-links-oficiais"
+                maxLength={1500}
+                placeholder="https://... ou /agenda"
+                className={input}
+              />
+              <datalist id="ceak-links-oficiais">
+                <option value="https://www.facebook.com/CEAKDEPENAPOLIS" />
+                <option value="/agenda" />
+                <option value="/estudos" />
+                <option value="/notificacoes" />
+              </datalist>
+              <span className="text-muted-2 text-xs">
+                Selecione o Facebook oficial do CEAK, uma página interna ou informe outro endereço
+                HTTPS.
+              </span>
             </label>
             <button
               type="submit"
@@ -178,20 +210,27 @@ export default async function AvisosInternosPage() {
                   <td className="p-3">
                     <strong className="block">{a.titulo}</strong>
                     <p className="my-1 max-w-md text-sm whitespace-pre-wrap">{a.mensagem}</p>
-                    {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) &&
+                    {a.filtro &&
+                    typeof a.filtro === 'object' &&
+                    !Array.isArray(a.filtro) &&
                     typeof (a.filtro as Record<string, unknown>).resumoPush === 'string' ? (
                       <p className="text-muted-2 my-2 max-w-md text-xs">
                         {String((a.filtro as Record<string, unknown>).resumoPush)}
                       </p>
                     ) : null}
-                    {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) && typeof (a.filtro as Record<string, unknown>).url === 'string' ? (
-                      <p className="my-2 max-w-md break-all text-xs text-green">
+                    {a.filtro &&
+                    typeof a.filtro === 'object' &&
+                    !Array.isArray(a.filtro) &&
+                    typeof (a.filtro as Record<string, unknown>).url === 'string' ? (
+                      <p className="text-green my-2 max-w-md text-xs break-all">
                         Link: {String((a.filtro as Record<string, unknown>).url)}
                       </p>
                     ) : null}
                     {administra && a.status === 'ENVIADO' ? (
                       <p className="text-muted-2 my-2 text-xs">
-                        Push: {metricasComunicado(a.id).aceitos} aceitos · {metricasComunicado(a.id).fila} pendentes · {metricasComunicado(a.id).erros} falhas
+                        Push: {metricasComunicado(a.id).aceitos} aceitos ·{' '}
+                        {metricasComunicado(a.id).fila} pendentes · {metricasComunicado(a.id).erros}{' '}
+                        falhas
                       </p>
                     ) : null}
                     <span className="text-muted-2 block text-xs">
@@ -203,10 +242,13 @@ export default async function AvisosInternosPage() {
                     <strong className="block">{a.status}</strong>
                     {administra && a.status === 'RASCUNHO' ? (
                       <form action={publicarAvisoInterno} className="mt-2">
-                        {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) &&
+                        {a.filtro &&
+                        typeof a.filtro === 'object' &&
+                        !Array.isArray(a.filtro) &&
                         (a.filtro as Record<string, unknown>).exigeSegmentacaoTurma === true ? (
                           <p className="text-muted-2 my-2 text-xs">
-                            Público restrito: somente usuários com matrícula ativa nesta turma e consentimento.
+                            Público restrito: somente usuários com matrícula ativa nesta turma e
+                            consentimento.
                           </p>
                         ) : null}
                         <input type="hidden" name="id" value={a.id} />
@@ -214,9 +256,12 @@ export default async function AvisosInternosPage() {
                           type="submit"
                           className="border-line rounded-input min-h-11 border bg-white px-3 text-sm font-medium"
                         >
-                          {a.filtro && typeof a.filtro === 'object' && !Array.isArray(a.filtro) &&
-                           (a.filtro as Record<string, unknown>).exigeSegmentacaoTurma === true
-                            ? 'Publicar aos matriculados da turma' : 'Publicar no aplicativo'}
+                          {a.filtro &&
+                          typeof a.filtro === 'object' &&
+                          !Array.isArray(a.filtro) &&
+                          (a.filtro as Record<string, unknown>).exigeSegmentacaoTurma === true
+                            ? 'Publicar aos matriculados da turma'
+                            : 'Publicar no aplicativo'}
                         </button>
                       </form>
                     ) : a.enviadoEm ? (

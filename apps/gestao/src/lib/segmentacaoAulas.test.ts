@@ -43,12 +43,15 @@ describe('segmentação de aulas (nunca ampliar público)', () => {
       { pessoaId: 'E', status: 'ATIVA' },
       { pessoaId: 'F', status: 'ATIVA' },
     ];
-    const pessoa = (id: string, extras: Partial<{
-      contaAtiva: boolean;
-      consentimento: boolean;
-      exclusaoSolicitada: boolean;
-      anonimizada: boolean;
-    }> = {}) => ({
+    const pessoa = (
+      id: string,
+      extras: Partial<{
+        contaAtiva: boolean;
+        consentimento: boolean;
+        exclusaoSolicitada: boolean;
+        anonimizada: boolean;
+      }> = {},
+    ) => ({
       id,
       contaAtiva: true,
       consentimento: true,
@@ -70,9 +73,19 @@ describe('segmentação de aulas (nunca ampliar público)', () => {
   });
 
   it('turma sem matrícula ativa produz lista vazia, nunca envio geral', () => {
-    expect(selecionarDestinatariosTurma([], [{
-      id: 'A', contaAtiva: true, consentimento: true,
-      exclusaoSolicitada: false, anonimizada: false,
-    }])).toEqual([]);
+    expect(
+      selecionarDestinatariosTurma(
+        [],
+        [
+          {
+            id: 'A',
+            contaAtiva: true,
+            consentimento: true,
+            exclusaoSolicitada: false,
+            anonimizada: false,
+          },
+        ],
+      ),
+    ).toEqual([]);
   });
 });

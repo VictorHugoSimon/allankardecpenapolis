@@ -20,7 +20,8 @@ export function podeEnviarAgradecimento(
   requisitos: RequisitosCanal,
 ): boolean {
   if (canal !== 'EMAIL' && canal !== 'WHATSAPP') return false;
-  return requisitos.doacaoConfirmada &&
+  return (
+    requisitos.doacaoConfirmada &&
     requisitos.reciboEmitido &&
     requisitos.cadastroAtivo &&
     requisitos.consentimentoGeral &&
@@ -28,7 +29,8 @@ export function podeEnviarAgradecimento(
     requisitos.destinoVerificado &&
     requisitos.provedorHabilitado &&
     requisitos.aprovacaoAdministrativa &&
-    !requisitos.exclusaoSolicitada;
+    !requisitos.exclusaoSolicitada
+  );
 }
 
 /** Estado verificável da integração atual; não inventar preferências individuais. */
@@ -36,11 +38,13 @@ export function estadoAtualDosCanais() {
   return {
     EMAIL: {
       habilitado: false,
-      motivo: 'Sem preferência de consentimento específica por e-mail e sem fluxo de aprovação e entrega homologado.',
+      motivo:
+        'Sem preferência de consentimento específica por e-mail e sem fluxo de aprovação e entrega homologado.',
     },
     WHATSAPP: {
       habilitado: false,
-      motivo: 'Sem preferência de consentimento específica por WhatsApp, opt-in verificável e fluxo de envio homologado.',
+      motivo:
+        'Sem preferência de consentimento específica por WhatsApp, opt-in verificável e fluxo de envio homologado.',
     },
   } as const;
 }

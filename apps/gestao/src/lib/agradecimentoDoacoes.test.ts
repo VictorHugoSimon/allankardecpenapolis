@@ -3,10 +3,14 @@ import { agradecimentoElegivel, mensagemAgradecimento } from './agradecimentoDoa
 
 const data = new Date('2026-11-09T12:00:00.000Z');
 const base = {
-  statusPagamento: 'PAGO', pagoEm: data, reciboEmitidoEm: data,
+  statusPagamento: 'PAGO',
+  pagoEm: data,
+  reciboEmitidoEm: data,
   pessoaId: '123e4567-e89b-42d3-a456-426614174000',
-  consentimentoEm: data, exclusaoSolicitadaEm: null,
-  anonimizadaEm: null, usuarioAtivo: true,
+  consentimentoEm: data,
+  exclusaoSolicitadaEm: null,
+  anonimizadaEm: null,
+  usuarioAtivo: true,
 };
 
 describe('agradecimentos privados a doadores', () => {

@@ -8,7 +8,8 @@ export function mensagemAgradecimento(nome: string, destino: string): string {
   return [
     `Olá, ${saudacao}!`,
     'O Centro Espírita Allan Kardec agradece de coração sua contribuição.',
-    finalidade ? `Seu apoio à iniciativa ${finalidade} é muito importante para nossas atividades.`
+    finalidade
+      ? `Seu apoio à iniciativa ${finalidade} é muito importante para nossas atividades.`
       : 'Seu apoio é muito importante para nossas atividades.',
     'Muito obrigado por fazer parte desta corrente de solidariedade!',
     'Centro Espírita Allan Kardec',
@@ -26,10 +27,16 @@ export type ContextoAgradecimento = {
 };
 /** Só disponibiliza a preparação quando há identificação e consentimento válido. */
 export function agradecimentoElegivel(d: ContextoAgradecimento): boolean {
-  return d.statusPagamento === 'PAGO' &&
-    d.pagoEm instanceof Date && !Number.isNaN(d.pagoEm.getTime()) &&
-    d.reciboEmitidoEm instanceof Date && !Number.isNaN(d.reciboEmitidoEm.getTime()) &&
-    !!d.pessoaId && d.consentimentoEm instanceof Date &&
-    d.exclusaoSolicitadaEm === null && d.anonimizadaEm === null &&
-    d.usuarioAtivo;
+  return (
+    d.statusPagamento === 'PAGO' &&
+    d.pagoEm instanceof Date &&
+    !Number.isNaN(d.pagoEm.getTime()) &&
+    d.reciboEmitidoEm instanceof Date &&
+    !Number.isNaN(d.reciboEmitidoEm.getTime()) &&
+    !!d.pessoaId &&
+    d.consentimentoEm instanceof Date &&
+    d.exclusaoSolicitadaEm === null &&
+    d.anonimizadaEm === null &&
+    d.usuarioAtivo
+  );
 }

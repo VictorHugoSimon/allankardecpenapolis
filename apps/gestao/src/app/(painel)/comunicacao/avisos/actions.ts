@@ -49,7 +49,14 @@ export async function criarAvisoInterno(form: FormData): Promise<void> {
         canal: 'APP',
         titulo,
         mensagem,
-        publico: ({ TODOS: 'Todos os membros elegíveis', MEMBROS: 'Membros', VOLUNTARIOS: 'Voluntários', INSTRUTORES: 'Instrutores' } as Record<Segmento, string>)[segmento as Segmento],
+        publico: (
+          {
+            TODOS: 'Todos os membros elegíveis',
+            MEMBROS: 'Membros',
+            VOLUNTARIOS: 'Voluntários',
+            INSTRUTORES: 'Instrutores',
+          } as Record<Segmento, string>
+        )[segmento as Segmento],
         filtro: { segmento, url },
         status: 'RASCUNHO',
       },
@@ -82,7 +89,9 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     SELECT to_regclass('ceak_v2.entrega_push') IS NOT NULL AS existe
   `;
   if (!infraFila?.existe) {
-    throw new Error('Atualização da fila de notificações pendente. Publique após aplicar a migração do banco.');
+    throw new Error(
+      'Atualização da fila de notificações pendente. Publique após aplicar a migração do banco.',
+    );
   }
   // Obtém somente IDs, sem endpoints/chaves. A inserção da fila ocorrerá
   // na MESMA transação da publicação, para não perder envios em caso de falha.
@@ -97,8 +106,10 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     if (!aviso || aviso.canal !== 'APP' || aviso.status !== 'RASCUNHO') {
       throw new Error('O aviso não está em rascunho ou já foi publicado.');
     }
-    const filtro = aviso.filtro && typeof aviso.filtro === 'object' && !Array.isArray(aviso.filtro)
-      ? aviso.filtro as Record<string, unknown> : {};
+    const filtro =
+      aviso.filtro && typeof aviso.filtro === 'object' && !Array.isArray(aviso.filtro)
+        ? (aviso.filtro as Record<string, unknown>)
+        : {};
     const segmento = String(filtro.segmento ?? 'TODOS');
     const restritoTurma = ehAvisoRestritoTurma(filtro);
     const filtroTurma = restritoTurma ? validarFiltroTurma(filtro) : null;
@@ -111,10 +122,14 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       check.set('url', url);
       validarLink(check);
     }
-    const perfis = segmento === 'MEMBROS' ? ['MEMBRO'] :
-      segmento === 'VOLUNTARIOS' ? ['VOLUNTARIO'] :
-      segmento === 'INSTRUTORES' ? ['INSTRUTOR'] :
-      ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'];
+    const perfis =
+      segmento === 'MEMBROS'
+        ? ['MEMBRO']
+        : segmento === 'VOLUNTARIOS'
+          ? ['VOLUNTARIO']
+          : segmento === 'INSTRUTORES'
+            ? ['INSTRUTOR']
+            : ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'];
     // Um lembrete de turma nunca usa o segmento público. Revalida aula, curso,
     // turma e matrículas ativas dentro da transação antes de calcular destinatários.
     let matriculados: string[] | null = null;
@@ -129,7 +144,9 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
         select: { id: true },
       });
       if (!aula) {
-        throw new Error('Aula indisponível, já realizada ou turma encerrada. Revise a programação.');
+        throw new Error(
+          'Aula indisponível, já realizada ou turma encerrada. Revise a programação.',
+        );
       }
       const vinculos = await tx.matricula.findMany({
         where: { turmaId: filtroTurma!.turmaId, status: 'ATIVA' },
@@ -137,7 +154,7 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
         take: 5001,
       });
       if (vinculos.length > 5000) throw new Error('Turma acima do limite de segurança.');
-      matriculados = vinculos.map(v => v.pessoaId);
+      matriculados = vinculos.map((v) => v.pessoaId);
     }
     const pessoas = await tx.pessoa.findMany({
       where: {
@@ -170,11 +187,13 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
         url,
       })),
     });
-    const pessoasElegiveis = new Set(pessoas.map(p => p.id));
-    const dispositivos = dispositivosCandidatos.filter(d => d.pessoaId && pessoasElegiveis.has(d.pessoaId));
+    const pessoasElegiveis = new Set(pessoas.map((p) => p.id));
+    const dispositivos = dispositivosCandidatos.filter(
+      (d) => d.pessoaId && pessoasElegiveis.has(d.pessoaId),
+    );
     if (dispositivos.length) {
       await tx.entregaPush.createMany({
-        data: dispositivos.map(d => ({ comunicacaoId: aviso.id, dispositivoId: d.id })),
+        data: dispositivos.map((d) => ({ comunicacaoId: aviso.id, dispositivoId: d.id })),
         skipDuplicates: true,
       });
     }
@@ -184,8 +203,12 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       entidade: 'Comunicacao',
       entidadeId: aviso.id,
       antes: { status: 'RASCUNHO' },
-      depois: { status: 'ENVIADO', destinatarios: pessoas.length, canal: 'APP',
-        escopo: restritoTurma ? 'MATRICULADOS_TURMA' : segmento },
+      depois: {
+        status: 'ENVIADO',
+        destinatarios: pessoas.length,
+        canal: 'APP',
+        escopo: restritoTurma ? 'MATRICULADOS_TURMA' : segmento,
+      },
       ip: null,
     });
     return { id: aviso.id, totalDispositivos: dispositivos.length };
@@ -208,7 +231,8 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
     });
   }
   log.info('NOTIFICACOES', 'comunicado publicado e aparelhos enfileirados', {
-    rota: '/comunicacao/avisos', status: 200,
+    rota: '/comunicacao/avisos',
+    status: 200,
     contexto: { comunicadoId: resultado.id, inscritos: resultado.totalDispositivos },
   });
   revalidatePath('/comunicacao/avisos');

@@ -37,13 +37,19 @@ try {
     console.log('AÇÃO: executar o bootstrap inicial conforme docs/PRIMEIRO_ACESSO_SEM_SEED.md.');
     console.log('Não execute db:seed. Visitantes existentes não precisam ser apagados.');
   } else if (ativos === 0) {
-    console.log('AÇÃO: há administrador desativado. Revisar recuperação institucional com acesso autorizado ao banco.');
+    console.log(
+      'AÇÃO: há administrador desativado. Revisar recuperação institucional com acesso autorizado ao banco.',
+    );
     process.exitCode = 2;
   } else if (process.env.AUTH_PROVIDER === 'local' && comCredencial === 0) {
-    console.log('AÇÃO: há administrador ativo sem senha local. Revisar provedor de autenticação e recuperação de credencial.');
+    console.log(
+      'AÇÃO: há administrador ativo sem senha local. Revisar provedor de autenticação e recuperação de credencial.',
+    );
     process.exitCode = 2;
   } else {
-    console.log('AÇÃO: há administrador ativo. Testar login, 2FA e Configurações > Usuários em produção.');
+    console.log(
+      'AÇÃO: há administrador ativo. Testar login, 2FA e Configurações > Usuários em produção.',
+    );
     if (process.env.AUTH_PROVIDER !== 'local') {
       console.log('OBSERVAÇÃO: autenticação externa requer validação no provedor configurado.');
     }

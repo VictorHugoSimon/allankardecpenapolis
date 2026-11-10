@@ -12,7 +12,9 @@ export default async function MinhasPreferenciasPage() {
   if (!(await preferenciasComunicacaoDisponiveis())) {
     return (
       <main className="mx-auto max-w-3xl p-5">
-        <Link href="/" className="text-sm underline">Voltar ao painel</Link>
+        <Link href="/" className="text-sm underline">
+          Voltar ao painel
+        </Link>
         <section className="border-line rounded-card border bg-white p-5" role="status">
           <h1 className="text-xl font-semibold">Preferências em implantação</h1>
           <p>Aguardando migração de dados. Nenhuma autorização ou envio foi efetuado.</p>
@@ -20,7 +22,7 @@ export default async function MinhasPreferenciasPage() {
       </main>
     );
   }
-  const [pessoa, preferencias] = await comRls(contextoRls(sessao), async tx => {
+  const [pessoa, preferencias] = await comRls(contextoRls(sessao), async (tx) => {
     return Promise.all([
       tx.pessoa.findUnique({
         where: { id: sessao.pessoaId },
@@ -32,35 +34,46 @@ export default async function MinhasPreferenciasPage() {
       }),
     ]);
   });
-  const cadastroValido = !!pessoa?.consentimentoEm && !pessoa.exclusaoSolicitadaEm && !pessoa.anonimizadaEm;
-  const status = Object.fromEntries(preferencias.map(p => [p.canal, p])) as Record<string, typeof preferencias[number]>;
+  const cadastroValido =
+    !!pessoa?.consentimentoEm && !pessoa.exclusaoSolicitadaEm && !pessoa.anonimizadaEm;
+  const status = Object.fromEntries(preferencias.map((p) => [p.canal, p])) as Record<
+    string,
+    (typeof preferencias)[number]
+  >;
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-5 p-5">
       <div>
-        <Link href="/" className="text-sm underline">Voltar ao painel</Link>
+        <Link href="/" className="text-sm underline">
+          Voltar ao painel
+        </Link>
         <h1 className="font-serif text-3xl">Minhas preferências de comunicação</h1>
         <p className="text-muted-2 text-sm">
-          Autorize ou revogue separadamente o recebimento de agradecimentos por e-mail e WhatsApp.
-          A preferência é pessoal, e não altera sua participação nas atividades do CEAK.
+          Autorize ou revogue separadamente o recebimento de agradecimentos por e-mail e WhatsApp. A
+          preferência é pessoal, e não altera sua participação nas atividades do CEAK.
         </p>
       </div>
       <section className="border-line rounded-card border bg-white p-4 text-sm">
-        Este cadastro registra somente sua escolha. Nenhum disparo externo está habilitado:
-        a entrega depende de verificação do contato, aprovação administrativa e integração com provedores.
-        Ausência de autorização significa não receber mensagens por esse canal.
+        Este cadastro registra somente sua escolha. Nenhum disparo externo está habilitado: a
+        entrega depende de verificação do contato, aprovação administrativa e integração com
+        provedores. Ausência de autorização significa não receber mensagens por esse canal.
       </section>
-      {(['EMAIL', 'WHATSAPP'] as const).map(canal => {
+      {(['EMAIL', 'WHATSAPP'] as const).map((canal) => {
         const p = status[canal];
         const autorizado = p?.autorizado === true;
         return (
           <section key={canal} className="border-line rounded-card border bg-white p-5">
-            <h2 className="mt-0 text-lg font-semibold">{canal === 'EMAIL' ? 'E-mail' : 'WhatsApp'}</h2>
+            <h2 className="mt-0 text-lg font-semibold">
+              {canal === 'EMAIL' ? 'E-mail' : 'WhatsApp'}
+            </h2>
             <p className="text-sm">
               Situação: <strong>{autorizado ? 'Autorizado' : 'Não autorizado'}</strong>
             </p>
-            {p && <p className="text-muted-2 text-xs">
-              Última atualização: {p.atualizadoEm.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
-            </p>}
+            {p && (
+              <p className="text-muted-2 text-xs">
+                Última atualização:{' '}
+                {p.atualizadoEm.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
+              </p>
+            )}
             <form action={alterarMinhaPreferencia} className="flex flex-col gap-3">
               <input type="hidden" name="canal" value={canal} />
               <input type="hidden" name="decisao" value={autorizado ? 'REVOGAR' : 'AUTORIZAR'} />
@@ -70,8 +83,11 @@ export default async function MinhasPreferenciasPage() {
                   ? 'Confirmo que desejo revogar minha autorização para este canal'
                   : 'Autorizo o CEAK a enviar agradecimentos individuais de doações por este canal'}
               </label>
-              <button type="submit" disabled={!cadastroValido && !autorizado}
-                className="border-line rounded-input w-fit border bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50">
+              <button
+                type="submit"
+                disabled={!cadastroValido && !autorizado}
+                className="border-line rounded-input w-fit border bg-white px-4 py-2 text-sm font-semibold disabled:opacity-50"
+              >
                 {autorizado ? 'Revogar autorização' : 'Autorizar este canal'}
               </button>
             </form>
@@ -80,8 +96,8 @@ export default async function MinhasPreferenciasPage() {
       })}
       {!cadastroValido && (
         <p className="border-line rounded-card border bg-white p-4 text-sm">
-          Autorizações indisponíveis: é necessário cadastro válido e consentimento geral.
-          Revogações existentes permanecem preservadas.
+          Autorizações indisponíveis: é necessário cadastro válido e consentimento geral. Revogações
+          existentes permanecem preservadas.
         </p>
       )}
     </main>

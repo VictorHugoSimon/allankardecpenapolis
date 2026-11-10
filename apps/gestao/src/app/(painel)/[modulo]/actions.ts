@@ -128,10 +128,19 @@ export async function salvarOperacao(modulo: Operacao, form: FormData): Promise<
       const nome = campo(form, 'nome', 120);
       const gatilho = campo(form, 'gatilho', 150);
       const acao = campo(form, 'acao', 150);
-      if (!nome ||
-          !((gatilho === 'MANUAL' && acao === 'DIAGNOSTICO_ESTOQUE') ||
-            (gatilho === 'DIARIO' && ['DIAGNOSTICO_ESTOQUE', 'RASCUNHO_LEMBRETE_EVENTO',
-              'RASCUNHO_LEMBRETE_AULA', 'RASCUNHO_CAMPANHA'].includes(acao)))) {
+      if (
+        !nome ||
+        !(
+          (gatilho === 'MANUAL' && acao === 'DIAGNOSTICO_ESTOQUE') ||
+          (gatilho === 'DIARIO' &&
+            [
+              'DIAGNOSTICO_ESTOQUE',
+              'RASCUNHO_LEMBRETE_EVENTO',
+              'RASCUNHO_LEMBRETE_AULA',
+              'RASCUNHO_CAMPANHA',
+            ].includes(acao))
+        )
+      ) {
         throw new Error('Combinação de gatilho e ação não homologada.');
       }
       const registro = await tx.automacao.create({
@@ -233,7 +242,6 @@ export async function alterarEstoqueMinimo(form: FormData): Promise<void> {
   revalidatePath('/estoque');
 }
 
-
 /**
  * Ativação controlada, sem iniciar execução por agendamento.
  * Apenas o diagnóstico MANUAL de estoque está aprovado nesta etapa.
@@ -245,21 +253,34 @@ export async function alterarAtivacaoAutomacao(form: FormData): Promise<void> {
   const id = String(form.get('id') ?? '');
   const ativa = String(form.get('ativa') ?? '');
   const confirmacao = String(form.get('confirmacao') ?? '');
-  if (!/^[0-9a-f-]{36}$/i.test(id) || !['sim', 'nao'].includes(ativa) ||
-      confirmacao !== 'CONFIRMO') {
+  if (
+    !/^[0-9a-f-]{36}$/i.test(id) ||
+    !['sim', 'nao'].includes(ativa) ||
+    confirmacao !== 'CONFIRMO'
+  ) {
     throw new Error('Confirme a alteração da automação.');
   }
-  await comRls(contextoRls(sessao), async tx => {
+  await comRls(contextoRls(sessao), async (tx) => {
     const regra = await tx.automacao.findUnique({
       where: { id },
       select: { id: true, gatilho: true, acao: true, ativa: true, exigeAprovacao: true },
     });
     if (!regra) throw new Error('Automação não encontrada.');
     const ativar = ativa === 'sim';
-    if (ativar && (!regra.exigeAprovacao ||
-        !((regra.gatilho === 'MANUAL' && regra.acao === 'DIAGNOSTICO_ESTOQUE') ||
+    if (
+      ativar &&
+      (!regra.exigeAprovacao ||
+        !(
+          (regra.gatilho === 'MANUAL' && regra.acao === 'DIAGNOSTICO_ESTOQUE') ||
           (regra.gatilho === 'DIARIO' &&
-            ['DIAGNOSTICO_ESTOQUE', 'RASCUNHO_LEMBRETE_EVENTO', 'RASCUNHO_LEMBRETE_AULA', 'RASCUNHO_CAMPANHA'].includes(regra.acao))))) {
+            [
+              'DIAGNOSTICO_ESTOQUE',
+              'RASCUNHO_LEMBRETE_EVENTO',
+              'RASCUNHO_LEMBRETE_AULA',
+              'RASCUNHO_CAMPANHA',
+            ].includes(regra.acao))
+        ))
+    ) {
       throw new Error('A ativação desta regra exige homologação de gatilho e ação.');
     }
     if (regra.ativa === ativar) return;
@@ -270,13 +291,20 @@ export async function alterarAtivacaoAutomacao(form: FormData): Promise<void> {
     if (alterada.count !== 1) throw new Error('A automação foi alterada em outra sessão.');
     await registrarAuditoria(tx, {
       usuarioId: sessao.usuarioId,
-      acao: ativar ? (regra.gatilho === 'DIARIO'
-        ? 'automacao.ativada_diaria' : 'automacao.ativada_manual') : 'automacao.desativada',
+      acao: ativar
+        ? regra.gatilho === 'DIARIO'
+          ? 'automacao.ativada_diaria'
+          : 'automacao.ativada_manual'
+        : 'automacao.desativada',
       entidade: 'Automacao',
       entidadeId: id,
       antes: { ativa: regra.ativa },
-      depois: { ativa: ativar, acao: regra.acao, gatilho: regra.gatilho,
-        executaSozinha: ativar && regra.gatilho === 'DIARIO' },
+      depois: {
+        ativa: ativar,
+        acao: regra.acao,
+        gatilho: regra.gatilho,
+        executaSozinha: ativar && regra.gatilho === 'DIARIO',
+      },
       ip: null,
     });
   });
@@ -290,17 +318,32 @@ export async function alterarAtivacaoAutomacao(form: FormData): Promise<void> {
  */
 export async function executarDiagnosticoEstoque(form: FormData): Promise<void> {
   const sessao = await exigirModulo('automacoes');
-  if (sessao.perfil !== 'ADMINISTRADOR') throw new Error('Somente administradores podem executar automações.');
+  if (sessao.perfil !== 'ADMINISTRADOR')
+    throw new Error('Somente administradores podem executar automações.');
   const id = String(form.get('id') ?? '');
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error('Automação inválida.');
   const inicio = Date.now();
-  await comRls(contextoRls(sessao), async tx => {
+  await comRls(contextoRls(sessao), async (tx) => {
     const regra = await tx.automacao.findUnique({
       where: { id },
-      select: { id: true, nome: true, gatilho: true, acao: true, ativa: true, exigeAprovacao: true },
+      select: {
+        id: true,
+        nome: true,
+        gatilho: true,
+        acao: true,
+        ativa: true,
+        exigeAprovacao: true,
+      },
     });
-    if (!regra || !regra.ativa || regra.gatilho !== 'MANUAL' || regra.acao !== 'DIAGNOSTICO_ESTOQUE') {
-      throw new Error('Regra não homologada para execução. Cadastre o diagnóstico manual de estoque.');
+    if (
+      !regra ||
+      !regra.ativa ||
+      regra.gatilho !== 'MANUAL' ||
+      regra.acao !== 'DIAGNOSTICO_ESTOQUE'
+    ) {
+      throw new Error(
+        'Regra não homologada para execução. Cadastre o diagnóstico manual de estoque.',
+      );
     }
     // O administrador iniciar este diagnóstico é a confirmação humana da operação.
     // Somente regras aprovadas e ativadas podem ser executadas, sem enviar nada.
@@ -308,8 +351,11 @@ export async function executarDiagnosticoEstoque(form: FormData): Promise<void> 
       select: { id: true, nome: true, saldo: true, minimo: true },
       take: 5001,
     });
-    if (registros.length > 5000) throw new Error('Mais de 5.000 itens. O diagnóstico requer paginação.');
-    const abaixoMinimo = registros.filter(i => i.minimo !== null && Number(i.saldo) < Number(i.minimo));
+    if (registros.length > 5000)
+      throw new Error('Mais de 5.000 itens. O diagnóstico requer paginação.');
+    const abaixoMinimo = registros.filter(
+      (i) => i.minimo !== null && Number(i.saldo) < Number(i.minimo),
+    );
     const execucao = await tx.execucao.create({
       data: {
         automacaoId: regra.id,
@@ -318,8 +364,11 @@ export async function executarDiagnosticoEstoque(form: FormData): Promise<void> 
         saida: {
           itensAnalisados: registros.length,
           abaixoDoMinimo: abaixoMinimo.length,
-          amostra: abaixoMinimo.slice(0, 20).map(i => ({
-            itemId: i.id, nome: i.nome, saldo: String(i.saldo), minimo: String(i.minimo),
+          amostra: abaixoMinimo.slice(0, 20).map((i) => ({
+            itemId: i.id,
+            nome: i.nome,
+            saldo: String(i.saldo),
+            minimo: String(i.minimo),
           })),
           somenteLeitura: true,
           mensagemExternaEnviada: false,
@@ -335,8 +384,13 @@ export async function executarDiagnosticoEstoque(form: FormData): Promise<void> 
       entidadeId: regra.id,
       ip: null,
       antes: null,
-      depois: { execucaoId: execucao.id, automacaoId: regra.id, itensAnalisados: registros.length,
-        abaixoDoMinimo: abaixoMinimo.length, somenteLeitura: true },
+      depois: {
+        execucaoId: execucao.id,
+        automacaoId: regra.id,
+        itensAnalisados: registros.length,
+        abaixoDoMinimo: abaixoMinimo.length,
+        somenteLeitura: true,
+      },
     });
   });
   revalidatePath('/automacoes');

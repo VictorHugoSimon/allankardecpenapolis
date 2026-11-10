@@ -5,6 +5,7 @@ Atualizado em 08/11/2026. Branch do projeto: `claude/new-session-n6t9kx`.
 ## Configuração concluída no ambiente Vercel
 
 Os projetos `ceak-app-git-preview` e `ceak-gestao-git-preview` possuem as variáveis:
+
 - `VAPID_PUBLIC_KEY` (chave pública);
 - `VAPID_PRIVATE_KEY` (segredo criptografado, nunca copiar ao repositório);
 - As duas chaves VAPID foram regeneradas a partir do mesmo par P-256 e aplicadas no CEAK App e no CEAK Gestão. Como a produção ainda não tem aparelhos inscritos, isso não exige migração de assinaturas existentes.

@@ -8,7 +8,10 @@
 const destinos = [
   ['Site institucional', process.env.CEAK_SITE_URL || 'https://ceak-site-git-preview.vercel.app/'],
   ['CEAK App (PWA)', process.env.CEAK_APP_URL || 'https://ceak-app-git-preview.vercel.app/'],
-  ['CEAK Gestão (login)', process.env.CEAK_GESTAO_URL || 'https://ceak-gestao-git-preview.vercel.app/login'],
+  [
+    'CEAK Gestão (login)',
+    process.env.CEAK_GESTAO_URL || 'https://ceak-gestao-git-preview.vercel.app/login',
+  ],
 ];
 
 async function verificar(nome, endereco) {
@@ -29,13 +32,23 @@ async function verificar(nome, endereco) {
     });
     const tipo = resposta.headers.get('content-type') || '';
     const destino = new URL(resposta.url);
-    const ok = resposta.ok && tipo.includes('text/html') &&
-      destino.protocol === 'https:' && !destino.hostname.endsWith('vercel.com');
-    console.log(`${ok ? 'OK' : 'FALHA'}: ${nome} — HTTP ${resposta.status}, ${tipo.split(';')[0] || 'sem content-type'}`);
-    if (!ok) console.log(`  Verifique publicação, proteção de acesso ou redirecionamento: ${destino.origin}`);
+    const ok =
+      resposta.ok &&
+      tipo.includes('text/html') &&
+      destino.protocol === 'https:' &&
+      !destino.hostname.endsWith('vercel.com');
+    console.log(
+      `${ok ? 'OK' : 'FALHA'}: ${nome} — HTTP ${resposta.status}, ${tipo.split(';')[0] || 'sem content-type'}`,
+    );
+    if (!ok)
+      console.log(
+        `  Verifique publicação, proteção de acesso ou redirecionamento: ${destino.origin}`,
+      );
     return ok;
   } catch (erro) {
-    console.error(`FALHA: ${nome} — ${erro?.name === 'TimeoutError' ? 'tempo limite excedido' : 'falha de conexão/TLS'}`);
+    console.error(
+      `FALHA: ${nome} — ${erro?.name === 'TimeoutError' ? 'tempo limite excedido' : 'falha de conexão/TLS'}`,
+    );
     return false;
   }
 }

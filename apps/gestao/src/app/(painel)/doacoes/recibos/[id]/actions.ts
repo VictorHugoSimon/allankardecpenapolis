@@ -17,13 +17,18 @@ export async function emitirReciboInterno(form: FormData): Promise<void> {
   if (!uuid.test(id) || form.get('confirmacao') !== 'EMITIR') {
     throw new Error('Identificação ou confirmação inválida.');
   }
-  await comRls(contextoRls(sessao), async tx => {
+  await comRls(contextoRls(sessao), async (tx) => {
     const doacao = await tx.doacao.findUnique({
       where: { id },
       select: {
-        id: true, statusPagamento: true, pagoEm: true,
-        reciboEmitidoEm: true, forma: true, valorCentavos: true,
-        itemDescricao: true, destino: true,
+        id: true,
+        statusPagamento: true,
+        pagoEm: true,
+        reciboEmitidoEm: true,
+        forma: true,
+        valorCentavos: true,
+        itemDescricao: true,
+        destino: true,
       },
     });
     if (reciboJaEmitido(doacao)) return; // Reenvio não duplica a emissão.

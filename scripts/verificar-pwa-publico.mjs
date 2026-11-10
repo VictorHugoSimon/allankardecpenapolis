@@ -45,33 +45,45 @@ await testar('Página inicial', base, ['text/html'], async (r) => {
 });
 
 const manifestUrl = new URL('/manifest.webmanifest', base);
-await testar('Manifesto PWA', manifestUrl, ['application/manifest+json', 'application/json'], async (r) => {
-  const data = await r.json();
-  if (data.display !== 'standalone') throw new Error('display standalone ausente');
-  if (!data.name || !data.start_url || !data.scope) throw new Error('campos essenciais ausentes');
-  if (!Array.isArray(data.icons)) throw new Error('ícones ausentes');
-  const tamanhos = new Set(data.icons.map((i) => i.sizes));
-  if (!tamanhos.has('192x192') || !tamanhos.has('512x512')) {
-    throw new Error('ícones 192x192 e 512x512 obrigatórios');
-  }
-  const icones = data.icons.filter((i) => ['192x192', '512x512'].includes(i.sizes));
-  for (const icone of icones) {
-    const endereco = new URL(icone.src, manifestUrl);
-    if (endereco.origin !== base.origin) throw new Error('ícone externo não permitido');
-    const img = await consultar(endereco, ['image/png']);
-    const bytes = await img.arrayBuffer();
-    if (bytes.byteLength < 100) throw new Error('ícone vazio');
-  }
-});
+await testar(
+  'Manifesto PWA',
+  manifestUrl,
+  ['application/manifest+json', 'application/json'],
+  async (r) => {
+    const data = await r.json();
+    if (data.display !== 'standalone') throw new Error('display standalone ausente');
+    if (!data.name || !data.start_url || !data.scope) throw new Error('campos essenciais ausentes');
+    if (!Array.isArray(data.icons)) throw new Error('ícones ausentes');
+    const tamanhos = new Set(data.icons.map((i) => i.sizes));
+    if (!tamanhos.has('192x192') || !tamanhos.has('512x512')) {
+      throw new Error('ícones 192x192 e 512x512 obrigatórios');
+    }
+    const icones = data.icons.filter((i) => ['192x192', '512x512'].includes(i.sizes));
+    for (const icone of icones) {
+      const endereco = new URL(icone.src, manifestUrl);
+      if (endereco.origin !== base.origin) throw new Error('ícone externo não permitido');
+      const img = await consultar(endereco, ['image/png']);
+      const bytes = await img.arrayBuffer();
+      if (bytes.byteLength < 100) throw new Error('ícone vazio');
+    }
+  },
+);
 
-await testar('Service worker', new URL('/sw.js', base), ['text/javascript', 'application/javascript'], async (r) => {
-  const script = await r.text();
-  if (script.length < 100) throw new Error('service worker vazio');
-});
+await testar(
+  'Service worker',
+  new URL('/sw.js', base),
+  ['text/javascript', 'application/javascript'],
+  async (r) => {
+    const script = await r.text();
+    if (script.length < 100) throw new Error('service worker vazio');
+  },
+);
 
 if (falhas.length) {
   console.error(`Checagem PWA reprovada: ${falhas.join(', ')}.`);
   process.exitCode = 1;
 } else {
-  console.log('Recursos públicos do PWA verificados. Instalação em Android/iOS exige teste manual.');
+  console.log(
+    'Recursos públicos do PWA verificados. Instalação em Android/iOS exige teste manual.',
+  );
 }

@@ -8,8 +8,12 @@ export function atrasoRetentativaMs(tentativas: number): number {
 
 /** Apenas rotas internas do PWA podem ser abertas pelo clique no push. */
 export function destinoInternoPush(url: unknown): string {
-  if (typeof url !== 'string' || !url.startsWith('/') ||
-      url.startsWith('//') || url.startsWith('/\\')) {
+  if (
+    typeof url !== 'string' ||
+    !url.startsWith('/') ||
+    url.startsWith('//') ||
+    url.startsWith('/\\')
+  ) {
     return '/notificacoes';
   }
   return url;

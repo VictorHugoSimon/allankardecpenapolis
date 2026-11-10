@@ -25,16 +25,26 @@ export function LoginForm({ next }: { next?: string }) {
         onChange={(e) => setEmail(e.target.value)}
       />
       <div className="relative">
-        <Input label="Senha" name="senha" type={mostrarSenha ? 'text' : 'password'} autoComplete="current-password" required />
+        <Input
+          label="Senha"
+          name="senha"
+          type={mostrarSenha ? 'text' : 'password'}
+          autoComplete="current-password"
+          required
+        />
         <button
           type="button"
           aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
           aria-pressed={mostrarSenha}
-          onClick={() => setMostrarSenha(v => !v)}
-          className="text-muted-2 absolute bottom-1 right-1 flex size-10 items-center justify-center rounded-lg bg-white hover:text-green"
+          onClick={() => setMostrarSenha((v) => !v)}
+          className="text-muted-2 hover:text-green absolute right-1 bottom-1 flex size-10 items-center justify-center rounded-lg bg-white"
           title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
         >
-          {mostrarSenha ? <EyeOff size={20} aria-hidden="true" /> : <Eye size={20} aria-hidden="true" />}
+          {mostrarSenha ? (
+            <EyeOff size={20} aria-hidden="true" />
+          ) : (
+            <Eye size={20} aria-hidden="true" />
+          )}
         </button>
       </div>
       {estado.erro ? (

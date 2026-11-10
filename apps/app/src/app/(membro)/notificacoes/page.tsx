@@ -37,7 +37,11 @@ export default async function NotificacoesPage() {
                 </span>
                 <span className="block text-sm font-medium">{n.titulo}</span>
                 <span className="text-muted block text-[13px] leading-[1.45]">{n.corpo}</span>
-                {n.url ? <span className="text-green mt-2 block text-[13px] font-semibold">Abrir link compartilhado ↗</span> : null}
+                {n.url ? (
+                  <span className="text-green mt-2 block text-[13px] font-semibold">
+                    Abrir link compartilhado ↗
+                  </span>
+                ) : null}
               </>
             );
             const classe = cn(
@@ -46,7 +50,9 @@ export default async function NotificacoesPage() {
             );
             return (
               <li key={n.id}>
-                {n.url && ((n.url.startsWith('/') && !n.url.startsWith('//') && !n.url.startsWith('/\\')) || /^https:\/\//i.test(n.url)) ? (
+                {n.url &&
+                ((n.url.startsWith('/') && !n.url.startsWith('//') && !n.url.startsWith('/\\')) ||
+                  /^https:\/\//i.test(n.url)) ? (
                   <a
                     href={n.url}
                     target={n.url.startsWith('https://') ? '_blank' : undefined}

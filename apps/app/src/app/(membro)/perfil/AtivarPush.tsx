@@ -25,7 +25,11 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
         setEstado('desligado');
         return;
       }
-      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+      if (
+        !('serviceWorker' in navigator) ||
+        !('PushManager' in window) ||
+        !('Notification' in window)
+      ) {
         setEstado('indisponivel');
         return;
       }
@@ -33,7 +37,8 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
         setEstado('bloqueado');
         return;
       }
-      const reg = (await navigator.serviceWorker.getRegistration()) ??
+      const reg =
+        (await navigator.serviceWorker.getRegistration()) ??
         (await navigator.serviceWorker.register('/sw.js', { scope: '/' }));
       const sub = await reg.pushManager.getSubscription();
       if (!sub) {
@@ -76,7 +81,8 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
           return;
         }
       }
-      const reg = (await navigator.serviceWorker.getRegistration()) ??
+      const reg =
+        (await navigator.serviceWorker.getRegistration()) ??
         (await navigator.serviceWorker.register('/sw.js', { scope: '/' }));
       if (ligar) {
         // Um navegador pode manter a inscrição anterior após a troca de conta.
@@ -123,7 +129,9 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
         setAviso('Notificações desativadas neste aparelho.');
       }
     } catch {
-      setAviso('Não foi possível ativar o push. Confira a permissão do sistema, a instalação do PWA e a configuração VAPID.');
+      setAviso(
+        'Não foi possível ativar o push. Confira a permissão do sistema, a instalação do PWA e a configuração VAPID.',
+      );
     } finally {
       setOcupado(false);
     }

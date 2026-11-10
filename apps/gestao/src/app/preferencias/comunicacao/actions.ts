@@ -15,8 +15,11 @@ export async function alterarMinhaPreferencia(form: FormData): Promise<void> {
   const canal = String(form.get('canal') ?? '');
   const decisao = String(form.get('decisao') ?? '');
   const confirmacao = String(form.get('confirmacao') ?? '');
-  if (!canais.some(c => c === canal) || !['AUTORIZAR', 'REVOGAR'].includes(decisao) ||
-      confirmacao !== 'CONFIRMO') {
+  if (
+    !canais.some((c) => c === canal) ||
+    !['AUTORIZAR', 'REVOGAR'].includes(decisao) ||
+    confirmacao !== 'CONFIRMO'
+  ) {
     throw new Error('Canal, decisão ou confirmação inválidos.');
   }
   if (!(await preferenciasComunicacaoDisponiveis())) {
@@ -24,13 +27,16 @@ export async function alterarMinhaPreferencia(form: FormData): Promise<void> {
   }
   const autorizar = decisao === 'AUTORIZAR';
   const agora = new Date();
-  await comRls(contextoRls(sessao), async tx => {
+  await comRls(contextoRls(sessao), async (tx) => {
     const pessoa = await tx.pessoa.findUnique({
       where: { id: sessao.pessoaId },
       select: { id: true, consentimentoEm: true, exclusaoSolicitadaEm: true, anonimizadaEm: true },
     });
-    if (!pessoa || (autorizar && (!pessoa.consentimentoEm ||
-        pessoa.exclusaoSolicitadaEm || pessoa.anonimizadaEm))) {
+    if (
+      !pessoa ||
+      (autorizar &&
+        (!pessoa.consentimentoEm || pessoa.exclusaoSolicitadaEm || pessoa.anonimizadaEm))
+    ) {
       throw new Error('Cadastro indisponível para autorizar esta comunicação.');
     }
     const chave = {
@@ -48,13 +54,18 @@ export async function alterarMinhaPreferencia(form: FormData): Promise<void> {
     const registro = await tx.preferenciaComunicacao.upsert({
       where: chave,
       create: {
-        pessoaId: pessoa.id, canal, finalidade: 'AGRADECIMENTO_DOACAO',
-        autorizado: autorizar, versao: VERSAO,
-        origem: 'AUTODECLARACAO_GESTAO', consentidoEm: autorizar ? agora : null,
+        pessoaId: pessoa.id,
+        canal,
+        finalidade: 'AGRADECIMENTO_DOACAO',
+        autorizado: autorizar,
+        versao: VERSAO,
+        origem: 'AUTODECLARACAO_GESTAO',
+        consentidoEm: autorizar ? agora : null,
         revogadoEm: autorizar ? null : agora,
       },
       update: {
-        autorizado: autorizar, versao: VERSAO,
+        autorizado: autorizar,
+        versao: VERSAO,
         origem: 'AUTODECLARACAO_GESTAO',
         consentidoEm: autorizar ? agora : null,
         revogadoEm: autorizar ? null : agora,
@@ -63,9 +74,12 @@ export async function alterarMinhaPreferencia(form: FormData): Promise<void> {
     });
     await registrarAuditoria(tx, {
       usuarioId: sessao.usuarioId,
-      acao: autorizar ? 'comunicacao.consentimento.autorizado' : 'comunicacao.consentimento.revogado',
+      acao: autorizar
+        ? 'comunicacao.consentimento.autorizado'
+        : 'comunicacao.consentimento.revogado',
       entidade: 'PreferenciaComunicacao',
-      entidadeId: registro.id, ip: null,
+      entidadeId: registro.id,
+      ip: null,
       antes: { canal, autorizado: anterior?.autorizado ?? false },
       depois: { canal, autorizado: autorizar, versao: VERSAO, origem: 'AUTODECLARACAO_GESTAO' },
     });

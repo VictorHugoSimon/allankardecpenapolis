@@ -69,7 +69,10 @@ export default async function PerfilPage() {
           </ul>
         </nav>
         <div className="border-line rounded-[18px] border bg-white px-4 py-2">
-          <PreferenciaNotificacoes chavePublica={process.env.VAPID_PUBLIC_KEY ?? null} pessoaId={s.pessoaId} />
+          <PreferenciaNotificacoes
+            chavePublica={process.env.VAPID_PUBLIC_KEY ?? null}
+            pessoaId={s.pessoaId}
+          />
         </div>
         <BotaoSairSeguro />
       </div>

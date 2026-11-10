@@ -5,11 +5,29 @@ import { comRls } from '@ceak/db';
 import { MODULO_LABEL, type Modulo } from '@ceak/core/rbac';
 import { TituloPagina } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
-import { alterarAtivacaoAutomacao, alterarEstoqueMinimo, alterarPublicacaoProduto, executarDiagnosticoEstoque, salvarOperacao } from './actions';
+import {
+  alterarAtivacaoAutomacao,
+  alterarEstoqueMinimo,
+  alterarPublicacaoProduto,
+  executarDiagnosticoEstoque,
+  salvarOperacao,
+} from './actions';
 
 type Operacao = 'doacoes' | 'loja' | 'estoque' | 'automacoes' | 'comunicacao';
 type Linha = { id: string; principal: string; detalhe: string; status: string; quando?: string };
-type Visao = { indicadores: { titulo: string; valor: string }[]; linhas: Linha[]; aviso: string; historicoAutomacoes?: { id: string; nome: string; status: string; modo: string; quando: string; resultado: string }[] };
+type Visao = {
+  indicadores: { titulo: string; valor: string }[];
+  linhas: Linha[];
+  aviso: string;
+  historicoAutomacoes?: {
+    id: string;
+    nome: string;
+    status: string;
+    modo: string;
+    quando: string;
+    resultado: string;
+  }[];
+};
 const ROTAS = [
   'comunicacao',
   'doacoes',
@@ -155,22 +173,30 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
         include: { automacao: { select: { nome: true } } },
       });
       return {
-        historicoAutomacoes: execucoes.map(e => {
-          const saida = e.saida && typeof e.saida === 'object' && !Array.isArray(e.saida)
-            ? e.saida as Record<string, unknown> : {};
-          const entrada = e.entrada && typeof e.entrada === 'object' && !Array.isArray(e.entrada)
-            ? e.entrada as Record<string, unknown> : {};
+        historicoAutomacoes: execucoes.map((e) => {
+          const saida =
+            e.saida && typeof e.saida === 'object' && !Array.isArray(e.saida)
+              ? (e.saida as Record<string, unknown>)
+              : {};
+          const entrada =
+            e.entrada && typeof e.entrada === 'object' && !Array.isArray(e.entrada)
+              ? (e.entrada as Record<string, unknown>)
+              : {};
           return {
             id: e.id,
             nome: e.automacao.nome,
             status: e.status,
-            modo: typeof entrada.modo === 'string' && entrada.modo.startsWith('AGENDADO') ? 'Automática' : 'Manual',
+            modo:
+              typeof entrada.modo === 'string' && entrada.modo.startsWith('AGENDADO')
+                ? 'Automática'
+                : 'Manual',
             quando: dataBR(e.iniciadaEm),
-            resultado: typeof saida.abaixoDoMinimo === 'number'
-              ? `${saida.abaixoDoMinimo} abaixo do mínimo entre ${saida.itensAnalisados} itens analisados`
-              : typeof saida.rascunhosCriados === 'number'
-                ? `${saida.rascunhosCriados} rascunho(s) preparados entre ${saida.campanhasEncontradas ?? saida.aulasEncontradas ?? saida.eventosEncontrados ?? 0} registros analisados — revisão pendente`
-                : e.erro ?? 'Execução registrada',
+            resultado:
+              typeof saida.abaixoDoMinimo === 'number'
+                ? `${saida.abaixoDoMinimo} abaixo do mínimo entre ${saida.itensAnalisados} itens analisados`
+                : typeof saida.rascunhosCriados === 'number'
+                  ? `${saida.rascunhosCriados} rascunho(s) preparados entre ${saida.campanhasEncontradas ?? saida.aulasEncontradas ?? saida.eventosEncontrados ?? 0} registros analisados — revisão pendente`
+                  : (e.erro ?? 'Execução registrada'),
           };
         }),
         indicadores: [
@@ -186,7 +212,11 @@ async function carregar(modulo: string, ctx: ReturnType<typeof contextoRls>): Pr
             a.id,
             a.nome,
             a.gatilho + ' → ' + a.acao,
-            a.ativa ? (a.gatilho === 'DIARIO' ? 'ATIVA DIÁRIA' : 'HABILITADA MANUAL') : 'DESATIVADA',
+            a.ativa
+              ? a.gatilho === 'DIARIO'
+                ? 'ATIVA DIÁRIA'
+                : 'HABILITADA MANUAL'
+              : 'DESATIVADA',
             a.criadoEm,
           ),
         ),
@@ -370,16 +400,23 @@ function Formulario({ modulo, itens }: { modulo: Operacao; itens: Linha[] }) {
               <span className="font-medium">Ação</span>
               <select name="acao" defaultValue="DIAGNOSTICO_ESTOQUE" className={input}>
                 <option value="DIAGNOSTICO_ESTOQUE">Diagnóstico do estoque (sem alterações)</option>
-                <option value="RASCUNHO_LEMBRETE_EVENTO">Preparar rascunhos de palestras e estudos (somente diário)</option>
-                <option value="RASCUNHO_LEMBRETE_AULA">Preparar rascunhos de aulas para turmas com matrículas (somente diário)</option>
-                <option value="RASCUNHO_CAMPANHA">Preparar rascunhos de campanhas solidárias ativas (somente diário)</option>
+                <option value="RASCUNHO_LEMBRETE_EVENTO">
+                  Preparar rascunhos de palestras e estudos (somente diário)
+                </option>
+                <option value="RASCUNHO_LEMBRETE_AULA">
+                  Preparar rascunhos de aulas para turmas com matrículas (somente diário)
+                </option>
+                <option value="RASCUNHO_CAMPANHA">
+                  Preparar rascunhos de campanhas solidárias ativas (somente diário)
+                </option>
               </select>
             </label>
             <p className="text-muted-2 text-xs sm:col-span-2">
               Novas regras começam desativadas. Para executar, habilite a regra com confirmação
-              administrativa. Regras manuais exibem Executar diagnóstico; regras diárias
-              são processadas pelo cron, no máximo uma vez por dia UTC.
-              Os lembretes gerados são somente rascunhos para aprovação. Nenhuma ação altera produtos ou envia mensagens sem revisão humana.
+              administrativa. Regras manuais exibem Executar diagnóstico; regras diárias são
+              processadas pelo cron, no máximo uma vez por dia UTC. Os lembretes gerados são somente
+              rascunhos para aprovação. Nenhuma ação altera produtos ou envia mensagens sem revisão
+              humana.
             </p>
           </>
         )}
@@ -443,12 +480,16 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
             </Link>
           ) : modulo === 'doacoes' ? (
             <div className="flex flex-wrap gap-2">
-              <Link href="/doacoes/campanhas"
-                className="border-line rounded-input border bg-white px-4 py-2 text-sm">
+              <Link
+                href="/doacoes/campanhas"
+                className="border-line rounded-input border bg-white px-4 py-2 text-sm"
+              >
                 Gerenciar campanhas solidárias
               </Link>
-              <Link href="/doacoes/recibos"
-                className="border-line rounded-input border bg-white px-4 py-2 text-sm">
+              <Link
+                href="/doacoes/recibos"
+                className="border-line rounded-input border bg-white px-4 py-2 text-sm"
+              >
                 Conferir doações e agradecimentos
               </Link>
             </div>
@@ -485,26 +526,28 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
       {editavel && <Formulario modulo={modulo as Operacao} itens={visao.linhas} />}
       {modulo === 'automacoes' && (
         <p className="text-muted-2 text-sm">
-          Os lembretes de eventos são salvos como rascunhos. Confira o conteúdo antes de publicar:
-          {' '}<Link href="/comunicacao/avisos">Revisar avisos do aplicativo</Link>.
+          Os lembretes de eventos são salvos como rascunhos. Confira o conteúdo antes de publicar:{' '}
+          <Link href="/comunicacao/avisos">Revisar avisos do aplicativo</Link>.
         </p>
       )}
       {modulo === 'automacoes' && visao.historicoAutomacoes && (
         <section className="border-line rounded-card border bg-white p-4">
           <h2 className="m-0 mb-3 text-lg font-semibold">Histórico de execuções</h2>
-          {visao.historicoAutomacoes.length === 0
-            ? <p className="text-muted-2 text-sm">Nenhuma automação executada ainda.</p>
-            : <ul className="m-0 list-none divide-y p-0">
-                {visao.historicoAutomacoes.map(e => (
-                  <li key={e.id} className="py-3 text-sm">
-                    <strong>{e.nome}</strong> · {e.modo} · {e.status} · {e.quando}
-                    <p className="text-muted-2 mb-0">{e.resultado}</p>
-                  </li>
-                ))}
-              </ul>}
+          {visao.historicoAutomacoes.length === 0 ? (
+            <p className="text-muted-2 text-sm">Nenhuma automação executada ainda.</p>
+          ) : (
+            <ul className="m-0 list-none divide-y p-0">
+              {visao.historicoAutomacoes.map((e) => (
+                <li key={e.id} className="py-3 text-sm">
+                  <strong>{e.nome}</strong> · {e.modo} · {e.status} · {e.quando}
+                  <p className="text-muted-2 mb-0">{e.resultado}</p>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
       )}
-          {visao.linhas.length > 0 ? (
+      {visao.linhas.length > 0 ? (
         <section className="border-line rounded-card overflow-x-auto border bg-white">
           <h2 className="m-0 p-4 text-lg font-semibold">Registros</h2>
           <table className="w-full min-w-[540px] text-left text-sm">
@@ -544,31 +587,47 @@ export default async function ModuloPage({ params }: { params: Promise<{ modulo:
                     {editavel && modulo === 'automacoes' && (
                       <form action={alterarAtivacaoAutomacao} className="mt-2 flex flex-col gap-2">
                         <input type="hidden" name="id" value={i.id} />
-                        <input type="hidden" name="ativa"
-                          value={i.status === 'DESATIVADA' ? 'sim' : 'nao'} />
+                        <input
+                          type="hidden"
+                          name="ativa"
+                          value={i.status === 'DESATIVADA' ? 'sim' : 'nao'}
+                        />
                         <label className="flex items-center gap-2 text-xs">
                           <input type="checkbox" name="confirmacao" value="CONFIRMO" required />
                           Confirmo a alteração manual desta regra
                         </label>
-                        <button type="submit"
-                          disabled={i.status === 'DESATIVADA' &&
-                            !['MANUAL → DIAGNOSTICO_ESTOQUE', 'DIARIO → DIAGNOSTICO_ESTOQUE',
-                              'DIARIO → RASCUNHO_LEMBRETE_EVENTO', 'DIARIO → RASCUNHO_LEMBRETE_AULA',
-                              'DIARIO → RASCUNHO_CAMPANHA'].includes(i.detalhe)}
-                          className="border-line rounded-input min-h-10 self-start border bg-white px-3 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50">
+                        <button
+                          type="submit"
+                          disabled={
+                            i.status === 'DESATIVADA' &&
+                            ![
+                              'MANUAL → DIAGNOSTICO_ESTOQUE',
+                              'DIARIO → DIAGNOSTICO_ESTOQUE',
+                              'DIARIO → RASCUNHO_LEMBRETE_EVENTO',
+                              'DIARIO → RASCUNHO_LEMBRETE_AULA',
+                              'DIARIO → RASCUNHO_CAMPANHA',
+                            ].includes(i.detalhe)
+                          }
+                          className="border-line rounded-input min-h-10 self-start border bg-white px-3 py-1 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-50"
+                        >
                           {i.status === 'DESATIVADA'
-                            ? (i.detalhe.startsWith('DIARIO') ? 'Habilitar agendamento diário' : 'Habilitar regra manual')
+                            ? i.detalhe.startsWith('DIARIO')
+                              ? 'Habilitar agendamento diário'
+                              : 'Habilitar regra manual'
                             : 'Desativar regra'}
                         </button>
                       </form>
                     )}
-                    {editavel && modulo === 'automacoes' &&
+                    {editavel &&
+                    modulo === 'automacoes' &&
                     i.detalhe === 'MANUAL → DIAGNOSTICO_ESTOQUE' &&
                     i.status === 'HABILITADA MANUAL' ? (
                       <form action={executarDiagnosticoEstoque} className="mt-2">
                         <input type="hidden" name="id" value={i.id} />
-                        <button type="submit"
-                          className="border-line rounded-input min-h-10 border bg-white px-3 py-1 text-xs font-medium">
+                        <button
+                          type="submit"
+                          className="border-line rounded-input min-h-10 border bg-white px-3 py-1 text-xs font-medium"
+                        >
                           Executar diagnóstico
                         </button>
                       </form>

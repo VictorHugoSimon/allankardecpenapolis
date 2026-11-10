@@ -29,12 +29,18 @@ describe('política de envio de agradecimentos', () => {
   });
 
   it('consentimento geral não autoriza mensagens de WhatsApp ou e-mail', () => {
-    expect(podeEnviarAgradecimento('EMAIL', {
-      ...permitido, consentimentoEspecificoDoCanal: false,
-    })).toBe(false);
-    expect(podeEnviarAgradecimento('WHATSAPP', {
-      ...permitido, consentimentoEspecificoDoCanal: false,
-    })).toBe(false);
+    expect(
+      podeEnviarAgradecimento('EMAIL', {
+        ...permitido,
+        consentimentoEspecificoDoCanal: false,
+      }),
+    ).toBe(false);
+    expect(
+      podeEnviarAgradecimento('WHATSAPP', {
+        ...permitido,
+        consentimentoEspecificoDoCanal: false,
+      }),
+    ).toBe(false);
   });
 
   it('os dois canais atuais permanecem desabilitados até homologação', () => {

@@ -56,7 +56,18 @@ export async function GET(req: Request) {
     const aulas = await prepararRascunhosDeAulas();
     const campanhas = await prepararRascunhosCampanhas();
     return NextResponse.json(
-      { lotes, processados, enviados, falhas, pendentes, indisponivel, automacoes, lembretes, aulas, campanhas },
+      {
+        lotes,
+        processados,
+        enviados,
+        falhas,
+        pendentes,
+        indisponivel,
+        automacoes,
+        lembretes,
+        aulas,
+        campanhas,
+      },
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch {

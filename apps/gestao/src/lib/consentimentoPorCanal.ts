@@ -13,12 +13,14 @@ export function temConsentimentoCanal(
   preferencia: PreferenciaCanal | null | undefined,
   canal: 'EMAIL' | 'WHATSAPP',
 ): boolean {
-  return !!preferencia &&
+  return (
+    !!preferencia &&
     preferencia.canal === canal &&
     preferencia.finalidade === 'AGRADECIMENTO_DOACAO' &&
     preferencia.autorizado === true &&
     preferencia.consentidoEm instanceof Date &&
     !Number.isNaN(preferencia.consentidoEm.getTime()) &&
     preferencia.revogadoEm === null &&
-    preferencia.versao.trim().length > 0;
+    preferencia.versao.trim().length > 0
+  );
 }
