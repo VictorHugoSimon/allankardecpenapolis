@@ -31,6 +31,7 @@ export const ENTIDADES_AUDITADAS = [
   'Integracao',
   'Automacao',
   'PreferenciaComunicacao',
+  'AprovacaoAgradecimento',
 ] as const;
 export type EntidadeAuditada = (typeof ENTIDADES_AUDITADAS)[number];
 
