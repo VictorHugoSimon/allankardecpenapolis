@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { comRls, registrarAuditoria } from '@ceak/db';
+import { aprovacoesAgradecimentoDisponiveis, comRls, registrarAuditoria } from '@ceak/db';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { temConsentimentoCanal } from '@/lib/consentimentoPorCanal';
 
@@ -26,6 +26,9 @@ async function sessaoAdministrador() {
 /** Prepara somente a solicitação interna; nenhum envio é criado ou executado. */
 export async function prepararAgradecimento(form: FormData): Promise<void> {
   const sessao = await sessaoAdministrador();
+  if (!(await aprovacoesAgradecimentoDisponiveis())) {
+    throw new Error('Aprovações indisponíveis até a migração do banco.');
+  }
   const { doacaoId, canal } = parametros(form);
   if (form.get('confirmacao') !== 'PREPARAR') throw new Error('Confirmação obrigatória.');
   await comRls(contextoRls(sessao), async (tx) => {
