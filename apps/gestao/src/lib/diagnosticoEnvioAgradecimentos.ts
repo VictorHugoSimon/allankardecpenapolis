@@ -1,4 +1,8 @@
-import { podeEnviarAgradecimento, type CanalAgradecimento, type RequisitosCanal } from './politicaEnvioAgradecimentos';
+import {
+  podeEnviarAgradecimento,
+  type CanalAgradecimento,
+  type RequisitosCanal,
+} from './politicaEnvioAgradecimentos';
 
 const MOTIVOS: Array<[keyof RequisitosCanal, string]> = [
   ['doacaoConfirmada', 'Doação não confirmada'],
@@ -22,7 +26,7 @@ export function diagnosticarEnvioAgradecimento(
   canal: CanalAgradecimento,
   requisitos: RequisitosCanal,
 ): DiagnosticoEnvio {
-  const impedimentos = MOTIVOS.flatMap(([campo, motivo]) => requisitos[campo] ? [] : [motivo]);
+  const impedimentos = MOTIVOS.flatMap(([campo, motivo]) => (requisitos[campo] ? [] : [motivo]));
   if (requisitos.exclusaoSolicitada) {
     impedimentos.unshift('Titular solicitou exclusão ou anonimização');
   }
@@ -34,9 +38,16 @@ export function diagnosticarEnvioAgradecimento(
 }
 
 /** Até uma integração segura de consulta administrativa existir, opt-in não é presumido. */
-export function requisitosSemCanalHomologado(base: Pick<RequisitosCanal,
-  'doacaoConfirmada' | 'reciboEmitido' | 'cadastroAtivo' |
-  'consentimentoGeral' | 'exclusaoSolicitada'>): RequisitosCanal {
+export function requisitosSemCanalHomologado(
+  base: Pick<
+    RequisitosCanal,
+    | 'doacaoConfirmada'
+    | 'reciboEmitido'
+    | 'cadastroAtivo'
+    | 'consentimentoGeral'
+    | 'exclusaoSolicitada'
+  >,
+): RequisitosCanal {
   return {
     ...base,
     consentimentoEspecificoDoCanal: false,
