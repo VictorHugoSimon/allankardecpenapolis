@@ -83,8 +83,12 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     await page.context().clearCookies();
     await entrar(page, USUARIOS.ADMINISTRADOR);
     await page.goto(`/doacoes/recibos/${doacaoId}`);
-    const emailCancelamento = page.getByRole('heading', { name: 'E-mail', exact: true }).locator('..');
-    await emailCancelamento.getByLabel('Motivo do cancelamento').fill('Revogação administrativa para teste isolado.');
+    const emailCancelamento = page
+      .getByRole('heading', { name: 'E-mail', exact: true })
+      .locator('..');
+    await emailCancelamento
+      .getByLabel('Motivo do cancelamento')
+      .fill('Revogação administrativa para teste isolado.');
     await emailCancelamento.getByRole('checkbox').check();
     await emailCancelamento.getByRole('button', { name: 'Cancelar aprovação interna' }).click();
     await expect(emailCancelamento.getByText('CANCELADO', { exact: true })).toBeVisible();
