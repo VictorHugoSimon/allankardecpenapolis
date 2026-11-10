@@ -166,3 +166,56 @@ export async function analisarAgradecimento(form: FormData): Promise<void> {
   });
   revalidatePath(`/doacoes/recibos/${doacaoId}`);
 }
+
+/** Cancela uma solicitação ou aprovação interna sem apagar o histórico.
+ * Nenhuma autorização de canal é alterada e nenhuma mensagem é enviada.
+ */
+export async function cancelarAgradecimento(form: FormData): Promise<void> {
+  const sessao = await sessaoAdministrador();
+  if (!(await aprovacoesAgradecimentoDisponiveis())) {
+    throw new Error('Aprovações indisponíveis até a migração do banco.');
+  }
+  const { doacaoId, canal } = parametros(form);
+  if (form.get('confirmacao') !== 'CANCELAR') {
+    throw new Error('Confirme o cancelamento da aprovação interna.');
+  }
+  const motivo = String(form.get('motivo') ?? '').trim();
+  if (motivo.length < 10 || motivo.length > 300) {
+    throw new Error('Informe um motivo de 10 a 300 caracteres.');
+  }
+
+  await comRls(contextoRls(sessao), async (tx) => {
+    const registro = await tx.aprovacaoAgradecimento.findUnique({
+      where: { doacaoId_canal: { doacaoId, canal } },
+      select: { id: true, status: true },
+    });
+    if (!registro || !['RASCUNHO', 'APROVADO'].includes(registro.status)) {
+      throw new Error('Somente solicitações abertas ou aprovadas podem ser canceladas.');
+    }
+    const alterado = await tx.aprovacaoAgradecimento.updateMany({
+      where: { id: registro.id, status: registro.status },
+      data: { status: 'CANCELADO', aprovadoPorId: null, aprovadoEm: null },
+    });
+    if (alterado.count !== 1) {
+      throw new Error('A aprovação foi alterada por outra sessão. Atualize a página.');
+    }
+    await tx.tentativaAgradecimento.create({
+      data: {
+        aprovacaoId: registro.id,
+        usuarioId: sessao.usuarioId,
+        resultado: 'CANCELAMENTO_INTERNO',
+        motivo,
+      },
+    });
+    await registrarAuditoria(tx, {
+      usuarioId: sessao.usuarioId,
+      acao: 'agradecimento.aprovacao.cancelada',
+      entidade: 'AprovacaoAgradecimento',
+      entidadeId: registro.id,
+      ip: null,
+      antes: { status: registro.status },
+      depois: { status: 'CANCELADO', canal, motivo, envioHabilitado: false },
+    });
+  });
+  revalidatePath(`/doacoes/recibos/${doacaoId}`);
+}
