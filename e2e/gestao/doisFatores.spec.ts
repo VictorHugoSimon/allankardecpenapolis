@@ -8,7 +8,7 @@ async function senha(page: Page, email: string) {
   await page.context().clearCookies();
   await page.goto('/login');
   await page.getByLabel('E-mail').fill(email);
-  await page.getByLabel('Senha').fill(SENHA);
+  await page.getByLabel('Senha', { exact: true }).fill(SENHA);
   await page.getByRole('button', { name: 'Entrar' }).click();
 }
 
