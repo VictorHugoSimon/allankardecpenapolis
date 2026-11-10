@@ -271,3 +271,12 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 - As server actions de ambos os apps também validam a presença da tabela, impedindo chamadas diretas antes da migração, mesmo com um formulário anterior aberto.
 - **Smoke test**: simular app novo + banco sem tabela em ambiente isolado; tela deve mostrar manutenção e server action deve rejeitar gravação. Após migração, reabrir tela e confirmar preferências inicialmente desativadas.
 - O bloqueio de builds da Vercel permanece uma pendência independente. Nenhum serviço de envio externo deve ser ativado por esta alteração.
+
+
+## Diagnóstico de prontidão dos agradecimentos por canal — 10/11/2026
+- A página do recibo interno apresenta os impeditivos separados para e-mail e WhatsApp, sem consultar indevidamente preferências de outras pessoas.
+- O diagnóstico utiliza `diagnosticarEnvioAgradecimento` e uma configuração estrita `requisitosSemCanalHomologado`: enquanto não houver consulta administrativa de opt-in, destinatário verificado, provedor validado e aprovação individual, o resultado de ambos os canais é sempre **bloqueado**.
+- A presença de consentimento geral **não é usada** como consentimento de e-mail ou WhatsApp. Usuários com exclusão/anonimização solicitada recebem impedimento prioritário.
+- Não foram incluídas chamadas a provedores, filas de disparo ou envio automático. O texto administrativo de agradecimento continua como prévia de revisão e não como autorização de encaminhamento externo.
+- Testes em `apps/gestao/src/lib/diagnosticoEnvioAgradecimentos.test.ts` cobrem todos os requisitos ausentes, isolamento de canal e pedido de exclusão; o CI executa essa suíte antes do build integrado.
+- **Critério de aceite**: a tela não deve exibir status pronto nem botão de enviar até existir integração do provedor, política de opt-in específica, verificação do contato e aprovação transacional auditável.
