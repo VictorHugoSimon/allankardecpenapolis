@@ -362,6 +362,44 @@ model PreferenciaComunicacao {
   @@map("preferencia_comunicacao")
 }
 
+/** Aprovação interna de mensagem individual, nunca representa envio.
+ * Um registro por doação/canal, com histórico de análises separado.
+ */
+model AprovacaoAgradecimento {
+  id               String   @id @default(uuid()) @db.Uuid
+  doacaoId         String   @map("doacao_id") @db.Uuid
+  pessoaId         String   @map("pessoa_id") @db.Uuid
+  canal            String
+  status           String   @default("RASCUNHO")
+  criadoPorId      String   @map("criado_por_id") @db.Uuid
+  aprovadoPorId    String?  @map("aprovado_por_id") @db.Uuid
+  aprovadoEm       DateTime? @map("aprovado_em")
+  criadoEm         DateTime @default(now()) @map("criado_em")
+  atualizadoEm     DateTime @default(now()) @updatedAt @map("atualizado_em")
+
+  doacao Doacao @relation(fields: [doacaoId], references: [id], onDelete: Cascade)
+  tentativas TentativaAgradecimento[]
+
+  @@unique([doacaoId, canal], map: "agradecimento_doacao_canal_unico")
+  @@index([pessoaId, status], map: "agradecimento_pessoa_status_idx")
+  @@map("aprovacao_agradecimento")
+}
+
+/** Auditoria das verificações internas: nenhuma linha indica mensagem entregue. */
+model TentativaAgradecimento {
+  id           String   @id @default(uuid()) @db.Uuid
+  aprovacaoId String   @map("aprovacao_id") @db.Uuid
+  usuarioId   String   @map("usuario_id") @db.Uuid
+  resultado   String
+  motivo      String
+  criadoEm    DateTime @default(now()) @map("criado_em")
+
+  aprovacao AprovacaoAgradecimento @relation(fields: [aprovacaoId], references: [id], onDelete: Cascade)
+
+  @@index([aprovacaoId, criadoEm], map: "tentativa_agradecimento_historico_idx")
+  @@map("tentativa_agradecimento")
+}
+
 /// Conta de acesso (App e/ou Gestão).
 model Usuario {
   id               String    @id @default(uuid()) @db.Uuid
@@ -885,6 +923,7 @@ model Doacao {
 
   pessoa   Pessoa?   @relation(fields: [pessoaId], references: [id], onDelete: SetNull)
   campanha Campanha? @relation(fields: [campanhaId], references: [id])
+  aprovacoesAgradecimento AprovacaoAgradecimento[]
 
   @@index([criadoEm])
   @@map("doacao")
