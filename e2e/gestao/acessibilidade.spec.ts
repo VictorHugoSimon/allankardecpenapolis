@@ -40,7 +40,7 @@ test('navegação por teclado no login', async ({ page }) => {
   await expect(page.getByLabel('E-mail')).toBeFocused();
   await page.keyboard.type(USUARIOS.ADMINISTRADOR);
   await page.keyboard.press('Tab');
-  await expect(page.getByLabel('Senha')).toBeFocused();
+  await expect(page.getByLabel('Senha', { exact: true })).toBeFocused();
   await page.keyboard.type(process.env.SEED_SENHA ?? 'ceak-dev-2026');
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'CEAK Command Center' })).toBeVisible();
