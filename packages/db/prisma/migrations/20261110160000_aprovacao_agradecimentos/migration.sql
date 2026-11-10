@@ -48,4 +48,16 @@ CREATE POLICY tentativa_admin_leitura ON ceak_v2.tentativa_agradecimento FOR SEL
   USING (ceak_v2.app_perfil_em('ADMINISTRADOR','TESOURARIA'));
 CREATE POLICY tentativa_admin_insercao ON ceak_v2.tentativa_agradecimento FOR INSERT TO ceak_app
   WITH CHECK (ceak_v2.app_perfil_em('ADMINISTRADOR'));
--- Não habilitar consulta de preferências de terceiros nem fornecer acesso a provedores.
+-- Somente o administrador pode verificar opt-in de pessoa vinculada a doação paga.
+-- Nunca permitir UPDATE/INSERT de preferências em nome do titular.
+CREATE POLICY preferencia_admin_conferencia_doacoes ON ceak_v2.preferencia_comunicacao
+  FOR SELECT TO ceak_app
+  USING (
+    ceak_v2.app_perfil_em('ADMINISTRADOR')
+    AND EXISTS (
+      SELECT 1 FROM ceak_v2.doacao d
+       WHERE d.pessoa_id = preferencia_comunicacao.pessoa_id
+         AND d.status_pagamento = 'PAGO'
+    )
+  );
+-- Não fornecer acesso de escrita administrativa às preferências ou de envio a provedores.
