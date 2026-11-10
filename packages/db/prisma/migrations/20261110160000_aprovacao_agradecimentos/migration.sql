@@ -39,27 +39,27 @@ GRANT SELECT, INSERT, UPDATE ON ceak_v2.aprovacao_agradecimento TO ceak_app;
 GRANT SELECT, INSERT ON ceak_v2.tentativa_agradecimento TO ceak_app;
 DROP POLICY IF EXISTS agradecimento_admin_leitura ON ceak_v2.aprovacao_agradecimento;
 CREATE POLICY agradecimento_admin_leitura ON ceak_v2.aprovacao_agradecimento FOR SELECT TO ceak_app
-  USING (ceak_v2.app_perfil_em('ADMINISTRADOR','TESOURARIA'));
+  USING (current_setting('app.perfil', true) IN ('ADMINISTRADOR','TESOURARIA'));
 DROP POLICY IF EXISTS agradecimento_admin_insercao ON ceak_v2.aprovacao_agradecimento;
 CREATE POLICY agradecimento_admin_insercao ON ceak_v2.aprovacao_agradecimento FOR INSERT TO ceak_app
-  WITH CHECK (ceak_v2.app_perfil_em('ADMINISTRADOR'));
+  WITH CHECK (current_setting('app.perfil', true) = 'ADMINISTRADOR');
 DROP POLICY IF EXISTS agradecimento_admin_alteracao ON ceak_v2.aprovacao_agradecimento;
 CREATE POLICY agradecimento_admin_alteracao ON ceak_v2.aprovacao_agradecimento FOR UPDATE TO ceak_app
-  USING (ceak_v2.app_perfil_em('ADMINISTRADOR'))
-  WITH CHECK (ceak_v2.app_perfil_em('ADMINISTRADOR'));
+  USING (current_setting('app.perfil', true) = 'ADMINISTRADOR')
+  WITH CHECK (current_setting('app.perfil', true) = 'ADMINISTRADOR');
 DROP POLICY IF EXISTS tentativa_admin_leitura ON ceak_v2.tentativa_agradecimento;
 CREATE POLICY tentativa_admin_leitura ON ceak_v2.tentativa_agradecimento FOR SELECT TO ceak_app
-  USING (ceak_v2.app_perfil_em('ADMINISTRADOR','TESOURARIA'));
+  USING (current_setting('app.perfil', true) IN ('ADMINISTRADOR','TESOURARIA'));
 DROP POLICY IF EXISTS tentativa_admin_insercao ON ceak_v2.tentativa_agradecimento;
 CREATE POLICY tentativa_admin_insercao ON ceak_v2.tentativa_agradecimento FOR INSERT TO ceak_app
-  WITH CHECK (ceak_v2.app_perfil_em('ADMINISTRADOR'));
+  WITH CHECK (current_setting('app.perfil', true) = 'ADMINISTRADOR');
 -- Somente o administrador pode verificar opt-in de pessoa vinculada a doação paga.
 -- Nunca permitir UPDATE/INSERT de preferências em nome do titular.
 DROP POLICY IF EXISTS preferencia_admin_conferencia_doacoes ON ceak_v2.preferencia_comunicacao;
 CREATE POLICY preferencia_admin_conferencia_doacoes ON ceak_v2.preferencia_comunicacao
   FOR SELECT TO ceak_app
   USING (
-    ceak_v2.app_perfil_em('ADMINISTRADOR')
+    current_setting('app.perfil', true) = 'ADMINISTRADOR'
     AND EXISTS (
       SELECT 1 FROM ceak_v2.doacao d
        WHERE d.pessoa_id = preferencia_comunicacao.pessoa_id
