@@ -86,9 +86,14 @@ export default async function PreviaAgradecimentoPage({
         tx.aprovacaoAgradecimento.findMany({
           where: { doacaoId: id },
           select: {
-            id: true, canal: true, status: true, criadoEm: true, aprovadoEm: true,
+            id: true,
+            canal: true,
+            status: true,
+            criadoEm: true,
+            aprovadoEm: true,
             tentativas: {
-              orderBy: { criadoEm: 'desc' }, take: 8,
+              orderBy: { criadoEm: 'desc' },
+              take: 8,
               select: { id: true, resultado: true, motivo: true, criadoEm: true },
             },
           },
@@ -173,9 +178,9 @@ export default async function PreviaAgradecimentoPage({
       <section className="border-line rounded-card border bg-white p-5 print:hidden">
         <h2 className="mt-0 text-lg font-semibold">Aprovações internas de agradecimento</h2>
         <p className="text-muted-2 text-sm">
-          Análises e aprovações são registros administrativos. Não representam envio,
-          agendamento, contato validado ou mensagem entregue. Revogação do consentimento
-          impede qualquer envio futuro, mesmo quando houver aprovação interna anterior.
+          Análises e aprovações são registros administrativos. Não representam envio, agendamento,
+          contato validado ou mensagem entregue. Revogação do consentimento impede qualquer envio
+          futuro, mesmo quando houver aprovação interna anterior.
         </p>
         {!aprovacoesDisponiveis ? (
           <p role="status" className="text-sm">
@@ -231,7 +236,8 @@ export default async function PreviaAgradecimentoPage({
                         <ul className="list-disc pl-4 text-xs">
                           {registro.tentativas.map((tentativa) => (
                             <li key={tentativa.id}>
-                              {dataBR(tentativa.criadoEm)} · {tentativa.resultado} · {tentativa.motivo}
+                              {dataBR(tentativa.criadoEm)} · {tentativa.resultado} ·{' '}
+                              {tentativa.motivo}
                             </li>
                           ))}
                         </ul>
