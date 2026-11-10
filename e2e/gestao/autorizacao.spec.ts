@@ -100,7 +100,7 @@ for (const perfil of ['MEMBRO', 'VISITANTE'] as const) {
 test('login: senha incorreta mostra erro genérico', async ({ page }) => {
   await page.goto('/login');
   await page.getByLabel('E-mail').fill(USUARIOS.TESOURARIA);
-  await page.getByLabel('Senha').fill('senha-errada');
+  await page.getByLabel('Senha', { exact: true }).fill('senha-errada');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page.getByRole('main').getByRole('alert')).toHaveText('E-mail ou senha incorretos.');
 });
@@ -109,7 +109,7 @@ test('login: volta para a rota pedida e sai', async ({ page }) => {
   await page.goto('/ui');
   await expect(page).toHaveURL(/\/login\?next=%2Fui/);
   await page.getByLabel('E-mail').fill(USUARIOS.SECRETARIA);
-  await page.getByLabel('Senha').fill(process.env.SEED_SENHA ?? 'ceak-dev-2026');
+  await page.getByLabel('Senha', { exact: true }).fill(process.env.SEED_SENHA ?? 'ceak-dev-2026');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page).toHaveURL(/\/ui$/);
   await expect(page.getByRole('heading', { name: 'Componentes CEAK' })).toBeVisible();
@@ -123,7 +123,7 @@ test('login: volta para a rota pedida e sai', async ({ page }) => {
 test('login: não aceita redirecionamento externo', async ({ page }) => {
   await page.goto('/login?next=//evil.example.com');
   await page.getByLabel('E-mail').fill(USUARIOS.SECRETARIA);
-  await page.getByLabel('Senha').fill(process.env.SEED_SENHA ?? 'ceak-dev-2026');
+  await page.getByLabel('Senha', { exact: true }).fill(process.env.SEED_SENHA ?? 'ceak-dev-2026');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await expect(page).toHaveURL('http://localhost:3002/');
 });
