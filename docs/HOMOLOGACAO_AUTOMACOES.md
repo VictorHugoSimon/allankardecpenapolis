@@ -272,8 +272,8 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 - **Smoke test**: simular app novo + banco sem tabela em ambiente isolado; tela deve mostrar manutenção e server action deve rejeitar gravação. Após migração, reabrir tela e confirmar preferências inicialmente desativadas.
 - O bloqueio de builds da Vercel permanece uma pendência independente. Nenhum serviço de envio externo deve ser ativado por esta alteração.
 
-
 ## Diagnóstico de prontidão dos agradecimentos por canal — 10/11/2026
+
 - A página do recibo interno apresenta os impeditivos separados para e-mail e WhatsApp, sem consultar indevidamente preferências de outras pessoas.
 - O diagnóstico utiliza `diagnosticarEnvioAgradecimento` e uma configuração estrita `requisitosSemCanalHomologado`: enquanto não houver consulta administrativa de opt-in, destinatário verificado, provedor validado e aprovação individual, o resultado de ambos os canais é sempre **bloqueado**.
 - A presença de consentimento geral **não é usada** como consentimento de e-mail ou WhatsApp. Usuários com exclusão/anonimização solicitada recebem impedimento prioritário.
