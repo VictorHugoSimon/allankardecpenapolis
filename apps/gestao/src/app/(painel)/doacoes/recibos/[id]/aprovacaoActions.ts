@@ -33,8 +33,13 @@ export async function prepararAgradecimento(form: FormData): Promise<void> {
   if (form.get('confirmacao') !== 'PREPARAR') throw new Error('Confirmação obrigatória.');
   await comRls(contextoRls(sessao), async (tx) => {
     const d = await tx.doacao.findFirst({
-      where: { id: doacaoId, statusPagamento: 'PAGO', pagoEm: { not: null },
-        reciboEmitidoEm: { not: null }, pessoaId: { not: null } },
+      where: {
+        id: doacaoId,
+        statusPagamento: 'PAGO',
+        pagoEm: { not: null },
+        reciboEmitidoEm: { not: null },
+        pessoaId: { not: null },
+      },
       select: { id: true, pessoaId: true },
     });
     if (!d?.pessoaId) throw new Error('Doação sem recibo ou identificação válida.');
@@ -48,9 +53,13 @@ export async function prepararAgradecimento(form: FormData): Promise<void> {
       select: { id: true },
     });
     await registrarAuditoria(tx, {
-      usuarioId: sessao.usuarioId, acao: 'agradecimento.rascunho.criado',
-      entidade: 'AprovacaoAgradecimento', entidadeId: registro.id, ip: null,
-      antes: null, depois: { doacaoId, canal, status: 'RASCUNHO', envioHabilitado: false },
+      usuarioId: sessao.usuarioId,
+      acao: 'agradecimento.rascunho.criado',
+      entidade: 'AprovacaoAgradecimento',
+      entidadeId: registro.id,
+      ip: null,
+      antes: null,
+      depois: { doacaoId, canal, status: 'RASCUNHO', envioHabilitado: false },
     });
   });
   revalidatePath(`/doacoes/recibos/${doacaoId}`);
@@ -70,35 +79,65 @@ export async function analisarAgradecimento(form: FormData): Promise<void> {
       throw new Error('Somente rascunhos podem ser analisados.');
     }
     const d = await tx.doacao.findFirst({
-      where: { id: doacaoId, pessoaId: aprovacao.pessoaId,
-        statusPagamento: 'PAGO', pagoEm: { not: null }, reciboEmitidoEm: { not: null } },
+      where: {
+        id: doacaoId,
+        pessoaId: aprovacao.pessoaId,
+        statusPagamento: 'PAGO',
+        pagoEm: { not: null },
+        reciboEmitidoEm: { not: null },
+      },
       select: {
         id: true,
-        pessoa: { select: {
-          consentimentoEm: true, exclusaoSolicitadaEm: true, anonimizadaEm: true,
-          usuario: { select: { ativo: true } },
-        } },
+        pessoa: {
+          select: {
+            consentimentoEm: true,
+            exclusaoSolicitadaEm: true,
+            anonimizadaEm: true,
+            usuario: { select: { ativo: true } },
+          },
+        },
       },
     });
     const p = await tx.preferenciaComunicacao.findUnique({
-      where: { pessoaId_canal_finalidade: {
-        pessoaId: aprovacao.pessoaId, canal, finalidade: 'AGRADECIMENTO_DOACAO',
-      } },
-      select: { canal: true, finalidade: true, autorizado: true,
-        consentidoEm: true, revogadoEm: true, versao: true },
+      where: {
+        pessoaId_canal_finalidade: {
+          pessoaId: aprovacao.pessoaId,
+          canal,
+          finalidade: 'AGRADECIMENTO_DOACAO',
+        },
+      },
+      select: {
+        canal: true,
+        finalidade: true,
+        autorizado: true,
+        consentidoEm: true,
+        revogadoEm: true,
+        versao: true,
+      },
     });
-    const valido = !!d?.pessoa?.consentimentoEm &&
-      !d.pessoa.exclusaoSolicitadaEm && !d.pessoa.anonimizadaEm &&
-      d.pessoa.usuario?.ativo === true && temConsentimentoCanal(p, canal);
+    const valido =
+      !!d?.pessoa?.consentimentoEm &&
+      !d.pessoa.exclusaoSolicitadaEm &&
+      !d.pessoa.anonimizadaEm &&
+      d.pessoa.usuario?.ativo === true &&
+      temConsentimentoCanal(p, canal);
     if (!valido) {
       await tx.tentativaAgradecimento.create({
-        data: { aprovacaoId: aprovacao.id, usuarioId: sessao.usuarioId,
-          resultado: 'ANALISE_BLOQUEADA', motivo: 'Sem consentimento específico válido ou cadastro elegível' },
+        data: {
+          aprovacaoId: aprovacao.id,
+          usuarioId: sessao.usuarioId,
+          resultado: 'ANALISE_BLOQUEADA',
+          motivo: 'Sem consentimento específico válido ou cadastro elegível',
+        },
       });
       await registrarAuditoria(tx, {
-        usuarioId: sessao.usuarioId, acao: 'agradecimento.analise.bloqueada',
-        entidade: 'AprovacaoAgradecimento', entidadeId: aprovacao.id, ip: null,
-        antes: { status: 'RASCUNHO' }, depois: { status: 'RASCUNHO', canal, bloqueado: true },
+        usuarioId: sessao.usuarioId,
+        acao: 'agradecimento.analise.bloqueada',
+        entidade: 'AprovacaoAgradecimento',
+        entidadeId: aprovacao.id,
+        ip: null,
+        antes: { status: 'RASCUNHO' },
+        depois: { status: 'RASCUNHO', canal, bloqueado: true },
       });
       return;
     }
@@ -108,12 +147,19 @@ export async function analisarAgradecimento(form: FormData): Promise<void> {
     });
     if (atualizado.count !== 1) throw new Error('Registro alterado em outra sessão.');
     await tx.tentativaAgradecimento.create({
-      data: { aprovacaoId: aprovacao.id, usuarioId: sessao.usuarioId,
-        resultado: 'APROVACAO_INTERNA', motivo: 'Aprovado internamente; entrega externa não habilitada' },
+      data: {
+        aprovacaoId: aprovacao.id,
+        usuarioId: sessao.usuarioId,
+        resultado: 'APROVACAO_INTERNA',
+        motivo: 'Aprovado internamente; entrega externa não habilitada',
+      },
     });
     await registrarAuditoria(tx, {
-      usuarioId: sessao.usuarioId, acao: 'agradecimento.aprovado.internamente',
-      entidade: 'AprovacaoAgradecimento', entidadeId: aprovacao.id, ip: null,
+      usuarioId: sessao.usuarioId,
+      acao: 'agradecimento.aprovado.internamente',
+      entidade: 'AprovacaoAgradecimento',
+      entidadeId: aprovacao.id,
+      ip: null,
       antes: { status: 'RASCUNHO' },
       depois: { status: 'APROVADO', canal, envioHabilitado: false },
     });
