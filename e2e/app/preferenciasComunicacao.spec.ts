@@ -54,7 +54,10 @@ test('membro autoriza e revoga e-mail sem autorizar WhatsApp ou outra pessoa', a
     );
     expect(autorizado.rows).toHaveLength(1);
     expect(autorizado.rows[0]).toMatchObject({
-      pessoa_id: victor, canal: 'EMAIL', autorizado: true, revogado_em: null,
+      pessoa_id: victor,
+      canal: 'EMAIL',
+      autorizado: true,
+      revogado_em: null,
     });
     expect(autorizado.rows[0].consentido_em).toBeTruthy();
 
@@ -62,10 +65,10 @@ test('membro autoriza e revoga e-mail sem autorizar WhatsApp ou outra pessoa', a
     await entrarApp(page, JOAO);
     await page.goto('/perfil/comunicacao');
     await expect(page.getByText('Não autorizado')).toHaveCount(2);
-    expect((await db.query(
-      'SELECT id FROM ceak_v2.preferencia_comunicacao WHERE pessoa_id=$1',
-      [joao],
-    )).rows).toHaveLength(0);
+    expect(
+      (await db.query('SELECT id FROM ceak_v2.preferencia_comunicacao WHERE pessoa_id=$1', [joao]))
+        .rows,
+    ).toHaveLength(0);
 
     await page.context().clearCookies();
     await entrarApp(page, VICTOR);
