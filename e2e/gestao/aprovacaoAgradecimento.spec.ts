@@ -66,7 +66,8 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     expect(estado.rows).toHaveLength(1);
     expect(estado.rows[0]).toMatchObject({ canal: 'EMAIL', status: 'APROVADO', analises: 2 });
     expect(estado.rows[0].aprovado_em).toBeTruthy();
-    await expect(page.getByText('Canais externos — não habilitados')).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Canais externos — não habilitados' }))
+      .toBeVisible();
 
     await page.context().clearCookies();
     await entrar(page, USUARIOS.TESOURARIA);
