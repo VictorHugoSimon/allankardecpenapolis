@@ -61,9 +61,10 @@ CREATE POLICY preferencia_admin_conferencia_doacoes ON ceak_v2.preferencia_comun
   USING (
     current_setting('app.perfil', true) = 'ADMINISTRADOR'
     AND EXISTS (
-      SELECT 1 FROM ceak_v2.doacao d
-       WHERE d.pessoa_id = preferencia_comunicacao.pessoa_id
-         AND d.status_pagamento = 'PAGO'
+      SELECT 1 FROM ceak_v2.aprovacao_agradecimento a
+       WHERE a.pessoa_id = preferencia_comunicacao.pessoa_id
+         AND a.canal = preferencia_comunicacao.canal
+         AND a.status IN ('RASCUNHO', 'APROVADO')
     )
   );
 -- Não fornecer acesso de escrita administrativa às preferências ou de envio a provedores.
