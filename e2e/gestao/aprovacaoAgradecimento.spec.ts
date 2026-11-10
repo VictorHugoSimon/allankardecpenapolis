@@ -43,7 +43,7 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     await email.getByRole('button', { name: 'Criar solicitação' }).click();
     await expect(email.getByText('RASCUNHO')).toBeVisible();
 
-    await email.getByRole('checkbox').check();
+    await email.getByRole('checkbox', { name: /Analisar consentimento e elegibilidade/ }).check();
     await email.getByRole('button', { name: 'Analisar aprovação interna' }).click();
     await expect(email.getByText('ANALISE_BLOQUEADA')).toBeVisible();
     await expect(email.getByText('RASCUNHO')).toBeVisible();
@@ -54,7 +54,7 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
        VALUES($1,'EMAIL','AGRADECIMENTO_DOACAO',true,'agradecimento-doacao-v1','CI_E2E',now())`,
       [pessoaId],
     );
-    await email.getByRole('checkbox').check();
+    await email.getByRole('checkbox', { name: /Analisar consentimento e elegibilidade/ }).check();
     await email.getByRole('button', { name: 'Analisar aprovação interna' }).click();
     await expect(email.getByText('APROVADO', { exact: true })).toBeVisible();
     await expect(email.getByText('APROVACAO_INTERNA')).toBeVisible();
@@ -89,7 +89,7 @@ test('aprovação interna por canal: bloqueia sem opt-in e audita decisão sem e
     await emailCancelamento
       .getByLabel('Motivo do cancelamento')
       .fill('Revogação administrativa para teste isolado.');
-    await emailCancelamento.getByRole('checkbox').check();
+    await emailCancelamento.getByRole('checkbox', { name: /Confirmo o cancelamento/ }).check();
     await emailCancelamento.getByRole('button', { name: 'Cancelar aprovação interna' }).click();
     await expect(emailCancelamento.getByText('CANCELADO', { exact: true })).toBeVisible();
     await expect(emailCancelamento.getByText('CANCELAMENTO_INTERNO')).toBeVisible();
