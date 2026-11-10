@@ -281,7 +281,6 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 - Testes em `apps/gestao/src/lib/diagnosticoEnvioAgradecimentos.test.ts` cobrem todos os requisitos ausentes, isolamento de canal e pedido de exclusão; o CI executa essa suíte antes do build integrado.
 - **Critério de aceite**: a tela não deve exibir status pronto nem botão de enviar até existir integração do provedor, política de opt-in específica, verificação do contato e aprovação transacional auditável.
 
-
 ## Aprovações individuais e trilha de verificações — 10/11/2026
 
 - Modelo `AprovacaoAgradecimento` vincula a doação paga a um único canal (`EMAIL` ou `WHATSAPP`); uma solicitação por doação/canal, estados internos `RASCUNHO` e `APROVADO`. **APROVADO NÃO significa mensagem enviada.**
@@ -294,6 +293,7 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 - Nenhum provedor externo, fila de entregas, agendamento ou disparo foi incluído. A autorização precisa ser revalidada no momento de eventual envio futuro, inclusive após aprovação interna antiga.
 
 ### Aceite da aprovação interna
+
 1. Sem sessão e perfis não autorizados: bloqueio de escrita.
 2. Doação não paga, sem recibo ou sem pessoa: não permitir criar solicitação.
 3. Uma única solicitação para cada doação/canal. Repetição não multiplica registros.
