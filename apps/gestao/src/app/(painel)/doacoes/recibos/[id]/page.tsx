@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { aprovacoesAgradecimentoDisponiveis, comRls } from '@ceak/db';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { emitirReciboInterno } from './actions';
-import { analisarAgradecimento, prepararAgradecimento } from './aprovacaoActions';
+import { analisarAgradecimento, cancelarAgradecimento, prepararAgradecimento } from './aprovacaoActions';
 import { ImprimirRecibo } from './ImprimirRecibo';
 import { CopiarAgradecimento } from './CopiarAgradecimento';
 import { agradecimentoElegivel, mensagemAgradecimento } from '@/lib/agradecimentoDoacoes';
@@ -227,6 +227,34 @@ export default async function PreviaAgradecimentoPage({
                       </button>
                     </form>
                   )}
+                  {sessao.perfil === 'ADMINISTRADOR' &&
+                    registro &&
+                    ['RASCUNHO', 'APROVADO'].includes(registro.status) && (
+                      <form action={cancelarAgradecimento} className="mt-3 flex flex-col gap-2">
+                        <input type="hidden" name="doacaoId" value={id} />
+                        <input type="hidden" name="canal" value={canal} />
+                        <label className="text-xs font-semibold" htmlFor={`motivo-${canal}`}>
+                          Motivo do cancelamento
+                        </label>
+                        <textarea
+                          id={`motivo-${canal}`}
+                          name="motivo"
+                          minLength={10}
+                          maxLength={300}
+                          required
+                          rows={2}
+                          className="border-line rounded-input border p-2 text-sm"
+                          placeholder="Explique por que deseja cancelar esta aprovação."
+                        />
+                        <label className="flex gap-2 text-xs">
+                          <input type="checkbox" name="confirmacao" value="CANCELAR" required />
+                          Confirmo o cancelamento administrativo sem envio
+                        </label>
+                        <button className="border-line rounded-input border px-3 py-2 text-sm">
+                          Cancelar aprovação interna
+                        </button>
+                      </form>
+                    )}
                   {registro && (
                     <div className="mt-3">
                       <h4 className="text-xs font-semibold">Histórico de verificações</h4>
