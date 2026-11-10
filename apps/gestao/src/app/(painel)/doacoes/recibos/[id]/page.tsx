@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { comRls } from '@ceak/db';
+import { aprovacoesAgradecimentoDisponiveis, comRls } from '@ceak/db';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { emitirReciboInterno } from './actions';
+import { analisarAgradecimento, prepararAgradecimento } from './aprovacaoActions';
 import { ImprimirRecibo } from './ImprimirRecibo';
 import { CopiarAgradecimento } from './CopiarAgradecimento';
 import { agradecimentoElegivel, mensagemAgradecimento } from '@/lib/agradecimentoDoacoes';
@@ -79,6 +80,21 @@ export default async function PreviaAgradecimentoPage({
   const canais = (['EMAIL', 'WHATSAPP'] as const).map((canal) =>
     diagnosticarEnvioAgradecimento(canal, dadosBasicos),
   );
+  const aprovacoesDisponiveis = await aprovacoesAgradecimentoDisponiveis();
+  const aprovacoes = aprovacoesDisponiveis
+    ? await comRls(contextoRls(sessao), (tx) =>
+        tx.aprovacaoAgradecimento.findMany({
+          where: { doacaoId: id },
+          select: {
+            id: true, canal: true, status: true, criadoEm: true, aprovadoEm: true,
+            tentativas: {
+              orderBy: { criadoEm: 'desc' }, take: 8,
+              select: { id: true, resultado: true, motivo: true, criadoEm: true },
+            },
+          },
+        }),
+      )
+    : [];
   const descricao =
     doacao.valorCentavos != null
       ? `contribuição de ${dinheiroBR(doacao.valorCentavos)}`
@@ -154,6 +170,80 @@ export default async function PreviaAgradecimentoPage({
           preparada ou enviada.
         </p>
       )}
+      <section className="border-line rounded-card border bg-white p-5 print:hidden">
+        <h2 className="mt-0 text-lg font-semibold">Aprovações internas de agradecimento</h2>
+        <p className="text-muted-2 text-sm">
+          Análises e aprovações são registros administrativos. Não representam envio,
+          agendamento, contato validado ou mensagem entregue. Revogação do consentimento
+          impede qualquer envio futuro, mesmo quando houver aprovação interna anterior.
+        </p>
+        {!aprovacoesDisponiveis ? (
+          <p role="status" className="text-sm">
+            Histórico em implantação. Aguardando migração de banco homologada.
+          </p>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {(['EMAIL', 'WHATSAPP'] as const).map((canal) => {
+              const registro = aprovacoes.find((a) => a.canal === canal);
+              return (
+                <div key={canal} className="border-line rounded-input border p-3">
+                  <h3 className="font-semibold">{canal === 'EMAIL' ? 'E-mail' : 'WhatsApp'}</h3>
+                  <p className="text-sm">
+                    Estado: <strong>{registro?.status ?? 'Sem solicitação'}</strong>
+                  </p>
+                  {registro?.aprovadoEm && (
+                    <p className="text-muted-2 text-xs">
+                      Aprovação interna: {dataBR(registro.aprovadoEm)}
+                    </p>
+                  )}
+                  {sessao.perfil === 'ADMINISTRADOR' && emitido && doacao.pessoaId && !registro && (
+                    <form action={prepararAgradecimento} className="flex flex-col gap-2">
+                      <input type="hidden" name="doacaoId" value={id} />
+                      <input type="hidden" name="canal" value={canal} />
+                      <label className="flex gap-2 text-xs">
+                        <input type="checkbox" name="confirmacao" value="PREPARAR" required />
+                        Registrar solicitação interna sem envio
+                      </label>
+                      <button className="border-line rounded-input border px-3 py-2 text-sm">
+                        Criar solicitação
+                      </button>
+                    </form>
+                  )}
+                  {sessao.perfil === 'ADMINISTRADOR' && registro?.status === 'RASCUNHO' && (
+                    <form action={analisarAgradecimento} className="flex flex-col gap-2">
+                      <input type="hidden" name="doacaoId" value={id} />
+                      <input type="hidden" name="canal" value={canal} />
+                      <label className="flex gap-2 text-xs">
+                        <input type="checkbox" name="confirmacao" value="ANALISAR" required />
+                        Analisar consentimento e elegibilidade; não enviar mensagem
+                      </label>
+                      <button className="border-line rounded-input border px-3 py-2 text-sm">
+                        Analisar aprovação interna
+                      </button>
+                    </form>
+                  )}
+                  {registro && (
+                    <div className="mt-3">
+                      <h4 className="text-xs font-semibold">Histórico de verificações</h4>
+                      {registro.tentativas.length === 0 ? (
+                        <p className="text-muted-2 text-xs">Nenhuma análise registrada.</p>
+                      ) : (
+                        <ul className="list-disc pl-4 text-xs">
+                          {registro.tentativas.map((tentativa) => (
+                            <li key={tentativa.id}>
+                              {dataBR(tentativa.criadoEm)} · {tentativa.resultado} · {tentativa.motivo}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
       <section
         className="border-line rounded-card border bg-white p-4 print:hidden"
         aria-label="Situação dos canais externos"
