@@ -19,7 +19,7 @@ async function main() {
   await db.query('BEGIN');
   try {
     await db.query(
-      'INSERT INTO ceak_v2.pessoa (id, nome) VALUES ($1, $2), ($3, $4)',
+      'INSERT INTO ceak_v2.pessoa (id, nome, atualizado_em) VALUES ($1, $2, now()), ($3, $4, now())',
       [pessoaA, 'Pessoa CI A', pessoaB, 'Pessoa CI B'],
     );
     await db.query(`
