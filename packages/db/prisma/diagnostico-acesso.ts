@@ -48,7 +48,7 @@ try {
       console.log('OBSERVAÇÃO: autenticação externa requer validação no provedor configurado.');
     }
   }
-} catch (erro) {
+} catch {
   console.error('Não foi possível consultar o banco com as permissões atuais.');
   process.exitCode = 2;
 } finally {
