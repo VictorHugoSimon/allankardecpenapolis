@@ -1,5 +1,8 @@
 export { prisma } from './client';
-export { preferenciasComunicacaoDisponiveis, aprovacoesAgradecimentoDisponiveis } from './preferencias';
+export {
+  preferenciasComunicacaoDisponiveis,
+  aprovacoesAgradecimentoDisponiveis,
+} from './preferencias';
 export { comRls, CONTEXTO_ANONIMO, type ContextoRls, type Tx } from './rls';
 export { registrarAuditoria } from './auditoria';
 export { criarLocalAuthProvider, type LocalAuthDeps } from './auth-local';
