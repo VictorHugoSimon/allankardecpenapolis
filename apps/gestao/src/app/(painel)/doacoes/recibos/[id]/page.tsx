@@ -7,7 +7,10 @@ import { emitirReciboInterno } from './actions';
 import { ImprimirRecibo } from './ImprimirRecibo';
 import { CopiarAgradecimento } from './CopiarAgradecimento';
 import { agradecimentoElegivel, mensagemAgradecimento } from '@/lib/agradecimentoDoacoes';
-import { diagnosticarEnvioAgradecimento, requisitosSemCanalHomologado } from '@/lib/diagnosticoEnvioAgradecimentos';
+import {
+  diagnosticarEnvioAgradecimento,
+  requisitosSemCanalHomologado,
+} from '@/lib/diagnosticoEnvioAgradecimentos';
 
 export const metadata: Metadata = { title: 'Recibo interno de doação' };
 export const dynamic = 'force-dynamic';
@@ -162,16 +165,20 @@ export default async function PreviaAgradecimentoPage({
           integração homologada.
         </p>
         <p className="text-muted-2 text-xs">
-          As preferências são declaradas pelo titular no PWA. A consulta administrativa do opt-in,
-          a verificação do destinatário e a integração de provedores ainda precisam de homologação.
+          As preferências são declaradas pelo titular no PWA. A consulta administrativa do opt-in, a
+          verificação do destinatário e a integração de provedores ainda precisam de homologação.
           Não existe envio habilitado nesta tela.
         </p>
         <div className="grid gap-3 md:grid-cols-2">
           {canais.map((c) => (
             <section key={c.canal} className="border-line rounded-input border p-3">
-              <h3 className="text-sm font-semibold">{c.canal === 'EMAIL' ? 'E-mail' : 'WhatsApp'} — bloqueado</h3>
+              <h3 className="text-sm font-semibold">
+                {c.canal === 'EMAIL' ? 'E-mail' : 'WhatsApp'} — bloqueado
+              </h3>
               <ul className="list-disc pl-5 text-xs">
-                {c.impedimentos.map((motivo) => <li key={motivo}>{motivo}</li>)}
+                {c.impedimentos.map((motivo) => (
+                  <li key={motivo}>{motivo}</li>
+                ))}
               </ul>
             </section>
           ))}
