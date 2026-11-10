@@ -280,3 +280,25 @@ Status: páginas implementadas no repositório. Publicação e aceite operaciona
 - Não foram incluídas chamadas a provedores, filas de disparo ou envio automático. O texto administrativo de agradecimento continua como prévia de revisão e não como autorização de encaminhamento externo.
 - Testes em `apps/gestao/src/lib/diagnosticoEnvioAgradecimentos.test.ts` cobrem todos os requisitos ausentes, isolamento de canal e pedido de exclusão; o CI executa essa suíte antes do build integrado.
 - **Critério de aceite**: a tela não deve exibir status pronto nem botão de enviar até existir integração do provedor, política de opt-in específica, verificação do contato e aprovação transacional auditável.
+
+
+## Aprovações individuais e trilha de verificações — 10/11/2026
+
+- Modelo `AprovacaoAgradecimento` vincula a doação paga a um único canal (`EMAIL` ou `WHATSAPP`); uma solicitação por doação/canal, estados internos `RASCUNHO` e `APROVADO`. **APROVADO NÃO significa mensagem enviada.**
+- Modelo `TentativaAgradecimento` registra somente resultados de **análise interna**, bloqueio ou aprovação, nunca simula entrega ao destinatário.
+- Migração `20261110160000_aprovacao_agradecimentos` adiciona tabelas com RLS obrigatório e acesso de escrita exclusivamente ao perfil administrador; tesouraria possui consulta.
+- A política adicional de preferências permite leitura administrativa **somente** para conferência de pessoas vinculadas a doações pagas, sem permissão de autorizar ou revogar em nome do titular.
+- No recibo, administrador pode criar solicitação e analisar; a tesouraria visualiza status e histórico. Análises reprovadas por falta de opt-in, cadastro inativo ou exclusão são registradas sem alterar o estado do rascunho.
+- A análise positiva confirma `PAGO`, `pagoEm`, recibo interno e consentimento específico atual por canal, vinculado à pessoa correta. Atualiza o estado e registra histórico/auditoria na mesma transação.
+- A migração do banco é detectada antes de abrir o painel: sem as tabelas, mostrar "Histórico em implantação", sem apresentar botões de escrita. As server actions também recusam operação antes da migração.
+- Nenhum provedor externo, fila de entregas, agendamento ou disparo foi incluído. A autorização precisa ser revalidada no momento de eventual envio futuro, inclusive após aprovação interna antiga.
+
+### Aceite da aprovação interna
+1. Sem sessão e perfis não autorizados: bloqueio de escrita.
+2. Doação não paga, sem recibo ou sem pessoa: não permitir criar solicitação.
+3. Uma única solicitação para cada doação/canal. Repetição não multiplica registros.
+4. Sem opt-in específico: gravar tentativa `ANALISE_BLOQUEADA`, não aprovar e não enviar.
+5. Após opt-in: permitir `APROVADO`, com auditoria transacional e identificação do administrador.
+6. Aprovação em EMAIL não aprova WHATSAPP. Revogação posterior nunca será ignorada na entrega futura.
+7. Tesouraria pode consultar, sem aprovar; não há informação bancária no histórico.
+8. Validar o SQL/Prisma e os fluxos com banco de homologação; **não migrar produção antes da aprovação do CI**.
