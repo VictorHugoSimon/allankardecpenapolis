@@ -24,10 +24,10 @@ test('área do membro exige login e volta para a tela pedida', async ({ page }) 
   await expect(page).toHaveURL(/\/entrar\?next=%2Fjornada/);
   await expect(page.getByRole('heading', { name: /Bem-vindo ao\s*CEAK App/ })).toBeVisible();
   await page.getByLabel('E-mail').fill(VICTOR);
-  await page.getByLabel('Senha').fill('senha-errada-123');
+  await page.getByLabel('Senha', { exact: true }).fill('senha-errada-123');
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await expect(page.getByRole('main').getByRole('alert')).toHaveText('E-mail ou senha incorretos.');
-  await page.getByLabel('Senha').fill(process.env.SEED_SENHA ?? 'ceak-dev-2026');
+  await page.getByLabel('Senha', { exact: true }).fill(process.env.SEED_SENHA ?? 'ceak-dev-2026');
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await expect(page).toHaveURL(/\/jornada$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Minha jornada' })).toBeVisible();
@@ -161,7 +161,7 @@ test('criar conta pelo App entra como Visitante', async ({ page }) => {
 
   await page.getByLabel('Nome completo').fill('Beatriz Lemos');
   await page.getByLabel('E-mail').fill(`beatriz.e2e.${Date.now()}@email.com`);
-  await page.getByLabel('Senha').fill('serenidade2026');
+  await page.getByLabel('Senha', { exact: true }).fill('serenidade2026');
   await page.getByRole('checkbox', { name: /Autorizo o CEAK/ }).check();
   await page.getByRole('button', { name: 'Criar conta' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Olá, Beatriz' })).toBeVisible();
