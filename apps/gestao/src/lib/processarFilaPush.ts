@@ -2,7 +2,13 @@ import 'server-only';
 import { prisma } from '@ceak/db';
 import { InscricaoPushExpirada } from '@ceak/core/adapters';
 import { adapters } from '@/lib/servidor';
-import { atrasoRetentativaMs, destinoInternoPush } from './regrasFilaPush';
+import {
+  atrasoRetentativaMs,
+  CONCORRENCIA_PUSH,
+  destinoInternoPush,
+  dividirEmLotes,
+  TAMANHO_CLAIM_PUSH,
+} from './regrasFilaPush';
 
 /**
  * Processa até 50 destinos por chamada. Um claim SQL com SKIP LOCKED
@@ -45,16 +51,16 @@ export async function processarFilaPush() {
           OR (status = 'PROCESSANDO' AND bloqueado_ate < now() AND tentativas < 5)
         )
         ORDER BY proxima_em, criado_em
-        LIMIT 50 FOR UPDATE SKIP LOCKED
+        LIMIT ${TAMANHO_CLAIM_PUSH} FOR UPDATE SKIP LOCKED
       )
       RETURNING fila.id, fila.comunicacao_id, fila.dispositivo_id, fila.tentativas
     `;
   });
   let enviados = 0;
   let falhas = 0;
-  for (let i = 0; i < itens.length; i += 10) {
+  for (const lote of dividirEmLotes(itens, CONCORRENCIA_PUSH)) {
     await Promise.all(
-      itens.slice(i, i + 10).map(async (item) => {
+      lote.map(async (item) => {
         try {
           const [comunicado, dispositivo] = await Promise.all([
             prisma.comunicacao.findUnique({
