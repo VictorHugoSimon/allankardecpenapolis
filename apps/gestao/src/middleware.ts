@@ -24,6 +24,9 @@ function secret(): string {
  */
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
+  // O cron autentica sua própria credencial Bearer na rota de API.
+  // Não exigir cookie do painel, pois a Vercel executa sem sessão humana.
+  if (pathname === '/api/cron/notificacoes') return NextResponse.next();
   const token = req.cookies.get(COOKIE_SESSAO)?.value;
   const sessao = await lerSessao(token, secret());
 
