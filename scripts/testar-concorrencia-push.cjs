@@ -44,7 +44,9 @@ async function main() {
   const db = clientes[0];
   try {
     await db.query(
-      'INSERT INTO ' + tabela + ' (comunicacao_id, dispositivo_id) SELECT $1::uuid, gen_random_uuid() FROM generate_series(1,1000)',
+      'INSERT INTO ' +
+        tabela +
+        ' (comunicacao_id, dispositivo_id) SELECT $1::uuid, gen_random_uuid() FROM generate_series(1,1000)',
       [comunicacaoId],
     );
     // Manter as duas transações abertas simultaneamente exercita SKIP LOCKED.
@@ -68,7 +70,7 @@ async function main() {
     await db.query('COMMIT');
     const id = a[0].id;
     await db.query(
-      "UPDATE " + tabela + " SET bloqueado_ate = now() - interval '1 minute' WHERE id = $1",
+      'UPDATE ' + tabela + " SET bloqueado_ate = now() - interval '1 minute' WHERE id = $1",
       [id],
     );
     const recuperado = await reivindicar(db);
@@ -77,16 +79,22 @@ async function main() {
     assert.equal(recuperado[0].tentativas, 2);
     await db.query('COMMIT');
     const antigo = await db.query(
-      "UPDATE " + tabela + " SET status = 'ENVIADO' WHERE id = $1 AND status = 'PROCESSANDO' AND tentativas = 1",
+      'UPDATE ' +
+        tabela +
+        " SET status = 'ENVIADO' WHERE id = $1 AND status = 'PROCESSANDO' AND tentativas = 1",
       [id],
     );
     assert.equal(antigo.rowCount, 0);
     await db.query(
-      "UPDATE " + tabela + " SET tentativas = 5, bloqueado_ate = now() - interval '1 minute' WHERE id = $1",
+      'UPDATE ' +
+        tabela +
+        " SET tentativas = 5, bloqueado_ate = now() - interval '1 minute' WHERE id = $1",
       [id],
     );
     await db.query(
-      "UPDATE " + tabela + " SET status = 'FALHA', bloqueado_ate = NULL WHERE comunicacao_id = $1 AND status = 'PROCESSANDO' AND bloqueado_ate < now() AND tentativas >= 5",
+      'UPDATE ' +
+        tabela +
+        " SET status = 'FALHA', bloqueado_ate = NULL WHERE comunicacao_id = $1 AND status = 'PROCESSANDO' AND bloqueado_ate < now() AND tentativas >= 5",
       [comunicacaoId],
     );
     const estado = await db.query('SELECT status, tentativas FROM ' + tabela + ' WHERE id = $1', [
