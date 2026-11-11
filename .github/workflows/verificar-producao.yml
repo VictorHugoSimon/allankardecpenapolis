@@ -1,10 +1,6 @@
 name: CEAK - Verificacao publica
 
 on:
-  push:
-    branches: [claude/new-session-n6t9kx]
-    paths:
-      - '.github/workflows/verificar-producao.yml'
   workflow_dispatch:
   schedule:
     - cron: '15 12 * * *'
