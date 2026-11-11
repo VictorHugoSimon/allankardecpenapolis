@@ -17,6 +17,7 @@ describe('fila de notificações', () => {
   it('aceita somente links internos e protege contra redirecionamentos externos', () => {
     expect(destinoInternoPush('/agenda')).toBe('/agenda');
     expect(destinoInternoPush('/notificacoes?origem=ceak')).toBe('/notificacoes?origem=ceak');
+    expect(destinoInternoPush('/agenda#proximos')).toBe('/agenda#proximos');
     for (const url of [
       null,
       undefined,
