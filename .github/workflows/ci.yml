@@ -243,7 +243,9 @@ jobs:
         run: pnpm --filter @ceak/gestao exec vitest run src/lib/consentimentoPorCanal.test.ts
       - run: pnpm test
       - run: pnpm build
-      - run: pnpm exec playwright install --with-deps chromium
+      # O runner ubuntu-24.04 já inclui bibliotecas de navegador; evitar apt externo
+      # impede que falhas transitórias de DNS do espelho Ubuntu bloqueiem o E2E.
+      - run: pnpm exec playwright install chromium
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()
