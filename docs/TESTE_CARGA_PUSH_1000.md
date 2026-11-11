@@ -22,20 +22,20 @@ Validar a fila persistente de `entrega_push` sem enviar mensagens para usuários
 
 ## Cenários obrigatórios
 
-| ID | Execução | Critério de aceite |
-| --- | --- | --- |
-| P01 | Executar worker com 1.000 entregas pendentes | Cada claim contém no máximo 50 registros; fila chega a estado terminal |
-| P02 | Executar dois workers simultaneamente | Nenhum par comunicado/aparelho é reivindicado por dois workers com claim válido |
-| P03 | Interromper worker durante `PROCESSANDO` | Claim vencido é recuperável após o prazo, com incremento das tentativas |
-| P04 | Simular falha transitória do provedor | Retry ocorre após 1, 2, 4, 8 ou 16 minutos conforme a tentativa; não há loop infinito |
-| P05 | Interromper a quinta tentativa | Claim vencido termina em `FALHA`; não existe sexta tentativa |
-| P06 | Simular inscrição expirada | Entrega termina em falha e inscrição inválida é removida |
-| P07 | Revogar consentimento antes de enviar | Entrega termina em `EXPIRADO`; nenhum envio é iniciado |
-| P08 | Desativar usuário ou solicitar exclusão | Nenhum envio é iniciado ao destino não elegível |
-| P09 | Tentar registrar resultado de worker antigo | Atualização de tentativa antiga afeta zero registros |
-| P10 | Testar link externo e URL ambígua | Notificação aponta para `/notificacoes`, sem redirecionamento |
-| P11 | Falta de VAPID ou provedor real | Retorna indisponível; não simula entrega bem-sucedida |
-| P12 | Pausar e reiniciar cron | Registros persistidos não são perdidos; processamento retoma |
+| ID  | Execução                                     | Critério de aceite                                                                    |
+| --- | -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| P01 | Executar worker com 1.000 entregas pendentes | Cada claim contém no máximo 50 registros; fila chega a estado terminal                |
+| P02 | Executar dois workers simultaneamente        | Nenhum par comunicado/aparelho é reivindicado por dois workers com claim válido       |
+| P03 | Interromper worker durante `PROCESSANDO`     | Claim vencido é recuperável após o prazo, com incremento das tentativas               |
+| P04 | Simular falha transitória do provedor        | Retry ocorre após 1, 2, 4, 8 ou 16 minutos conforme a tentativa; não há loop infinito |
+| P05 | Interromper a quinta tentativa               | Claim vencido termina em `FALHA`; não existe sexta tentativa                          |
+| P06 | Simular inscrição expirada                   | Entrega termina em falha e inscrição inválida é removida                              |
+| P07 | Revogar consentimento antes de enviar        | Entrega termina em `EXPIRADO`; nenhum envio é iniciado                                |
+| P08 | Desativar usuário ou solicitar exclusão      | Nenhum envio é iniciado ao destino não elegível                                       |
+| P09 | Tentar registrar resultado de worker antigo  | Atualização de tentativa antiga afeta zero registros                                  |
+| P10 | Testar link externo e URL ambígua            | Notificação aponta para `/notificacoes`, sem redirecionamento                         |
+| P11 | Falta de VAPID ou provedor real              | Retorna indisponível; não simula entrega bem-sucedida                                 |
+| P12 | Pausar e reiniciar cron                      | Registros persistidos não são perdidos; processamento retoma                          |
 
 ## Evidências exigidas
 
