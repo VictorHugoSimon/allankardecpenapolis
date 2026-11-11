@@ -14,12 +14,15 @@ if (
 }
 const comunicacaoId = randomUUID();
 const tabela = 'ceak_v2.entrega_push';
-const clientes = Array.from({ length: 2 }, () => new Client({ connectionString: process.env.DATABASE_URL }));
+const clientes = Array.from(
+  { length: 2 },
+  () => new Client({ connectionString: process.env.DATABASE_URL }),
+);
 
 async function reivindicar(db) {
   await db.query('BEGIN');
   try {
-    return (await db.query([
+    const sql = [
       'UPDATE ' + tabela + ' AS fila',
       "SET status = 'PROCESSANDO', bloqueado_ate = now() + interval '5 minutes', tentativas = fila.tentativas + 1",
       'WHERE fila.id IN (',
@@ -28,7 +31,9 @@ async function reivindicar(db) {
       "OR (status = 'PROCESSANDO' AND bloqueado_ate < now() AND tentativas < 5))",
       'ORDER BY proxima_em, criado_em, id LIMIT 50 FOR UPDATE SKIP LOCKED)',
       'RETURNING fila.id, fila.tentativas',
-    ].join(' '), [comunicacaoId])).rows;
+    ].join(' ');
+    const resultado = await db.query(sql, [comunicacaoId]);
+    return resultado.rows;
   } catch (erro) {
     await db.query('ROLLBACK');
     throw erro;
@@ -84,14 +89,26 @@ async function main() {
       "UPDATE " + tabela + " SET status = 'FALHA', bloqueado_ate = NULL WHERE comunicacao_id = $1 AND status = 'PROCESSANDO' AND bloqueado_ate < now() AND tentativas >= 5",
       [comunicacaoId],
     );
-    const estado = await db.query('SELECT status, tentativas FROM ' + tabela + ' WHERE id = $1', [id]);
+    const estado = await db.query('SELECT status, tentativas FROM ' + tabela + ' WHERE id = $1', [
+      id,
+    ]);
     assert.deepEqual(estado.rows[0], { status: 'FALHA', tentativas: 5 });
-    const contagem = await db.query('SELECT count(*)::int AS total FROM ' + tabela + ' WHERE comunicacao_id = $1', [comunicacaoId]);
+    const contagem = await db.query(
+      'SELECT count(*)::int AS total FROM ' + tabela + ' WHERE comunicacao_id = $1',
+      [comunicacaoId],
+    );
     assert.equal(contagem.rows[0].total, 1000);
-    process.stdout.write('PostgreSQL: 1.000 claims unicos, dois workers, recuperacao e tentativa antiga OK.\n');
+    process.stdout.write(
+      'PostgreSQL: 1.000 claims unicos, dois workers, recuperacao e tentativa antiga OK.\n',
+    );
   } finally {
-    await db.query('DELETE FROM ' + tabela + ' WHERE comunicacao_id = $1', [comunicacaoId]).catch(() => undefined);
+    await db
+      .query('DELETE FROM ' + tabela + ' WHERE comunicacao_id = $1', [comunicacaoId])
+      .catch(() => undefined);
     await Promise.all(clientes.map((conn) => conn.end().catch(() => undefined)));
   }
 }
-main().catch((erro) => { console.error(erro); process.exitCode = 1; });
+main().catch((erro) => {
+  console.error(erro);
+  process.exitCode = 1;
+});
