@@ -122,9 +122,9 @@ export default async function AvisosInternosPage() {
           </div>
           <p className="text-muted-2 text-xs">
             Aparelhos inscritos: <strong>{inscritosPush}</strong>. Web Push:{' '}
-            <strong>{pushConfigurado ? 'configurado' : 'indisponível'}</strong>.
-            O processamento automático está agendado para 06h (horário de Brasília, 09h UTC),
-            diariamente. Também é possível iniciar manualmente o próximo lote.
+            <strong>{pushConfigurado ? 'configurado' : 'indisponível'}</strong>. O processamento
+            automático está agendado para 06h (horário de Brasília, 09h UTC), diariamente. Também é
+            possível iniciar manualmente o próximo lote.
           </p>
           <p className="text-muted-2 text-xs">
             O processamento é feito em lotes de até 50 aparelhos. Envio aceito pelo provedor não
