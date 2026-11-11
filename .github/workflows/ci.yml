@@ -223,6 +223,10 @@ jobs:
           })().catch(err => { console.error(err); process.exitCode = 1; });
           NODE
       - run: pnpm db:seed
+      - name: Validar concorrencia e recuperacao da fila push em PostgreSQL isolado
+        env:
+          CEAK_TEST_PUSH_FILA: SIM
+        run: node scripts/testar-concorrencia-push.cjs
       - name: Testar RLS com dois titulares isolados e rollback completo
         run: node scripts/testar-rls-preferencias.cjs
       - name: Validar isolamento de matriculas e consentimento
