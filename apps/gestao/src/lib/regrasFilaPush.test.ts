@@ -24,6 +24,12 @@ describe('fila de notificações', () => {
       'https://example.org',
       '//example.org',
       '/\\example.org',
+      '/foo\\\\bar',
+      '/%5cexample.org',
+      '/%2fexample.org',
+      '/%2F%2Fexample.org',
+      '/agenda%0d%0a',
+      '/agenda\n//example.org',
       'javascript:alert(1)',
       123,
     ]) {
