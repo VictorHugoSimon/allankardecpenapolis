@@ -16,8 +16,12 @@ export function destinoInternoPush(url: unknown): string {
   if (typeof url !== 'string' || !url.startsWith('/') || url.startsWith('//')) {
     return fallback;
   }
+  const contemCaracterePerigoso = Array.from(url).some((caractere) => {
+    const codigo = caractere.charCodeAt(0);
+    return codigo < 32 || codigo === 127 || caractere === '\\';
+  });
   if (
-    /[\\\u0000-\u001f\u007f]/.test(url) ||
+    contemCaracterePerigoso ||
     /%(?:2f|5c|0[0-9a-f]|1[0-9a-f]|7f)/i.test(url)
   ) {
     return fallback;
