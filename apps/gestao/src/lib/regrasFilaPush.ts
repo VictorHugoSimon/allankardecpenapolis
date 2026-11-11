@@ -32,3 +32,19 @@ export function destinoInternoPush(url: unknown): string {
     return fallback;
   }
 }
+
+/** A seleção SQL limita o claim a 50; o provedor recebe no máximo 10 envios concorrentes. */
+export const TAMANHO_CLAIM_PUSH = 50;
+export const CONCORRENCIA_PUSH = 10;
+
+/** Preserva a ordem, sem omitir ou repetir destinos em lotes independentes. */
+export function dividirEmLotes<T>(itens: readonly T[], tamanho: number): T[][] {
+  if (!Number.isSafeInteger(tamanho) || tamanho < 1) {
+    throw new Error('Tamanho de lote inválido.');
+  }
+  const lotes: T[][] = [];
+  for (let i = 0; i < itens.length; i += tamanho) {
+    lotes.push(itens.slice(i, i + tamanho));
+  }
+  return lotes;
+}
