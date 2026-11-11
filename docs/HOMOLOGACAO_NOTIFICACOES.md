@@ -45,6 +45,13 @@ Os projetos `ceak-app-git-preview` e `ceak-gestao-git-preview` possuem as variá
 - Não existe publicação automática no Facebook. O endereço fornecido é um **link de referência**, não uma integração Meta autorizada.
 - Não registrar senhas, tokens VAPID, URLs de endpoints ou dados pessoais nos logs.
 
+## Verificação pública do cron — 11/11/2026
+
+- A CI do commit `0a766dd` foi concluída com sucesso (lint, TypeScript, build, testes e Playwright).
+- O deployment de `ceak-gestao-git-preview` desse commit está `READY` na Vercel.
+- Em navegação pública, sem autenticação, a rota `/api/cron/notificacoes` **não redirecionou para `/login`**; respondeu com `{"erro":"Acesso não autorizado."}`. O navegador utilizado não expôs o código HTTP exato; o teste automático de contrato espera **401**.
+- O monitor HTTP foi configurado para verificação diária. Esta observação não comprova a execução autenticada do cron nem a entrega de push a um celular real.
+
 ## Pendências para aceite final
 
 **Banco CEAK (consulta somente leitura, 11/11/2026):** 4 pessoas, 4 usuários, 1 dispositivo push e zero comunicações/entregas na fila. A homologação de 1.000 dispositivos reais não é possível com a base atual. Não cadastrar dispositivos artificiais em produção.
