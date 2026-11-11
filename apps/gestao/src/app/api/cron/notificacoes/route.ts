@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { timingSafeEqual } from 'node:crypto';
 import { processarFilaPush } from '@/lib/processarFilaPush';
+import { cronAutorizado } from '@/lib/segurancaCron';
 import { executarDiagnosticosDiarios } from '@/lib/automacoesAgendadas';
 import { prepararRascunhosDeEventos } from '@/lib/rascunhosEventosAgendados';
 import { prepararRascunhosDeAulas } from '@/lib/rascunhosAulasAgendados';
@@ -11,12 +11,7 @@ export const maxDuration = 120;
 
 /** Rota exclusiva de automação. Não aceita cookies de usuário como credencial. */
 export async function GET(req: Request) {
-  const segredo = process.env.CRON_SECRET;
-  const cabecalho = req.headers.get('authorization') ?? '';
-  const esperado = segredo ? `Bearer ${segredo}` : '';
-  const a = Buffer.from(cabecalho);
-  const b = Buffer.from(esperado);
-  if (!segredo || segredo.length < 32 || a.length !== b.length || !timingSafeEqual(a, b)) {
+  if (!cronAutorizado(req.headers.get('authorization'), process.env.CRON_SECRET)) {
     return NextResponse.json({ erro: 'Acesso não autorizado.' }, { status: 401 });
   }
   try {
