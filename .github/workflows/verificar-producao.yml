@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/verificar-producao.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '15 12 * * *'
 
 permissions:
   contents: read
@@ -33,7 +35,10 @@ jobs:
             redirect: 'manual',
           });
           if (resposta.status !== 401) {
-            throw new Error('Cron público retornou status inesperado: ' + resposta.status);
+            const motivo = resposta.status === 307 || resposta.status === 308
+              ? 'middleware ainda redireciona para login; publicar correcao do cron'
+              : 'verificar protecao da API e deployment ativo';
+            throw new Error('Cron HTTP ' + resposta.status + ': ' + motivo);
           }
           console.log('Cron protegido: acesso sem credencial retorna 401.');
           NODE
