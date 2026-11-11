@@ -12,7 +12,10 @@ test('olho alterna a visibilidade da senha sem apagar o valor no painel', async 
   await mostrar.click();
   await expect(senha).toHaveAttribute('type', 'text');
   await expect(senha).toHaveValue('SenhaTemporaria123!');
-  await expect(page.getByRole('button', { name: 'Ocultar senha' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Ocultar senha' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
 
   await page.getByRole('button', { name: 'Ocultar senha' }).click();
   await expect(senha).toHaveAttribute('type', 'password');
