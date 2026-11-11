@@ -20,10 +20,7 @@ export function destinoInternoPush(url: unknown): string {
     const codigo = caractere.charCodeAt(0);
     return codigo < 32 || codigo === 127 || caractere === '\\';
   });
-  if (
-    contemCaracterePerigoso ||
-    /%(?:2f|5c|0[0-9a-f]|1[0-9a-f]|7f)/i.test(url)
-  ) {
+  if (contemCaracterePerigoso || /%(?:2f|5c|0[0-9a-f]|1[0-9a-f]|7f)/i.test(url)) {
     return fallback;
   }
   try {
