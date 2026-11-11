@@ -1,6 +1,6 @@
 # CEAK Digital — homologação de comunicados e Web Push
 
-Atualizado em 08/11/2026. Branch do projeto: `claude/new-session-n6t9kx`.
+Atualizado em 11/11/2026. Branch do projeto: `claude/new-session-n6t9kx`.
 
 ## Configuração concluída no ambiente Vercel
 
@@ -12,9 +12,7 @@ Os projetos `ceak-app-git-preview` e `ceak-gestao-git-preview` possuem as variá
 - `VAPID_SUBJECT`;
 - `PUSH_PROVIDER=webpush`.
 
-**Atenção:** variáveis novas só entram em vigor depois de um novo deployment.
-Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
-`api-deployments-free-per-day` da Vercel. Não considerar a versão online atualizada.
+**Situação verificada em 11/11/2026:** variáveis VAPID e `CRON_SECRET` existem nos respectivos projetos Vercel (sem expor seus valores). As versões do site e do PWA estavam publicadas (`READY`), e o Gestão teve nova publicação solicitada para o commit `1f36e48`. A CI desse commit passou. Confirmar o estado final da nova publicação e testar o cron autenticado ainda são passos necessários.
 
 ## Enviar um comunicado de teste depois da publicação
 
@@ -49,15 +47,17 @@ Em 08/11/2026, a tentativa de publicação foi recusada pelo limite diário
 
 ## Pendências para aceite final
 
-- [ ] Aplicar antes do deploy a migração `20261108193000_entrega_push_fila` ao banco `ceak_v2` com `pnpm db:deploy` e gerar o Prisma Client.
-- [ ] Fazer novo deploy dos dois aplicativos após liberação do limite da Vercel.
+**Banco CEAK (consulta somente leitura, 11/11/2026):** 4 pessoas, 4 usuários, 1 dispositivo push e zero comunicações/entregas na fila. A homologação de 1.000 dispositivos reais não é possível com a base atual. Não cadastrar dispositivos artificiais em produção.
+
+- [x] Confirmar migração `20261108193000_entrega_push_fila` no Neon CEAK: tabela `ceak_v2.entrega_push` presente e migração marcada como concluída (consulta somente leitura em 11/11/2026).
+- [x] Site e PWA com deployments `READY` na Vercel; último commit funcional verificado: `2103c73` (11/11/2026).
 - [x] Adicionar cron diário autenticado à rota `/api/cron/notificacoes` no código do CEAK Gestão.
 - [ ] Publicar e testar o cron real no ambiente Vercel, validando retomada de fila interrompida e limites de execução.
 - [ ] Para maior frequência, contratar plano adequado ou integrar agendador externo com credencial protegida.
 - [ ] Verificar 1.000 aparelhos inscritos em ambiente de teste com métricas de aceites/falhas sem envio acidental para usuários reais.
 - [x] Validar `EXPLAIN` da consulta de seleção concorrente de 50 registros no Neon de homologação.
-- [ ] Homologar recuperação de workers interrompidos, com testes de concorrência e ausência de duplicação funcional.
-- [ ] Executar build, lint e TypeScript na versão publicada.
+- [x] CI em PostgreSQL local: 1.000 claims sintéticos, dois workers concorrentes, recuperação de claim, proteção contra atualização obsoleta e limite de tentativas aprovados. Ainda é necessário testar falhas reais e o cron publicado.
+- [x] CI do commit `1f36e48`: build, lint, TypeScript, testes e Playwright aprovados. Deploy dessa revisão do Gestão submetido separadamente.
 - [ ] Testar primeiro consentimento e o botão push no Android Chrome.
 - [ ] Testar no iPhone com PWA instalado pela Tela de Início.
 - [ ] Conferir rascunho, destinatário, link, publicação e contadores no Gestão.
