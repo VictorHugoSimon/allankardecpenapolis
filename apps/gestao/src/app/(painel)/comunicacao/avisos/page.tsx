@@ -28,6 +28,10 @@ export default async function AvisosInternosPage() {
   const fila = tabelaFilaExiste
     ? await prisma.entregaPush.groupBy({ by: ['status'], _count: { _all: true } })
     : [];
+  const inscritosPush = administra ? await prisma.dispositivoPush.count() : 0;
+  const pushConfigurado =
+    process.env.PUSH_PROVIDER === 'webpush' &&
+    Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
   const contagem = (status: string) => fila.find((x) => x.status === status)?._count._all ?? 0;
   const porComunicado = tabelaFilaExiste
     ? await prisma.entregaPush.groupBy({
@@ -117,13 +121,20 @@ export default async function AvisosInternosPage() {
             </p>
           </div>
           <p className="text-muted-2 text-xs">
+            Aparelhos inscritos: <strong>{inscritosPush}</strong>. Web Push:{' '}
+            <strong>{pushConfigurado ? 'configurado' : 'indisponível'}</strong>.
+            O processamento automático está agendado para 06h (horário de Brasília, 09h UTC),
+            diariamente. Também é possível iniciar manualmente o próximo lote.
+          </p>
+          <p className="text-muted-2 text-xs">
             O processamento é feito em lotes de até 50 aparelhos. Envio aceito pelo provedor não
             garante exibição pelo sistema operacional.
           </p>
           <form action={processarLotePush}>
             <button
               type="submit"
-              className="bg-green rounded-input min-h-11 px-4 py-2 text-sm font-semibold text-white"
+              disabled={!pushConfigurado || contagem('PENDENTE') + contagem('PROCESSANDO') === 0}
+              className="bg-green rounded-input min-h-11 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Processar próximo lote (até 50)
             </button>
