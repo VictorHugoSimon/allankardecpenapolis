@@ -1,0 +1,39 @@
+name: CEAK - Verificacao publica
+
+on:
+  push:
+    branches: [claude/new-session-n6t9kx]
+    paths:
+      - '.github/workflows/verificar-producao.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Testar HTTPS publico e PWA
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Conferir os tres enderecos publicos
+        run: node scripts/verificar-urls-publicas.mjs
+      - name: Conferir manifesto, icones e service worker
+        run: node scripts/verificar-pwa-publico.mjs
+      - name: Cron exige autorizacao
+        run: |
+          node --input-type=module - <<'NODE'
+          const url = 'https://ceak-gestao-git-preview.vercel.app/api/cron/notificacoes';
+          const resposta = await fetch(url, {
+            signal: AbortSignal.timeout(15000),
+            redirect: 'manual',
+          });
+          if (resposta.status !== 401) {
+            throw new Error('Cron público retornou status inesperado: ' + resposta.status);
+          }
+          console.log('Cron protegido: acesso sem credencial retorna 401.');
+          NODE
