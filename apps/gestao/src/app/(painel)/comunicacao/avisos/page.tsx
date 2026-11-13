@@ -29,6 +29,13 @@ export default async function AvisosInternosPage() {
     ? await prisma.entregaPush.groupBy({ by: ['status'], _count: { _all: true } })
     : [];
   const inscritosPush = administra ? await prisma.dispositivoPush.count() : 0;
+  const ultimoCron = administra
+    ? await prisma.log.findFirst({
+        where: { categoria: 'NOTIFICACOES', mensagem: 'cron.notificacoes.executado' },
+        orderBy: { criadoEm: 'desc' },
+        select: { criadoEm: true, nivel: true, contexto: true },
+      })
+    : null;
   const pushConfigurado =
     process.env.PUSH_PROVIDER === 'webpush' &&
     Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
@@ -149,6 +156,11 @@ export default async function AvisosInternosPage() {
             <strong>{pushConfigurado ? 'configurado' : 'indisponível'}</strong>. O processamento
             automático está agendado para 06h (horário de Brasília, 09h UTC), diariamente. Também é
             possível iniciar manualmente o próximo lote.
+          </p>
+          <p className="text-muted-2 text-xs">
+            Última execução automática:{' '}
+            <strong>{ultimoCron ? formatoData(ultimoCron.criadoEm) : 'sem registro'}</strong>.
+            {ultimoCron && ultimoCron.nivel === 'WARN' ? ' Verifique os alertas do processamento.' : ''}
           </p>
           <p className="text-muted-2 text-xs">
             O processamento é feito em lotes de até 50 aparelhos. Envio aceito pelo provedor não
