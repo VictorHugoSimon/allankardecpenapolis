@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ErroNegocio, prisma, registrarDispositivoPush } from '@ceak/db';
+import { endpointPushSeguro, ErroNegocio, prisma, registrarDispositivoPush } from '@ceak/db';
 import { getSessao, log } from '@/lib/servidor';
 
 const inscricao = z.object({
@@ -14,7 +14,9 @@ export async function GET(req: Request) {
   if (!s) return NextResponse.json({ erro: 'Sessão expirada.' }, { status: 401 });
   const endpoint = new URL(req.url).searchParams.get('endpoint');
   const parsed = z.string().url().startsWith('https://').max(1000).safeParse(endpoint);
-  if (!parsed.success) return NextResponse.json({ erro: 'Inscrição inválida.' }, { status: 400 });
+  if (!parsed.success || !endpointPushSeguro(parsed.data)) {
+    return NextResponse.json({ erro: 'Inscrição inválida.' }, { status: 400 });
+  }
   const registro = await prisma.dispositivoPush.findUnique({
     where: { endpoint: parsed.data },
     select: { pessoaId: true },
@@ -33,7 +35,9 @@ export async function POST(req: Request) {
   const s = await getSessao();
   if (!s) return NextResponse.json({ erro: 'Sessão expirada.' }, { status: 401 });
   const r = inscricao.safeParse(await req.json().catch(() => null));
-  if (!r.success) return NextResponse.json({ erro: 'Inscrição inválida.' }, { status: 400 });
+  if (!r.success || !endpointPushSeguro(r.data.endpoint)) {
+    return NextResponse.json({ erro: 'Inscrição inválida.' }, { status: 400 });
+  }
   try {
     await registrarDispositivoPush(s.pessoaId, r.data);
   } catch (e) {
