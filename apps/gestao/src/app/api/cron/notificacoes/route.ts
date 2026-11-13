@@ -15,10 +15,10 @@ export async function GET(req: Request) {
   if (!cronAutorizado(req.headers.get('authorization'), process.env.CRON_SECRET)) {
     return NextResponse.json({ erro: 'Acesso não autorizado.' }, { status: 401 });
   }
+  const inicio = Date.now();
   try {
     // Cron do plano Hobby pode executar somente uma vez ao dia. Processar
     // vários lotes num único chamado, respeitando o orçamento do runtime.
-    const inicio = Date.now();
     let lotes = 0;
     let enviados = 0;
     let falhas = 0;
@@ -83,6 +83,22 @@ export async function GET(req: Request) {
       { headers: { 'Cache-Control': 'no-store' } },
     );
   } catch {
+    // Não gravar detalhes da exceção: podem conter identificadores do provedor.
+    // Falha do banco ao registrar o incidente não deve mascarar o HTTP 500.
+    await prisma.log
+      .create({
+        data: {
+          categoria: 'NOTIFICACOES',
+          nivel: 'ERROR',
+          mensagem: 'cron.notificacoes.executado',
+          rota: '/api/cron/notificacoes',
+          ator: 'vercel-cron',
+          status: 500,
+          latenciaMs: Date.now() - inicio,
+          contexto: { falha: true },
+        },
+      })
+      .catch(() => undefined);
     return NextResponse.json({ erro: 'Falha no processamento da fila.' }, { status: 500 });
   }
 }
