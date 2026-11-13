@@ -84,7 +84,10 @@ export default async function VisaoGeralPage() {
         )}
 
       {prontidao && (
-        <section className="border-line rounded-card border bg-white p-5" aria-label="Prontidão operacional">
+        <section
+          className="border-line rounded-card border bg-white p-5"
+          aria-label="Prontidão operacional"
+        >
           <h2 className="m-0 font-serif text-xl">Prontidão operacional</h2>
           <p className="text-muted-2 mt-2 text-sm">
             A presença de módulos no sistema não significa que os serviços externos estão ativos.
@@ -94,14 +97,16 @@ export default async function VisaoGeralPage() {
             <div>
               <strong className="block">Dados institucionais</strong>
               <p className="text-muted-2 my-1">
-                {Object.values(prontidao[0]).filter((valor) => valor.trim()).length} de 6 contatos preenchidos
+                {Object.values(prontidao[0]).filter((valor) => valor.trim()).length} de 6 contatos
+                preenchidos
               </p>
               <Link href="/config">Revisar cadastro</Link>
             </div>
             <div>
               <strong className="block">Notificações Web Push</strong>
               <p className="text-muted-2 my-1">
-                {pushReal ? 'Provedor configurado' : 'Provedor não configurado'} · {prontidao[1]} aparelhos inscritos
+                {pushReal ? 'Provedor configurado' : 'Provedor não configurado'} · {prontidao[1]}{' '}
+                aparelhos inscritos
               </p>
               <Link href="/comunicacao/avisos">Verificar fila</Link>
             </div>
@@ -114,9 +119,7 @@ export default async function VisaoGeralPage() {
             </div>
             <div>
               <strong className="block">Inteligência artificial</strong>
-              <p className="text-muted-2 my-1">
-                Provedor externo generativo ainda não integrado.
-              </p>
+              <p className="text-muted-2 my-1">Provedor externo generativo ainda não integrado.</p>
               <span className="text-muted-2 text-xs">Não considerar IA generativa ativa</span>
             </div>
           </div>
