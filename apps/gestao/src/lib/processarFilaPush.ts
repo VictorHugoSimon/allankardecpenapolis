@@ -1,5 +1,5 @@
 import 'server-only';
-import { prisma } from '@ceak/db';
+import { endpointPushSeguro, prisma } from '@ceak/db';
 import { InscricaoPushExpirada } from '@ceak/core/adapters';
 import { adapters } from '@/lib/servidor';
 import {
@@ -82,7 +82,13 @@ export async function processarFilaPush() {
               })
             : null;
           // O usuário pode revogar autorização ou excluir a conta depois da publicação.
-          if (!comunicado || comunicado.status !== 'ENVIADO' || !dispositivo || !pessoaAutorizada) {
+          if (
+            !comunicado ||
+            comunicado.status !== 'ENVIADO' ||
+            !dispositivo ||
+            !pessoaAutorizada ||
+            !endpointPushSeguro(dispositivo.endpoint)
+          ) {
             await prisma.entregaPush.updateMany({
               where: { id: item.id, status: 'PROCESSANDO', tentativas: item.tentativas },
               data: { status: 'EXPIRADO', bloqueadoAte: null, ultimoErro: 'Destino indisponível' },
