@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@ceak/db';
 import { processarFilaPush } from '@/lib/processarFilaPush';
 import { cronAutorizado } from '@/lib/segurancaCron';
 import { executarDiagnosticosDiarios } from '@/lib/automacoesAgendadas';
@@ -50,6 +51,22 @@ export async function GET(req: Request) {
     const lembretes = await prepararRascunhosDeEventos();
     const aulas = await prepararRascunhosDeAulas();
     const campanhas = await prepararRascunhosCampanhas();
+    // Histórico durável, sem segredos, mensagens ou dados de destinatários.
+    // Uma falha do registro não deve provocar repetição de notificações enviadas.
+    await prisma.log
+      .create({
+        data: {
+          categoria: 'NOTIFICACOES',
+          nivel: indisponivel || falhas > 0 ? 'WARN' : 'INFO',
+          mensagem: 'cron.notificacoes.executado',
+          rota: '/api/cron/notificacoes',
+          ator: 'vercel-cron',
+          status: indisponivel || falhas > 0 ? 207 : 200,
+          latenciaMs: Date.now() - inicio,
+          contexto: { lotes, processados, enviados, falhas, pendentes, indisponivel },
+        },
+      })
+      .catch(() => undefined);
     return NextResponse.json(
       {
         lotes,
