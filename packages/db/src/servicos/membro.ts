@@ -1,3 +1,4 @@
+import { endpointPushSeguro } from './pushSeguranca';
 import { hashSenha } from '@ceak/core/auth';
 import { type Logger } from '@ceak/core/logger';
 import { inicioDoDia, partesData } from '@ceak/core/format';
@@ -571,6 +572,9 @@ export async function registrarDispositivoPush(
   pessoaId: string,
   inscricao: { endpoint: string; keys: { p256dh: string; auth: string } },
 ) {
+  if (!endpointPushSeguro(inscricao.endpoint)) {
+    throw new ErroNegocio('Serviço de notificações não autorizado.', 'push_endpoint_invalido');
+  }
   // O endpoint é único globalmente, mas nunca pode trocar de titular apenas
   // porque outra sessão apresentou sua URL. Isso evita cruzar notificações
   // pessoais em aparelhos compartilhados ou links de inscrição reutilizados.
