@@ -2,7 +2,13 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { formatarDataExtenso, formatarHora } from '@ceak/core/format';
 import { podeAcessar } from '@ceak/core/rbac';
-import { alertasDoPainel, painelGeral, quadrosDoPainel } from '@ceak/db';
+import {
+  alertasDoPainel,
+  dadosInstitucionais,
+  painelGeral,
+  prisma,
+  quadrosDoPainel,
+} from '@ceak/db';
 import { cn } from '@ceak/ui';
 import { Barras } from '@/components/Graficos';
 import { Cartao, Indicadores } from '@/components/Pagina';
@@ -26,6 +32,13 @@ export default async function VisaoGeralPage() {
   const e = p.engajamento;
   const fmt1 = (v: number) => v.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
   const podeAprovar = podeAcessar(s.perfil, 'aprovacoes');
+  const prontidao =
+    s.perfil === 'ADMINISTRADOR'
+      ? await Promise.all([dadosInstitucionais(), prisma.dispositivoPush.count()])
+      : null;
+  const pushReal =
+    process.env.PUSH_PROVIDER === 'webpush' &&
+    Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
 
   return (
     <div className="flex flex-col gap-5">
@@ -69,6 +82,46 @@ export default async function VisaoGeralPage() {
             </div>
           </section>
         )}
+
+      {prontidao && (
+        <section className="border-line rounded-card border bg-white p-5" aria-label="Prontidão operacional">
+          <h2 className="m-0 font-serif text-xl">Prontidão operacional</h2>
+          <p className="text-muted-2 mt-2 text-sm">
+            A presença de módulos no sistema não significa que os serviços externos estão ativos.
+            Este quadro mostra somente configurações e registros verificados, sem exibir segredos.
+          </p>
+          <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <strong className="block">Dados institucionais</strong>
+              <p className="text-muted-2 my-1">
+                {Object.values(prontidao[0]).filter((valor) => valor.trim()).length} de 6 contatos preenchidos
+              </p>
+              <Link href="/config">Revisar cadastro</Link>
+            </div>
+            <div>
+              <strong className="block">Notificações Web Push</strong>
+              <p className="text-muted-2 my-1">
+                {pushReal ? 'Provedor configurado' : 'Provedor não configurado'} · {prontidao[1]} aparelhos inscritos
+              </p>
+              <Link href="/comunicacao/avisos">Verificar fila</Link>
+            </div>
+            <div>
+              <strong className="block">Pagamentos e mensageria</strong>
+              <p className="text-muted-2 my-1">
+                Pagamentos, e-mail e WhatsApp ainda usam adaptadores simulados.
+              </p>
+              <span className="text-muted-2 text-xs">Exigem integração real e homologação</span>
+            </div>
+            <div>
+              <strong className="block">Inteligência artificial</strong>
+              <p className="text-muted-2 my-1">
+                Provedor externo generativo ainda não integrado.
+              </p>
+              <span className="text-muted-2 text-xs">Não considerar IA generativa ativa</span>
+            </div>
+          </div>
+        </section>
+      )}
 
       <Indicadores
         itens={[
