@@ -30,3 +30,4 @@ export * from './gestao/busca';
 export * from './doisFatores';
 
 export * from './vinculacao';
+export { endpointPushSeguro } from './pushSeguranca';
