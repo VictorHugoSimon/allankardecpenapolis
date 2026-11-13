@@ -33,6 +33,23 @@ export default async function AvisosInternosPage() {
     process.env.PUSH_PROVIDER === 'webpush' &&
     Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
   const contagem = (status: string) => fila.find((x) => x.status === status)?._count._all ?? 0;
+  const agora = new Date();
+  const [pendentesAtrasados, claimsVencidos] = tabelaFilaExiste
+    ? await Promise.all([
+        prisma.entregaPush.count({
+          where: {
+            status: 'PENDENTE',
+            proximaEm: { lt: new Date(agora.getTime() - 30 * 60_000) },
+          },
+        }),
+        prisma.entregaPush.count({
+          where: {
+            status: 'PROCESSANDO',
+            bloqueadoAte: { lt: agora },
+          },
+        }),
+      ])
+    : [0, 0];
   const porComunicado = tabelaFilaExiste
     ? await prisma.entregaPush.groupBy({
         by: ['comunicacaoId', 'status'],
@@ -120,6 +137,13 @@ export default async function AvisosInternosPage() {
               Falhas finais: <strong>{contagem('FALHA') + contagem('EXPIRADO')}</strong>
             </p>
           </div>
+          {(pendentesAtrasados > 0 || claimsVencidos > 0) && (
+            <p role="status" className="rounded-input border border-amber-500 p-3 text-sm">
+              Atenção à fila: {pendentesAtrasados} notificações aguardam há mais de 30 minutos e{' '}
+              {claimsVencidos} processamentos estão com prazo de bloqueio vencido. Verifique a
+              rotina agendada e use o processamento manual quando necessário.
+            </p>
+          )}
           <p className="text-muted-2 text-xs">
             Aparelhos inscritos: <strong>{inscritosPush}</strong>. Web Push:{' '}
             <strong>{pushConfigurado ? 'configurado' : 'indisponível'}</strong>. O processamento
