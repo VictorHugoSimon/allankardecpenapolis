@@ -160,7 +160,9 @@ export default async function AvisosInternosPage() {
           <p className="text-muted-2 text-xs">
             Última execução automática:{' '}
             <strong>{ultimoCron ? formatoData(ultimoCron.criadoEm) : 'sem registro'}</strong>.
-            {ultimoCron && ultimoCron.nivel === 'WARN' ? ' Verifique os alertas do processamento.' : ''}
+            {ultimoCron && ultimoCron.nivel === 'WARN'
+              ? ' Verifique os alertas do processamento.'
+              : ''}
           </p>
           <p className="text-muted-2 text-xs">
             O processamento é feito em lotes de até 50 aparelhos. Envio aceito pelo provedor não
