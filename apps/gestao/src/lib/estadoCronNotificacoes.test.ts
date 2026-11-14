@@ -23,17 +23,11 @@ describe('estado da automação diária', () => {
     ).toBe('atrasado');
   });
   it('prioriza erro operacional sobre a idade do registro', () => {
-    expect(
-      estadoCronNotificacoes(
-        { criadoEm: agora, nivel: 'ERROR', status: 500 },
-        agora,
-      ),
-    ).toBe('falha');
-    expect(
-      estadoCronNotificacoes(
-        { criadoEm: agora, nivel: 'WARN', status: 207 },
-        agora,
-      ),
-    ).toBe('falha');
+    expect(estadoCronNotificacoes({ criadoEm: agora, nivel: 'ERROR', status: 500 }, agora)).toBe(
+      'falha',
+    );
+    expect(estadoCronNotificacoes({ criadoEm: agora, nivel: 'WARN', status: 207 }, agora)).toBe(
+      'falha',
+    );
   });
 });
