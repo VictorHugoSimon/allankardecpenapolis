@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { comRls, prisma } from '@ceak/db';
 import { TituloPagina } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
+import { estadoCronNotificacoes } from '@/lib/estadoCronNotificacoes';
 import { criarAvisoInterno, processarLotePush, publicarAvisoInterno } from './actions';
 
 export const metadata: Metadata = { title: 'Central de notificações do CEAK' };
@@ -33,9 +34,10 @@ export default async function AvisosInternosPage() {
     ? await prisma.log.findFirst({
         where: { categoria: 'NOTIFICACOES', mensagem: 'cron.notificacoes.executado' },
         orderBy: { criadoEm: 'desc' },
-        select: { criadoEm: true, nivel: true, contexto: true },
+        select: { criadoEm: true, nivel: true, status: true },
       })
     : null;
+  const estadoCron = estadoCronNotificacoes(ultimoCron, new Date());
   const pushConfigurado =
     process.env.PUSH_PROVIDER === 'webpush' &&
     Boolean(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
@@ -157,12 +159,18 @@ export default async function AvisosInternosPage() {
             automático está agendado para 06h (horário de Brasília, 09h UTC), diariamente. Também é
             possível iniciar manualmente o próximo lote.
           </p>
+          {estadoCron !== 'regular' && (
+            <p role="status" className="rounded-input border border-amber-500 p-3 text-sm">
+              {estadoCron === 'sem_registro'
+                ? 'Sem registro de execução automática. Confira a configuração do agendador.'
+                : estadoCron === 'atrasado'
+                  ? 'A última execução automática ocorreu há mais de 27 horas. Verifique o agendador.'
+                  : 'A última execução automática registrou falhas. Confira os logs e a fila.'}
+            </p>
+          )}
           <p className="text-muted-2 text-xs">
             Última execução automática:{' '}
             <strong>{ultimoCron ? formatoData(ultimoCron.criadoEm) : 'sem registro'}</strong>.
-            {ultimoCron && ultimoCron.nivel === 'WARN'
-              ? ' Verifique os alertas do processamento.'
-              : ''}
           </p>
           <p className="text-muted-2 text-xs">
             O processamento é feito em lotes de até 50 aparelhos. Envio aceito pelo provedor não
