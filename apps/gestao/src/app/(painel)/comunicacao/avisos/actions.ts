@@ -83,6 +83,9 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
   const sessao = await exigirModulo('comunicacao');
   if (sessao.perfil !== 'ADMINISTRADOR')
     throw new Error('Apenas administradores podem publicar avisos gerais.');
+  if (form.get('confirmarEnvio') !== 'sim') {
+    throw new Error('Confirme explicitamente a publicação e o envio das notificações.');
+  }
   const id = String(form.get('id') ?? '');
   if (!/^[0-9a-f-]{36}$/i.test(id)) throw new Error('Aviso inválido.');
   const [infraFila] = await prisma.$queryRaw<Array<{ existe: boolean }>>`
