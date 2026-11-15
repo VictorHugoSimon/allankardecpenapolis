@@ -379,9 +379,9 @@ export default async function AvisosInternosPage() {
                             className="mt-0.5 size-4 shrink-0"
                           />
                           <span>
-                            Confirmo a publicação deste comunicado para o público selecionado.
-                            Isso criará avisos no aplicativo e poderá enviar notificações aos
-                            aparelhos autorizados.
+                            Confirmo a publicação deste comunicado para o público selecionado. Isso
+                            criará avisos no aplicativo e poderá enviar notificações aos aparelhos
+                            autorizados.
                           </span>
                         </label>
                         <button
