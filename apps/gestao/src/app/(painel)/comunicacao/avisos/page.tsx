@@ -370,6 +370,20 @@ export default async function AvisosInternosPage() {
                           </p>
                         ) : null}
                         <input type="hidden" name="id" value={a.id} />
+                        <label className="mt-3 flex max-w-md items-start gap-2 text-xs">
+                          <input
+                            type="checkbox"
+                            name="confirmarEnvio"
+                            value="sim"
+                            required
+                            className="mt-0.5 size-4 shrink-0"
+                          />
+                          <span>
+                            Confirmo a publicação deste comunicado para o público selecionado.
+                            Isso criará avisos no aplicativo e poderá enviar notificações aos
+                            aparelhos autorizados.
+                          </span>
+                        </label>
                         <button
                           type="submit"
                           className="border-line rounded-input min-h-11 border bg-white px-3 text-sm font-medium"
