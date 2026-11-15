@@ -30,13 +30,15 @@ export default async function AvisosInternosPage() {
     ? await prisma.entregaPush.groupBy({ by: ['status'], _count: { _all: true } })
     : [];
   const inscritosPush = administra ? await prisma.dispositivoPush.count() : 0;
-  const ultimoCron = administra
-    ? await prisma.log.findFirst({
+  const historicoCron = administra
+    ? await prisma.log.findMany({
         where: { categoria: 'NOTIFICACOES', mensagem: 'cron.notificacoes.executado' },
+        take: 7,
         orderBy: { criadoEm: 'desc' },
-        select: { criadoEm: true, nivel: true, status: true },
+        select: { id: true, criadoEm: true, nivel: true, status: true, latenciaMs: true, contexto: true },
       })
-    : null;
+    : [];
+  const ultimoCron = historicoCron[0] ?? null;
   const estadoCron = estadoCronNotificacoes(ultimoCron, new Date());
   const pushConfigurado =
     process.env.PUSH_PROVIDER === 'webpush' &&
@@ -172,6 +174,52 @@ export default async function AvisosInternosPage() {
             Última execução automática:{' '}
             <strong>{ultimoCron ? formatoData(ultimoCron.criadoEm) : 'sem registro'}</strong>.
           </p>
+          <div className="mt-3 overflow-x-auto">
+            <h3 className="text-sm font-semibold">Histórico das últimas execuções</h3>
+            {historicoCron.length === 0 ? (
+              <p className="text-muted-2 text-sm">Nenhuma execução registrada até o momento.</p>
+            ) : (
+              <table className="w-full min-w-[470px] text-left text-sm">
+                <thead>
+                  <tr className="border-line border-b">
+                    <th scope="col" className="py-2">Data e hora</th>
+                    <th scope="col" className="py-2">Resultado</th>
+                    <th scope="col" className="py-2">Envios aceitos</th>
+                    <th scope="col" className="py-2">Duração</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historicoCron.map((execucao) => {
+                    const contexto =
+                      execucao.contexto &&
+                      typeof execucao.contexto === 'object' &&
+                      !Array.isArray(execucao.contexto)
+                        ? (execucao.contexto as Record<string, unknown>)
+                        : {};
+                    const enviados = contexto.enviados;
+                    return (
+                      <tr key={execucao.id} className="border-line border-b last:border-b-0">
+                        <td className="py-2">{formatoData(execucao.criadoEm)}</td>
+                        <td className="py-2">
+                          {execucao.nivel === 'INFO' && execucao.status === 200
+                            ? 'Concluída'
+                            : 'Atenção'}
+                        </td>
+                        <td className="py-2">
+                          {typeof enviados === 'number' ? enviados : '—'}
+                        </td>
+                        <td className="py-2">
+                          {execucao.latenciaMs !== null
+                            ? `${(execucao.latenciaMs / 1000).toFixed(1)} s`
+                            : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
           <p className="text-muted-2 text-xs">
             O processamento é feito em lotes de até 50 aparelhos. Envio aceito pelo provedor não
             garante exibição pelo sistema operacional.
