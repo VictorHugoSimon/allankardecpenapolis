@@ -35,7 +35,14 @@ export default async function AvisosInternosPage() {
         where: { categoria: 'NOTIFICACOES', mensagem: 'cron.notificacoes.executado' },
         take: 7,
         orderBy: { criadoEm: 'desc' },
-        select: { id: true, criadoEm: true, nivel: true, status: true, latenciaMs: true, contexto: true },
+        select: {
+          id: true,
+          criadoEm: true,
+          nivel: true,
+          status: true,
+          latenciaMs: true,
+          contexto: true,
+        },
       })
     : [];
   const ultimoCron = historicoCron[0] ?? null;
@@ -182,10 +189,18 @@ export default async function AvisosInternosPage() {
               <table className="w-full min-w-[470px] text-left text-sm">
                 <thead>
                   <tr className="border-line border-b">
-                    <th scope="col" className="py-2">Data e hora</th>
-                    <th scope="col" className="py-2">Resultado</th>
-                    <th scope="col" className="py-2">Envios aceitos</th>
-                    <th scope="col" className="py-2">Duração</th>
+                    <th scope="col" className="py-2">
+                      Data e hora
+                    </th>
+                    <th scope="col" className="py-2">
+                      Resultado
+                    </th>
+                    <th scope="col" className="py-2">
+                      Envios aceitos
+                    </th>
+                    <th scope="col" className="py-2">
+                      Duração
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -205,9 +220,7 @@ export default async function AvisosInternosPage() {
                             ? 'Concluída'
                             : 'Atenção'}
                         </td>
-                        <td className="py-2">
-                          {typeof enviados === 'number' ? enviados : '—'}
-                        </td>
+                        <td className="py-2">{typeof enviados === 'number' ? enviados : '—'}</td>
                         <td className="py-2">
                           {execucao.latenciaMs !== null
                             ? `${(execucao.latenciaMs / 1000).toFixed(1)} s`
