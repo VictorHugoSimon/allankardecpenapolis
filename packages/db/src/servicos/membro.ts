@@ -604,8 +604,12 @@ export async function registrarDispositivoPush(
   }
 }
 
-export async function removerDispositivoPush(endpoint: string) {
-  await prisma.dispositivoPush.deleteMany({ where: { endpoint } });
+/** Uma conta só pode cancelar inscrições vinculadas à própria pessoa. */
+export async function removerDispositivoPush(pessoaId: string, endpoint: string) {
+  if (!pessoaId || !endpointPushSeguro(endpoint)) {
+    throw new ErroNegocio('Inscrição de notificações inválida.', 'push_endpoint_invalido');
+  }
+  return prisma.dispositivoPush.deleteMany({ where: { endpoint, pessoaId } });
 }
 
 // ─── Perfil e LGPD ───────────────────────────────────────────────────────
