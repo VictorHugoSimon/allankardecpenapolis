@@ -6,6 +6,7 @@ import { comRls, prisma, registrarAuditoria } from '@ceak/db';
 import { log } from '@/lib/servidor';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { ehAvisoRestritoTurma, validarFiltroTurma } from '@/lib/segmentacaoAulas';
+import { perfisDoSegmento, SEGMENTOS_COMUNICACAO, type SegmentoComunicacao } from '@/lib/segmentosComunicacao';
 
 function validarTexto(form: FormData, chave: string, minimo: number, maximo: number) {
   const valor = String(form.get(chave) ?? '').trim();
@@ -15,8 +16,8 @@ function validarTexto(form: FormData, chave: string, minimo: number, maximo: num
   return valor;
 }
 
-const segmentos = ['TODOS', 'MEMBROS', 'VOLUNTARIOS', 'INSTRUTORES'] as const;
-type Segmento = (typeof segmentos)[number];
+const segmentos = SEGMENTOS_COMUNICACAO;
+type Segmento = SegmentoComunicacao;
 
 function validarLink(form: FormData): string | null {
   const valor = String(form.get('url') ?? '').trim();
@@ -125,14 +126,7 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
       check.set('url', url);
       validarLink(check);
     }
-    const perfis =
-      segmento === 'MEMBROS'
-        ? ['MEMBRO']
-        : segmento === 'VOLUNTARIOS'
-          ? ['VOLUNTARIO']
-          : segmento === 'INSTRUTORES'
-            ? ['INSTRUTOR']
-            : ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'];
+    const perfis = perfisDoSegmento(segmento as Segmento);
     // Um lembrete de turma nunca usa o segmento público. Revalida aula, curso,
     // turma e matrículas ativas dentro da transação antes de calcular destinatários.
     let matriculados: string[] | null = null;
@@ -167,7 +161,7 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
         anonimizadaEm: null,
         ...(matriculados !== null
           ? { id: { in: matriculados } }
-          : { perfil: { in: perfis as ('MEMBRO' | 'VISITANTE' | 'VOLUNTARIO' | 'INSTRUTOR')[] } }),
+          : { perfil: { in: perfis } }),
       },
       select: { id: true },
       take: 5001,
