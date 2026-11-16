@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { endpointPushSeguro, ErroNegocio, prisma, registrarDispositivoPush, removerDispositivoPush } from '@ceak/db';
+import {
+  endpointPushSeguro,
+  ErroNegocio,
+  prisma,
+  registrarDispositivoPush,
+  removerDispositivoPush,
+} from '@ceak/db';
 import { getSessao, log } from '@/lib/servidor';
 
 const inscricao = z.object({
