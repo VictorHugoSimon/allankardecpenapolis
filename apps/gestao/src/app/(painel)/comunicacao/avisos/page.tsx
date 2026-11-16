@@ -4,6 +4,7 @@ import { comRls, prisma } from '@ceak/db';
 import { TituloPagina } from '@/components/Pagina';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { estadoCronNotificacoes } from '@/lib/estadoCronNotificacoes';
+import { perfisDoSegmento, SEGMENTOS_COMUNICACAO } from '@/lib/segmentosComunicacao';
 import { criarAvisoInterno, processarLotePush, publicarAvisoInterno } from './actions';
 
 export const metadata: Metadata = { title: 'Central de notificações do CEAK' };
@@ -89,31 +90,21 @@ export default async function AvisosInternosPage() {
   // A quantidade definitiva é recalculada sob RLS na ação de publicação.
   const contagensElegiveis = administra
     ? await Promise.all(
-        (['TODOS', 'MEMBROS', 'VOLUNTARIOS', 'INSTRUTORES'] as const).map(async (segmento) => {
-          const perfis =
-            segmento === 'MEMBROS'
-              ? ['MEMBRO']
-              : segmento === 'VOLUNTARIOS'
-                ? ['VOLUNTARIO']
-                : segmento === 'INSTRUTORES'
-                  ? ['INSTRUTOR']
-                  : ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'];
-          return prisma.pessoa.count({
+        SEGMENTOS_COMUNICACAO.map(async (segmento) =>
+          prisma.pessoa.count({
             where: {
               usuario: { is: { ativo: true } },
               consentimentoEm: { not: null },
               exclusaoSolicitadaEm: null,
               anonimizadaEm: null,
-              perfil: {
-                in: perfis as ('MEMBRO' | 'VISITANTE' | 'VOLUNTARIO' | 'INSTRUTOR')[],
-              },
+              perfil: { in: perfisDoSegmento(segmento) },
             },
-          });
-        }),
+          }),
+        ),
       )
     : [];
   const estimativaElegiveis = Object.fromEntries(
-    (['TODOS', 'MEMBROS', 'VOLUNTARIOS', 'INSTRUTORES'] as const).map((segmento, i) => [
+    SEGMENTOS_COMUNICACAO.map((segmento, i) => [
       segmento,
       contagensElegiveis[i] ?? 0,
     ]),
