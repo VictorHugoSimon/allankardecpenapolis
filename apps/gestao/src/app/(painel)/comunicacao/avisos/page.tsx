@@ -85,6 +85,42 @@ export default async function AvisosInternosPage() {
       .filter((x) => x.comunicacaoId === id && ['FALHA', 'EXPIRADO'].includes(x.status))
       .reduce((n, x) => n + x._count._all, 0),
   });
+  // Prévia agregada para comunicação geral; sem expor nomes ou identificadores.
+  // A quantidade definitiva é recalculada sob RLS na ação de publicação.
+  const contagensElegiveis = administra
+    ? await Promise.all(
+        (['TODOS', 'MEMBROS', 'VOLUNTARIOS', 'INSTRUTORES'] as const).map(
+          async (segmento) => {
+            const perfis =
+              segmento === 'MEMBROS'
+                ? ['MEMBRO']
+                : segmento === 'VOLUNTARIOS'
+                  ? ['VOLUNTARIO']
+                  : segmento === 'INSTRUTORES'
+                    ? ['INSTRUTOR']
+                    : ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'];
+            return prisma.pessoa.count({
+              where: {
+                usuario: { is: { ativo: true } },
+                consentimentoEm: { not: null },
+                exclusaoSolicitadaEm: null,
+                anonimizadaEm: null,
+                perfil: {
+                  in: perfis as ('MEMBRO' | 'VISITANTE' | 'VOLUNTARIO' | 'INSTRUTOR')[],
+                },
+              },
+            });
+          },
+        ),
+      )
+    : [];
+  const estimativaElegiveis = Object.fromEntries(
+    (['TODOS', 'MEMBROS', 'VOLUNTARIOS', 'INSTRUTORES'] as const).map((segmento, i) => [
+      segmento,
+      contagensElegiveis[i] ?? 0,
+    ]),
+  );
+
   const avisos = await comRls(contextoRls(sessao), (tx) =>
     tx.comunicacao.findMany({
       where: { canal: 'APP' },
@@ -367,6 +403,27 @@ export default async function AvisosInternosPage() {
                           <p className="text-muted-2 my-2 text-xs">
                             Público restrito: somente usuários com matrícula ativa nesta turma e
                             consentimento.
+                          </p>
+                        ) : null}
+                        {a.filtro &&
+                        typeof a.filtro === 'object' &&
+                        !Array.isArray(a.filtro) &&
+                        (a.filtro as Record<string, unknown>).exigeSegmentacaoTurma !== true &&
+                        typeof (a.filtro as Record<string, unknown>).segmento === 'string' &&
+                        Object.hasOwn(
+                          estimativaElegiveis,
+                          String((a.filtro as Record<string, unknown>).segmento),
+                        ) ? (
+                          <p className="text-muted-2 my-2 text-xs">
+                            Prévia: aproximadamente{' '}
+                            <strong>
+                              {
+                                estimativaElegiveis[
+                                  String((a.filtro as Record<string, unknown>).segmento)
+                                ]
+                              }
+                            </strong>{' '}
+                            contas elegíveis neste momento. A lista será recalculada na publicação.
                           </p>
                         ) : null}
                         <input type="hidden" name="id" value={a.id} />
