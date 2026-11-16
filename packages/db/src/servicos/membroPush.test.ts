@@ -36,9 +36,9 @@ describe('isolamento de inscrições Web Push por pessoa', () => {
   it('cadastro não pode assumir endpoint já associado a outra pessoa', async () => {
     create.mockRejectedValueOnce({ code: 'P2002' });
     updateMany.mockResolvedValueOnce({ count: 0 });
-    await expect(
-      registrarDispositivoPush('pessoa-b', { endpoint, keys }),
-    ).rejects.toMatchObject({ codigo: 'dispositivo_outra_conta' });
+    await expect(registrarDispositivoPush('pessoa-b', { endpoint, keys })).rejects.toMatchObject({
+      codigo: 'dispositivo_outra_conta',
+    });
     expect(updateMany).toHaveBeenCalledWith({
       where: { endpoint, pessoaId: 'pessoa-b' },
       data: { p256dh: keys.p256dh, auth: keys.auth },
