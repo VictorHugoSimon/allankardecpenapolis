@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { endpointPushSeguro, ErroNegocio, prisma, registrarDispositivoPush } from '@ceak/db';
+import { endpointPushSeguro, ErroNegocio, prisma, registrarDispositivoPush, removerDispositivoPush } from '@ceak/db';
 import { getSessao, log } from '@/lib/servidor';
 
 const inscricao = z.object({
@@ -57,9 +57,9 @@ export async function DELETE(req: Request) {
   const r = z
     .object({ endpoint: z.string().max(1000) })
     .safeParse(await req.json().catch(() => null));
-  if (!r.success) return NextResponse.json({ erro: 'Pedido inválido.' }, { status: 400 });
-  await prisma.dispositivoPush.deleteMany({
-    where: { endpoint: r.data.endpoint, pessoaId: s.pessoaId },
-  });
+  if (!r.success || !endpointPushSeguro(r.data.endpoint)) {
+    return NextResponse.json({ erro: 'Pedido inválido.' }, { status: 400 });
+  }
+  await removerDispositivoPush(s.pessoaId, r.data.endpoint);
   return NextResponse.json({ ok: true });
 }
