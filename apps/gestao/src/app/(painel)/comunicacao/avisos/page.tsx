@@ -107,6 +107,35 @@ export default async function AvisosInternosPage() {
     SEGMENTOS_COMUNICACAO.map((segmento, i) => [segmento, contagensElegiveis[i] ?? 0]),
   );
 
+  // Um membro pode ter mais de um aparelho. A prévia de push conta inscrições,
+  // não pessoas, e considera apenas contas atualmente autorizadas.
+  const dispositivosDaPrevia = administra
+    ? await prisma.dispositivoPush.findMany({ select: { pessoaId: true } })
+    : [];
+  const pessoasComPush = administra
+    ? await prisma.pessoa.findMany({
+        where: {
+          id: { in: [...new Set(dispositivosDaPrevia.flatMap((d) => (d.pessoaId ? [d.pessoaId] : [])))] },
+          usuario: { is: { ativo: true } },
+          consentimentoEm: { not: null },
+          exclusaoSolicitadaEm: null,
+          anonimizadaEm: null,
+        },
+        select: { id: true, perfil: true },
+      })
+    : [];
+  const perfisPorId = new Map(pessoasComPush.map((p) => [p.id, p.perfil]));
+  const aparelhosElegiveis = Object.fromEntries(
+    SEGMENTOS_COMUNICACAO.map((segmento) => [
+      segmento,
+      dispositivosDaPrevia.filter(
+        (d) =>
+          d.pessoaId &&
+          perfisDoSegmento(segmento).some((perfil) => perfil === perfisPorId.get(d.pessoaId!)),
+      ).length,
+    ]),
+  );
+
   const avisos = await comRls(contextoRls(sessao), (tx) =>
     tx.comunicacao.findMany({
       where: { canal: 'APP' },
@@ -409,7 +438,15 @@ export default async function AvisosInternosPage() {
                                 ]
                               }
                             </strong>{' '}
-                            contas elegíveis neste momento. A lista será recalculada na publicação.
+                            contas elegíveis e aproximadamente{' '}
+                            <strong>
+                              {
+                                aparelhosElegiveis[
+                                  String((a.filtro as Record<string, unknown>).segmento)
+                                ]
+                              }
+                            </strong>{' '}
+                            aparelhos inscritos neste momento. A lista será recalculada na publicação.
                           </p>
                         ) : null}
                         <input type="hidden" name="id" value={a.id} />
