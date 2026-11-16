@@ -104,10 +104,7 @@ export default async function AvisosInternosPage() {
       )
     : [];
   const estimativaElegiveis = Object.fromEntries(
-    SEGMENTOS_COMUNICACAO.map((segmento, i) => [
-      segmento,
-      contagensElegiveis[i] ?? 0,
-    ]),
+    SEGMENTOS_COMUNICACAO.map((segmento, i) => [segmento, contagensElegiveis[i] ?? 0]),
   );
 
   const avisos = await comRls(contextoRls(sessao), (tx) =>
