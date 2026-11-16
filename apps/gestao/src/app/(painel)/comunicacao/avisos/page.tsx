@@ -115,7 +115,9 @@ export default async function AvisosInternosPage() {
   const pessoasComPush = administra
     ? await prisma.pessoa.findMany({
         where: {
-          id: { in: [...new Set(dispositivosDaPrevia.flatMap((d) => (d.pessoaId ? [d.pessoaId] : [])))] },
+          id: {
+            in: [...new Set(dispositivosDaPrevia.flatMap((d) => (d.pessoaId ? [d.pessoaId] : [])))],
+          },
           usuario: { is: { ativo: true } },
           consentimentoEm: { not: null },
           exclusaoSolicitadaEm: null,
@@ -446,7 +448,8 @@ export default async function AvisosInternosPage() {
                                 ]
                               }
                             </strong>{' '}
-                            aparelhos inscritos neste momento. A lista será recalculada na publicação.
+                            aparelhos inscritos neste momento. A lista será recalculada na
+                            publicação.
                           </p>
                         ) : null}
                         <input type="hidden" name="id" value={a.id} />
