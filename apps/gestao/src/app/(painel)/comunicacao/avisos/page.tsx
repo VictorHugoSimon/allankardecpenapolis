@@ -89,29 +89,27 @@ export default async function AvisosInternosPage() {
   // A quantidade definitiva é recalculada sob RLS na ação de publicação.
   const contagensElegiveis = administra
     ? await Promise.all(
-        (['TODOS', 'MEMBROS', 'VOLUNTARIOS', 'INSTRUTORES'] as const).map(
-          async (segmento) => {
-            const perfis =
-              segmento === 'MEMBROS'
-                ? ['MEMBRO']
-                : segmento === 'VOLUNTARIOS'
-                  ? ['VOLUNTARIO']
-                  : segmento === 'INSTRUTORES'
-                    ? ['INSTRUTOR']
-                    : ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'];
-            return prisma.pessoa.count({
-              where: {
-                usuario: { is: { ativo: true } },
-                consentimentoEm: { not: null },
-                exclusaoSolicitadaEm: null,
-                anonimizadaEm: null,
-                perfil: {
-                  in: perfis as ('MEMBRO' | 'VISITANTE' | 'VOLUNTARIO' | 'INSTRUTOR')[],
-                },
+        (['TODOS', 'MEMBROS', 'VOLUNTARIOS', 'INSTRUTORES'] as const).map(async (segmento) => {
+          const perfis =
+            segmento === 'MEMBROS'
+              ? ['MEMBRO']
+              : segmento === 'VOLUNTARIOS'
+                ? ['VOLUNTARIO']
+                : segmento === 'INSTRUTORES'
+                  ? ['INSTRUTOR']
+                  : ['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR'];
+          return prisma.pessoa.count({
+            where: {
+              usuario: { is: { ativo: true } },
+              consentimentoEm: { not: null },
+              exclusaoSolicitadaEm: null,
+              anonimizadaEm: null,
+              perfil: {
+                in: perfis as ('MEMBRO' | 'VISITANTE' | 'VOLUNTARIO' | 'INSTRUTOR')[],
               },
-            });
-          },
-        ),
+            },
+          });
+        }),
       )
     : [];
   const estimativaElegiveis = Object.fromEntries(
