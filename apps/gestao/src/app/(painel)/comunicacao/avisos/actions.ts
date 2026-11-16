@@ -6,7 +6,11 @@ import { comRls, prisma, registrarAuditoria } from '@ceak/db';
 import { log } from '@/lib/servidor';
 import { contextoRls, exigirModulo } from '@/lib/auth';
 import { ehAvisoRestritoTurma, validarFiltroTurma } from '@/lib/segmentacaoAulas';
-import { perfisDoSegmento, SEGMENTOS_COMUNICACAO, type SegmentoComunicacao } from '@/lib/segmentosComunicacao';
+import {
+  perfisDoSegmento,
+  SEGMENTOS_COMUNICACAO,
+  type SegmentoComunicacao,
+} from '@/lib/segmentosComunicacao';
 
 function validarTexto(form: FormData, chave: string, minimo: number, maximo: number) {
   const valor = String(form.get(chave) ?? '').trim();
@@ -159,9 +163,7 @@ export async function publicarAvisoInterno(form: FormData): Promise<void> {
         consentimentoEm: { not: null },
         exclusaoSolicitadaEm: null,
         anonimizadaEm: null,
-        ...(matriculados !== null
-          ? { id: { in: matriculados } }
-          : { perfil: { in: perfis } }),
+        ...(matriculados !== null ? { id: { in: matriculados } } : { perfil: { in: perfis } }),
       },
       select: { id: true },
       take: 5001,
