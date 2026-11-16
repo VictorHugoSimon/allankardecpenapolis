@@ -6,12 +6,7 @@ describe('segmentação compartilhada de comunicados', () => {
     expect(SEGMENTOS_COMUNICACAO).toEqual(['TODOS', 'MEMBROS', 'VOLUNTARIOS', 'INSTRUTORES']);
   });
   it('seleciona os mesmos perfis para prévia e publicação', () => {
-    expect(perfisDoSegmento('TODOS')).toEqual([
-      'MEMBRO',
-      'VISITANTE',
-      'VOLUNTARIO',
-      'INSTRUTOR',
-    ]);
+    expect(perfisDoSegmento('TODOS')).toEqual(['MEMBRO', 'VISITANTE', 'VOLUNTARIO', 'INSTRUTOR']);
     expect(perfisDoSegmento('MEMBROS')).toEqual(['MEMBRO']);
     expect(perfisDoSegmento('VOLUNTARIOS')).toEqual(['VOLUNTARIO']);
     expect(perfisDoSegmento('INSTRUTORES')).toEqual(['INSTRUTOR']);
