@@ -24,8 +24,10 @@ function estaInstalado() {
 export function DiagnosticoPush() {
   const [dados, setDados] = useState<Diagnostico | null>(null);
   const [verificando, setVerificando] = useState(false);
+  const [mensagemCopia, setMensagemCopia] = useState('');
 
   async function verificar() {
+    setMensagemCopia('');
     setVerificando(true);
     try {
       const instalacao = estaInstalado() ? 'Instalado' : 'Aberto no navegador';
@@ -88,6 +90,25 @@ export function DiagnosticoPush() {
     }
   }
 
+  async function copiarDiagnostico() {
+    if (!dados) return;
+    const relatorio = [
+      'CEAK Digital — diagnóstico de notificações',
+      `Instalação: ${dados.instalacao}`,
+      `Navegador: ${dados.suporte}`,
+      `Permissão: ${dados.permissao}`,
+      `Service worker: ${dados.servico}`,
+      `Inscrição push: ${dados.inscricao}`,
+      'Este diagnóstico não comprova o recebimento de uma mensagem real.',
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(relatorio);
+      setMensagemCopia('Diagnóstico copiado. Compartilhe com a equipe de homologação.');
+    } catch {
+      setMensagemCopia('Não foi possível copiar automaticamente neste navegador.');
+    }
+  }
+
   return (
     <div className="border-line mt-3 border-t pt-3 text-sm">
       <h3 className="m-0 text-sm font-semibold">Diagnóstico deste aparelho</h3>
@@ -103,18 +124,30 @@ export function DiagnosticoPush() {
         {verificando ? 'Verificando...' : 'Verificar notificações'}
       </button>
       {dados && (
-        <dl aria-live="polite" className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-          <dt className="text-muted-2">Instalação</dt>
-          <dd className="m-0 font-medium">{dados.instalacao}</dd>
-          <dt className="text-muted-2">Navegador</dt>
-          <dd className="m-0 font-medium">{dados.suporte}</dd>
-          <dt className="text-muted-2">Permissão</dt>
-          <dd className="m-0 font-medium">{dados.permissao}</dd>
-          <dt className="text-muted-2">Service worker</dt>
-          <dd className="m-0 font-medium">{dados.servico}</dd>
-          <dt className="text-muted-2">Inscrição push</dt>
-          <dd className="m-0 font-medium">{dados.inscricao}</dd>
-        </dl>
+        <div className="mt-3">
+          <dl aria-live="polite" className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+            <dt className="text-muted-2">Instalação</dt>
+            <dd className="m-0 font-medium">{dados.instalacao}</dd>
+            <dt className="text-muted-2">Navegador</dt>
+            <dd className="m-0 font-medium">{dados.suporte}</dd>
+            <dt className="text-muted-2">Permissão</dt>
+            <dd className="m-0 font-medium">{dados.permissao}</dd>
+            <dt className="text-muted-2">Service worker</dt>
+            <dd className="m-0 font-medium">{dados.servico}</dd>
+            <dt className="text-muted-2">Inscrição push</dt>
+            <dd className="m-0 font-medium">{dados.inscricao}</dd>
+          </dl>
+          <button
+            type="button"
+            onClick={() => void copiarDiagnostico()}
+            className="border-line rounded-input mt-3 min-h-11 border bg-white px-3 text-sm font-medium"
+          >
+            Copiar diagnóstico
+          </button>
+          <p role="status" className="text-muted-2 mt-2 text-xs empty:hidden">
+            {mensagemCopia}
+          </p>
+        </div>
       )}
       <p className="text-muted-2 mt-3 mb-0 text-xs">
         No iPhone, instale o aplicativo pela opção Adicionar à Tela de Início para receber Web Push.
