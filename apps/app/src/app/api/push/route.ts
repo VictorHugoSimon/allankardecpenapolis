@@ -47,8 +47,13 @@ export async function POST(req: Request) {
   try {
     await registrarDispositivoPush(s.pessoaId, r.data);
   } catch (e) {
-    if (e instanceof ErroNegocio && e.codigo === 'dispositivo_outra_conta') {
-      return NextResponse.json({ erro: e.message }, { status: 409 });
+    if (e instanceof ErroNegocio) {
+      if (e.codigo === 'dispositivo_outra_conta') {
+        return NextResponse.json({ erro: e.message }, { status: 409 });
+      }
+      if (e.codigo === 'push_sem_consentimento') {
+        return NextResponse.json({ erro: e.message }, { status: 403 });
+      }
     }
     throw e;
   }
