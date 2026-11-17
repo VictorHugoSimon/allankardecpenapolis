@@ -575,6 +575,24 @@ export async function registrarDispositivoPush(
   if (!endpointPushSeguro(inscricao.endpoint)) {
     throw new ErroNegocio('Serviço de notificações não autorizado.', 'push_endpoint_invalido');
   }
+  const pessoaAutorizada = pessoaId
+    ? await prisma.pessoa.findFirst({
+        where: {
+          id: pessoaId,
+          consentimentoEm: { not: null },
+          exclusaoSolicitadaEm: null,
+          anonimizadaEm: null,
+          usuario: { is: { ativo: true } },
+        },
+        select: { id: true },
+      })
+    : null;
+  if (!pessoaAutorizada) {
+    throw new ErroNegocio(
+      'Conta sem autorização ativa para notificações. Revise o consentimento.',
+      'push_sem_consentimento',
+    );
+  }
   // O endpoint é único globalmente, mas nunca pode trocar de titular apenas
   // porque outra sessão apresentou sua URL. Isso evita cruzar notificações
   // pessoais em aparelhos compartilhados ou links de inscrição reutilizados.
