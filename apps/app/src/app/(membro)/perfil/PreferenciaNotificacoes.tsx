@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { AtivarPush } from './AtivarPush';
+import { DiagnosticoPush } from './DiagnosticoPush';
 
 /**
  * A preferência começa em "Sim", mas isso não equivale à permissão do sistema.
@@ -130,6 +131,7 @@ export function PreferenciaNotificacoes({
           avisos dentro do aplicativo.
         </p>
       )}
+      <DiagnosticoPush />
     </section>
   );
 }
