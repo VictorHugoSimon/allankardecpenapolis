@@ -51,10 +51,9 @@ export function DiagnosticoPush() {
       const sub = await reg?.pushManager.getSubscription();
       let inscricao = sub ? 'Não foi possível confirmar o vínculo' : 'Sem inscrição neste aparelho';
       if (sub) {
-        const resposta = await fetch(
-          `/api/push?endpoint=${encodeURIComponent(sub.endpoint)}`,
-          { cache: 'no-store' },
-        );
+        const resposta = await fetch(`/api/push?endpoint=${encodeURIComponent(sub.endpoint)}`, {
+          cache: 'no-store',
+        });
         if (resposta.ok) {
           const vinculo = (await resposta.json()) as {
             vinculado: boolean;
