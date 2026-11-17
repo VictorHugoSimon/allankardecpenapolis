@@ -17,6 +17,7 @@ export function PreferenciaNotificacoes({
 }) {
   const [preferencia, setPreferencia] = useState<'sim' | 'nao'>('sim');
   const [montado, setMontado] = useState(false);
+  const [avisoContaAnterior, setAvisoContaAnterior] = useState(false);
   const chavePreferencia = `ceak-preferencia-push:${pessoaId}`;
 
   useEffect(() => {
@@ -36,12 +37,31 @@ export function PreferenciaNotificacoes({
         const reg = await navigator.serviceWorker.getRegistration();
         const inscricao = await reg?.pushManager?.getSubscription();
         if (inscricao) {
-          const resposta = await fetch('/api/push', {
-            method: 'DELETE',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ endpoint: inscricao.endpoint }),
-          });
-          if (!resposta.ok || !(await inscricao.unsubscribe())) throw new Error('falha');
+          const consulta = await fetch(
+            `/api/push?endpoint=${encodeURIComponent(inscricao.endpoint)}`,
+            { cache: 'no-store' },
+          );
+          if (!consulta.ok) throw new Error('falha_ao_verificar_titular');
+          const vinculo = (await consulta.json()) as {
+            vinculado: boolean;
+            pertenceOutraConta: boolean;
+          };
+          if (vinculo.pertenceOutraConta) {
+            // O dispositivo compartilhado mantém a inscrição da conta anterior.
+            // Não revogar a inscrição de outra pessoa em nome da conta atual.
+            setAvisoContaAnterior(true);
+          } else {
+            if (vinculo.vinculado) {
+              const resposta = await fetch('/api/push', {
+                method: 'DELETE',
+                headers: { 'content-type': 'application/json' },
+                body: JSON.stringify({ endpoint: inscricao.endpoint }),
+              });
+              if (!resposta.ok) throw new Error('falha_ao_desativar');
+            }
+            if (!(await inscricao.unsubscribe())) throw new Error('falha');
+            setAvisoContaAnterior(false);
+          }
         }
       } catch {
         window.alert(
@@ -90,6 +110,12 @@ export function PreferenciaNotificacoes({
           Não
         </label>
       </fieldset>
+      {avisoContaAnterior && (
+        <p role="status" className="mt-3 text-xs text-amber-800">
+          Sua preferência nesta conta foi salva. Este aparelho ainda pode receber avisos de outra
+          conta: entre nela e desative a inscrição para interromper esses envios.
+        </p>
+      )}
       {preferencia === 'sim' ? (
         <div className="mt-3 border-t border-[#e1e7df] pt-3">
           <AtivarPush chavePublica={chavePublica} />
