@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { deleteMany, create, updateMany } = vi.hoisted(() => ({
+const { deleteMany, create, updateMany, findFirst } = vi.hoisted(() => ({
   deleteMany: vi.fn(),
   create: vi.fn(),
   updateMany: vi.fn(),
+  findFirst: vi.fn(),
 }));
 vi.mock('../client', () => ({
-  prisma: { dispositivoPush: { deleteMany, create, updateMany } },
+  prisma: { dispositivoPush: { deleteMany, create, updateMany }, pessoa: { findFirst } },
 }));
 import { registrarDispositivoPush, removerDispositivoPush } from './membro';
 
@@ -18,6 +19,7 @@ describe('isolamento de inscrições Web Push por pessoa', () => {
     vi.clearAllMocks();
     deleteMany.mockResolvedValue({ count: 1 });
     create.mockResolvedValue({ id: 'dispositivo-123' });
+    findFirst.mockResolvedValue({ id: 'pessoa-a' });
   });
 
   it('nunca remove assinatura por endpoint sem filtrar seu titular', async () => {
@@ -31,6 +33,24 @@ describe('isolamento de inscrições Web Push por pessoa', () => {
     await expect(removerDispositivoPush('pessoa-a', 'https://localhost/push')).rejects.toThrow();
     await expect(removerDispositivoPush('', endpoint)).rejects.toThrow();
     expect(deleteMany).not.toHaveBeenCalled();
+  });
+
+  it('não registra aparelho quando falta consentimento ou a conta está inativa', async () => {
+    findFirst.mockResolvedValueOnce(null);
+    await expect(registrarDispositivoPush('pessoa-a', { endpoint, keys })).rejects.toMatchObject({
+      codigo: 'push_sem_consentimento',
+    });
+    expect(create).not.toHaveBeenCalled();
+    expect(findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'pessoa-a',
+        consentimentoEm: { not: null },
+        exclusaoSolicitadaEm: null,
+        anonimizadaEm: null,
+        usuario: { is: { ativo: true } },
+      },
+      select: { id: true },
+    });
   });
 
   it('cadastro não pode assumir endpoint já associado a outra pessoa', async () => {
