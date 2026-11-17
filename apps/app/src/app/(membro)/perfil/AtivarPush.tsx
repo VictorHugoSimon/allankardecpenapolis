@@ -53,7 +53,7 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
       setEstado(status.vinculado ? 'ativo' : 'inativo');
       if (status.pertenceOutraConta) {
         setAviso(
-          'Este aparelho ainda tem notificações de outra conta. Ao ativar, será criada uma inscrição exclusiva para sua conta.',
+          'Este aparelho ainda está vinculado a outra conta. Entre na conta anterior e desative as notificações antes de ativá-las aqui.',
         );
       }
     })().catch(() => setEstado('indisponivel'));
@@ -94,7 +94,17 @@ export function AtivarPush({ chavePublica }: { chavePublica: string | null }) {
             { cache: 'no-store' },
           );
           if (!consulta.ok) throw new Error(String(consulta.status));
-          const vinculo = (await consulta.json()) as { vinculado: boolean };
+          const vinculo = (await consulta.json()) as {
+            vinculado: boolean;
+            pertenceOutraConta: boolean;
+          };
+          if (vinculo.pertenceOutraConta) {
+            setEstado('inativo');
+            setAviso(
+              'O navegador ainda está vinculado a outra conta. Entre na conta anterior e desative as notificações primeiro.',
+            );
+            return;
+          }
           if (!vinculo.vinculado) {
             const removido = await anterior.unsubscribe();
             if (!removido) throw new Error('falha_ao_remover_inscricao_antiga');
