@@ -15,8 +15,8 @@ export default async function LojaPage() {
     <Tela titulo="Loja solidária">
       <div className="flex flex-col gap-3">
         <p className="text-muted m-0 text-sm">
-          Renda revertida para a assistência social. Retirada no CEAK. A compra depende da
-          ativação do pagamento PIX no site.
+          Renda revertida para a assistência social. Retirada no CEAK. A compra depende da ativação
+          do pagamento PIX no site.
         </p>
         <ul className="m-0 grid list-none grid-cols-2 gap-2.5 p-0">
           {produtos.map((p) => (
