@@ -19,10 +19,9 @@ export function BotaoSairSeguro() {
         const reg = await navigator.serviceWorker.getRegistration();
         const sub = await reg?.pushManager?.getSubscription();
         if (sub) {
-          const consulta = await fetch(
-            `/api/push?endpoint=${encodeURIComponent(sub.endpoint)}`,
-            { cache: 'no-store' },
-          );
+          const consulta = await fetch(`/api/push?endpoint=${encodeURIComponent(sub.endpoint)}`, {
+            cache: 'no-store',
+          });
           if (!consulta.ok) throw new Error('falha_ao_verificar_titular');
           const vinculo = (await consulta.json()) as {
             vinculado: boolean;
