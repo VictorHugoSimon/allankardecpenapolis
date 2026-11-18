@@ -19,12 +19,30 @@ export function BotaoSairSeguro() {
         const reg = await navigator.serviceWorker.getRegistration();
         const sub = await reg?.pushManager?.getSubscription();
         if (sub) {
-          const res = await fetch('/api/push', {
-            method: 'DELETE',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ endpoint: sub.endpoint }),
-          });
-          if (!res.ok) throw new Error('falha_ao_desvincular');
+          const consulta = await fetch(
+            `/api/push?endpoint=${encodeURIComponent(sub.endpoint)}`,
+            { cache: 'no-store' },
+          );
+          if (!consulta.ok) throw new Error('falha_ao_verificar_titular');
+          const vinculo = (await consulta.json()) as {
+            vinculado: boolean;
+            pertenceOutraConta: boolean;
+          };
+          if (vinculo.pertenceOutraConta) {
+            setErro(
+              'Este aparelho mantém a inscrição de outra conta. A saída atual não vai removê-la. ' +
+                'Entre na conta anterior para desativar as notificações ou saia mesmo assim.',
+            );
+            return;
+          }
+          if (vinculo.vinculado) {
+            const res = await fetch('/api/push', {
+              method: 'DELETE',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ endpoint: sub.endpoint }),
+            });
+            if (!res.ok) throw new Error('falha_ao_desvincular');
+          }
           const desinscrito = await sub.unsubscribe();
           if (!desinscrito) throw new Error('falha_ao_desinscrever');
         }
