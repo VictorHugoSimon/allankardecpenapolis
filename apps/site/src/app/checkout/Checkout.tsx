@@ -11,7 +11,7 @@ import { finalizarPedido, type EstadoCheckout } from './actions';
 const brl = (c: number) =>
   (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-export function Checkout() {
+export function Checkout({ pagamentosDisponiveis }: { pagamentosDisponiveis: boolean }) {
   const { itens, pronto, subtotalCentavos, limpar } = useCarrinho();
   const [estado, acao, enviando] = useActionState<EstadoCheckout, FormData>(finalizarPedido, {});
   const router = useRouter();
@@ -77,12 +77,22 @@ export function Checkout() {
         />
       </fieldset>
       <div className="border-line rounded-card-lg flex flex-col items-center gap-4 border bg-white p-[26px]">
-        <p className="text-muted m-0 text-[15px]">Total via PIX</p>
-        <p className="m-0 font-serif text-[38px]">{brl(subtotalCentavos)}</p>
-        <p className="text-muted-2 m-0 text-center text-sm">
-          O QR Code e o PIX copia e cola aparecem na próxima tela. O valor é conferido com o estoque
-          e os preços atuais.
+        {!pagamentosDisponiveis && (
+          <p role="status" className="bg-pill-err-bg text-pill-err-fg rounded-input m-0 w-full p-3 text-sm">
+            A loja está em fase de preparação. O pagamento PIX ainda não está disponível.
+            Você pode consultar o catálogo, mas nenhum pedido será cobrado ou confirmado nesta etapa.
+          </p>
+        )}
+        <p className="text-muted m-0 text-[15px]">
+          {pagamentosDisponiveis ? 'Total via PIX' : 'Total estimado do carrinho'}
         </p>
+        <p className="m-0 font-serif text-[38px]">{brl(subtotalCentavos)}</p>
+        {pagamentosDisponiveis && (
+          <p className="text-muted-2 m-0 text-center text-sm">
+            O QR Code e o PIX copia e cola aparecem na próxima tela. O valor é conferido com o estoque
+            e os preços atuais.
+          </p>
+        )}
         {estado.erro ? (
           <p
             role="alert"
@@ -96,10 +106,14 @@ export function Checkout() {
         ) : null}
         <button
           type="submit"
-          disabled={enviando || !!estado.ok}
+          disabled={!pagamentosDisponiveis || enviando || !!estado.ok}
           className="rounded-pill bg-green hover:bg-green-dark min-h-12 w-full p-[15px] text-base font-medium text-white disabled:opacity-60"
         >
-          {enviando || estado.ok ? 'Gerando PIX…' : 'Pagar com PIX'}
+          {!pagamentosDisponiveis
+            ? 'Pagamento indisponível'
+            : enviando || estado.ok
+              ? 'Gerando PIX…'
+              : 'Pagar com PIX'}
         </button>
       </div>
     </form>
