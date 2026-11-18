@@ -8,7 +8,7 @@ export default function CheckoutPage() {
   return (
     <Secao estreita={640} className="pt-14 pb-20">
       <h1 className="m-0 mb-6 font-serif text-[40px] font-medium">Checkout</h1>
-      <Checkout />
+      <Checkout pagamentosDisponiveis={process.env.PAYMENT_PROVIDER !== undefined && process.env.PAYMENT_PROVIDER !== 'mock'} />
     </Secao>
   );
 }
