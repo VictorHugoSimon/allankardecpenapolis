@@ -7,7 +7,7 @@ import { siteUrl } from '@/lib/urls';
 export const metadata: Metadata = { title: 'Loja solidária' };
 export const dynamic = 'force-dynamic';
 
-/** Vitrine da loja: a compra (carrinho e PIX) acontece no site. */
+/** Vitrine da loja: o site possui catálogo e carrinho, mas o PIX depende de provedor real. */
 export default async function LojaPage() {
   await exigirSessao();
   const produtos = await produtosDaLoja(6);
@@ -15,7 +15,8 @@ export default async function LojaPage() {
     <Tela titulo="Loja solidária">
       <div className="flex flex-col gap-3">
         <p className="text-muted m-0 text-sm">
-          Renda revertida para a assistência social. Retirada no CEAK.
+          Renda revertida para a assistência social. Retirada no CEAK. A compra depende da
+          ativação do pagamento PIX no site.
         </p>
         <ul className="m-0 grid list-none grid-cols-2 gap-2.5 p-0">
           {produtos.map((p) => (
