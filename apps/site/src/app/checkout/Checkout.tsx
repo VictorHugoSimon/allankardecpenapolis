@@ -78,9 +78,12 @@ export function Checkout({ pagamentosDisponiveis }: { pagamentosDisponiveis: boo
       </fieldset>
       <div className="border-line rounded-card-lg flex flex-col items-center gap-4 border bg-white p-[26px]">
         {!pagamentosDisponiveis && (
-          <p role="status" className="bg-pill-err-bg text-pill-err-fg rounded-input m-0 w-full p-3 text-sm">
-            A loja está em fase de preparação. O pagamento PIX ainda não está disponível.
-            Você pode consultar o catálogo, mas nenhum pedido será cobrado ou confirmado nesta etapa.
+          <p
+            role="status"
+            className="bg-pill-err-bg text-pill-err-fg rounded-input m-0 w-full p-3 text-sm"
+          >
+            A loja está em fase de preparação. O pagamento PIX ainda não está disponível. Você pode
+            consultar o catálogo, mas nenhum pedido será cobrado ou confirmado nesta etapa.
           </p>
         )}
         <p className="text-muted m-0 text-[15px]">
@@ -89,8 +92,8 @@ export function Checkout({ pagamentosDisponiveis }: { pagamentosDisponiveis: boo
         <p className="m-0 font-serif text-[38px]">{brl(subtotalCentavos)}</p>
         {pagamentosDisponiveis && (
           <p className="text-muted-2 m-0 text-center text-sm">
-            O QR Code e o PIX copia e cola aparecem na próxima tela. O valor é conferido com o estoque
-            e os preços atuais.
+            O QR Code e o PIX copia e cola aparecem na próxima tela. O valor é conferido com o
+            estoque e os preços atuais.
           </p>
         )}
         {estado.erro ? (
