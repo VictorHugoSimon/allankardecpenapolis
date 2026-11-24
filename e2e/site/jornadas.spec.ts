@@ -139,13 +139,11 @@ test('Loja: checkout não aceita pagamento fictício sem PIX integrado', async (
   await page.getByRole('button', { name: 'Adicionar ao carrinho' }).click();
   await expect(page).toHaveURL(/\/carrinho$/);
   await page.getByRole('link', { name: 'Finalizar pedido' }).click();
-  await page.getByLabel('Nome', { exact: true }).fill('Carla Nogueira');
-  await page.getByLabel('WhatsApp', { exact: true }).fill(WHATS);
-  await aceitar(page);
-  await page.getByRole('button', { name: 'Pagar com PIX' }).click();
-  await expect(page.getByRole('main').getByRole('alert')).toContainText(
-    'Pagamentos indisponíveis neste ambiente de demonstração',
+  await expect(page.getByRole('main').getByRole('status')).toContainText(
+    'O pagamento PIX ainda não está disponível',
   );
+  await expect(page.getByRole('button', { name: 'Pagamento indisponível' })).toBeDisabled();
+  await expect(page.getByText('Total estimado do carrinho')).toBeVisible();
   await expect(page.getByRole('heading', { name: /Pedido nº/ })).toHaveCount(0);
 });
 
