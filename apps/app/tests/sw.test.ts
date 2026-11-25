@@ -79,6 +79,74 @@ describe('CEAK PWA: worker estático', () => {
   });
 });
 
+describe('recebimento de notificações push', () => {
+  it('mostra título e mensagem e mantém o destino dentro do aplicativo', async () => {
+    const { handlers, self } = carregarWorker();
+    let tarefa: Promise<unknown> | undefined;
+    handlers.get('push')!({
+      data: {
+        json: () => ({
+          titulo: 'Próxima palestra',
+          corpo: 'Confira a programação desta semana.',
+          url: '/agenda',
+        }),
+      },
+      waitUntil: (p: Promise<unknown>) => {
+        tarefa = p;
+      },
+    });
+    await tarefa;
+    expect(self.registration.showNotification).toHaveBeenCalledWith(
+      'Próxima palestra',
+      expect.objectContaining({
+        body: 'Confira a programação desta semana.',
+        data: { path: '/agenda' },
+      }),
+    );
+  });
+
+  it.each(['//evil.example/roubo', '/\\\\evil.example/roubo', 'https://evil.example'])(
+    'não aceita destino externo na mensagem recebida (%s)',
+    async (url) => {
+      const { handlers, self } = carregarWorker();
+      let tarefa: Promise<unknown> | undefined;
+      handlers.get('push')!({
+        data: { json: () => ({ titulo: 'CEAK', corpo: 'Mensagem', url }) },
+        waitUntil: (p: Promise<unknown>) => {
+          tarefa = p;
+        },
+      });
+      await tarefa;
+      expect(self.registration.showNotification).toHaveBeenCalledWith(
+        'CEAK',
+        expect.objectContaining({ data: { path: '/notificacoes' } }),
+      );
+    },
+  );
+
+  it('recebe texto simples quando o payload não é JSON', async () => {
+    const { handlers, self } = carregarWorker();
+    let tarefa: Promise<unknown> | undefined;
+    handlers.get('push')!({
+      data: {
+        json: () => { throw new SyntaxError('JSON inválido'); },
+        text: () => 'Comunicado do Centro',
+      },
+      waitUntil: (p: Promise<unknown>) => {
+        tarefa = p;
+      },
+    });
+    await tarefa;
+    expect(self.registration.showNotification).toHaveBeenCalledWith(
+      'CEAK',
+      expect.objectContaining({
+        body: 'Comunicado do Centro',
+        data: { path: '/notificacoes' },
+      }),
+    );
+  });
+});
+
 describe('isolamento de navegações externas', () => {
   it.each([
     'https://outro-dominio.example/pagina',
