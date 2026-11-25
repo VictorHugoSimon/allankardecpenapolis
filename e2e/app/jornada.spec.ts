@@ -80,7 +80,9 @@ test('Jornada 2 · Membro: Login → Home → Check-in → Estudo → Palestra �
   await expect(page.getByText('Apostila — Módulo 3')).toBeVisible();
   await page.getByRole('link', { name: 'Calendário' }).click();
   // Após a última aula do calendário, a lista de próximas aulas fica vazia.
-  await expect(page.getByText(/Aula \d+ · |Não há próximas aulas agendadas\./).first()).toBeVisible();
+  await expect(
+    page.getByText(/Aula \d+ · |Não há próximas aulas agendadas\./).first(),
+  ).toBeVisible();
 
   // Palestra de hoje
   await page.goto('/palestra');
