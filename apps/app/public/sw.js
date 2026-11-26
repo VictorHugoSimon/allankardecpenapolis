@@ -7,9 +7,9 @@ const OFFLINE_URL = '/offline';
 self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(OFFLINE_CACHE);
-      // Uma falha temporária na página offline não deve impedir o registro do PWA.
+      // Uma falha do armazenamento ou da rede não deve impedir a instalação.
       try {
+        const cache = await caches.open(OFFLINE_CACHE);
         await cache.add(new Request(OFFLINE_URL, { cache: 'reload' }));
       } catch (error) {
         console.warn('[CEAK PWA] Não foi possível preparar a tela offline:', error);
@@ -87,7 +87,8 @@ function caminhoSeguro(valor, fallback = '/notificacoes') {
 self.addEventListener('push', (event) => {
   let message = {};
   try {
-    message = event.data ? event.data.json() : {};
+    const payload = event.data ? event.data.json() : {};
+    message = payload && typeof payload === 'object' && !Array.isArray(payload) ? payload : {};
   } catch {
     message = { corpo: event.data ? event.data.text() : '' };
   }
