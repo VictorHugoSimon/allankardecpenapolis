@@ -79,6 +79,50 @@ describe('CEAK PWA: worker estático', () => {
   });
 });
 
+describe('abertura de notificações com PWA já aberto', () => {
+  it('abre nova janela se a aba existente falhar ao navegar', async () => {
+    const { handlers, self, openWindow } = carregarWorker();
+    const focus = vi.fn(async () => undefined);
+    const navigate = vi.fn(async () => {
+      throw new Error('aba encerrada');
+    });
+    self.clients.matchAll.mockResolvedValue([
+      { url: 'https://app.ceak.example/', focus, navigate },
+    ]);
+    let tarefa: Promise<unknown> | undefined;
+    handlers.get('notificationclick')!({
+      notification: { data: { path: '/agenda' }, close: vi.fn() },
+      waitUntil: (p: Promise<unknown>) => {
+        tarefa = p;
+      },
+    });
+    await tarefa;
+    expect(focus).toHaveBeenCalledOnce();
+    expect(navigate).toHaveBeenCalledWith('https://app.ceak.example/agenda');
+    expect(openWindow).toHaveBeenCalledWith('https://app.ceak.example/agenda');
+  });
+
+  it('não reutiliza aba cujo domínio apenas começa com o domínio do CEAK', async () => {
+    const { handlers, self, openWindow } = carregarWorker();
+    const focus = vi.fn(async () => undefined);
+    const navigate = vi.fn(async () => undefined);
+    self.clients.matchAll.mockResolvedValue([
+      { url: 'https://app.ceak.example.evil.example/', focus, navigate },
+    ]);
+    let tarefa: Promise<unknown> | undefined;
+    handlers.get('notificationclick')!({
+      notification: { data: { path: '/agenda' }, close: vi.fn() },
+      waitUntil: (p: Promise<unknown>) => {
+        tarefa = p;
+      },
+    });
+    await tarefa;
+    expect(focus).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(openWindow).toHaveBeenCalledWith('https://app.ceak.example/agenda');
+  });
+});
+
 describe('recebimento de notificações push', () => {
   it('mostra título e mensagem e mantém o destino dentro do aplicativo', async () => {
     const { handlers, self } = carregarWorker();
