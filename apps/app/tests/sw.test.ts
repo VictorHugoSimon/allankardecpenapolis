@@ -4,7 +4,7 @@ import { runInNewContext } from 'node:vm';
 
 const source = readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
 
-function carregarWorker(options?: { falharCache?: boolean; falharRede?: boolean }) {
+function carregarWorker(options?: { falharCache?: boolean; falharAberturaCache?: boolean; falharRede?: boolean }) {
   const handlers = new Map<string, (event: unknown) => void>();
   const openWindow = vi.fn(async () => undefined);
   const add = options?.falharCache
@@ -13,7 +13,10 @@ function carregarWorker(options?: { falharCache?: boolean; falharRede?: boolean 
       })
     : vi.fn(async () => undefined);
   const caches = {
-    open: vi.fn(async () => ({ add })),
+    open: vi.fn(async () => {
+      if (options?.falharAberturaCache) throw new Error('armazenamento indisponível');
+      return { add };
+    }),
     keys: vi.fn(async () => []),
     delete: vi.fn(async () => true),
     match: vi.fn(async () => null),
@@ -49,6 +52,18 @@ function carregarWorker(options?: { falharCache?: boolean; falharRede?: boolean 
 describe('CEAK PWA: worker estático', () => {
   it('permite registrar o worker mesmo se o cache offline falhar', async () => {
     const { handlers, self } = carregarWorker({ falharCache: true });
+    let tarefa: Promise<unknown> | undefined;
+    handlers.get('install')!({
+      waitUntil: (p: Promise<unknown>) => {
+        tarefa = p;
+      },
+    });
+    await expect(tarefa).resolves.toBeUndefined();
+    expect(self.skipWaiting).toHaveBeenCalledOnce();
+  });
+
+  it('registra o worker quando o CacheStorage não pode ser aberto', async () => {
+    const { handlers, self } = carregarWorker({ falharAberturaCache: true });
     let tarefa: Promise<unknown> | undefined;
     handlers.get('install')!({
       waitUntil: (p: Promise<unknown>) => {
@@ -164,6 +179,25 @@ describe('recebimento de notificações push', () => {
       expect(self.registration.showNotification).toHaveBeenCalledWith(
         'CEAK',
         expect.objectContaining({ data: { path: '/notificacoes' } }),
+      );
+    },
+  );
+
+  it.each([null, [], 'mensagem sem objeto'])(
+    'não interrompe o recebimento quando o JSON não é um objeto (%s)',
+    async (payload) => {
+      const { handlers, self } = carregarWorker();
+      let tarefa: Promise<unknown> | undefined;
+      handlers.get('push')!({
+        data: { json: () => payload },
+        waitUntil: (p: Promise<unknown>) => {
+          tarefa = p;
+        },
+      });
+      await tarefa;
+      expect(self.registration.showNotification).toHaveBeenCalledWith(
+        'CEAK',
+        expect.objectContaining({ body: '', data: { path: '/notificacoes' } }),
       );
     },
   );
