@@ -111,13 +111,24 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     (async () => {
       const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-      const existing = pages.find((page) => page.url.startsWith(self.location.origin));
+      const existing = pages.find((page) => {
+        try {
+          return new URL(page.url).origin === self.location.origin;
+        } catch {
+          return false;
+        }
+      });
       if (existing) {
-        await existing.focus();
-        await existing.navigate(url).catch(() => undefined);
-      } else {
-        await self.clients.openWindow(url);
+        try {
+          await existing.focus();
+          await existing.navigate(url);
+          return;
+        } catch {
+          // A aba pode ter sido fechada entre a busca e a navegação.
+          // Abrir nova janela em vez de perder o clique da notificação.
+        }
       }
+      await self.clients.openWindow(url);
     })(),
   );
 });
